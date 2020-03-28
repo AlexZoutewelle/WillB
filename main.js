@@ -1,6 +1,6 @@
 //// TODO:
-//Load a model
-//console.log it
+//detach obj loading from main
+//parse the .obj
 main();
 
 function main() {
