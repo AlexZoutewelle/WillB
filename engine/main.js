@@ -6,5 +6,11 @@
 main();
 function main() {
 
-  mdlLoad.log();
+  var model = mdlLoad.loadObject("models/cat.obj");
+  model.then(function(result) {
+    
+    var modelGeometry = Geometry.parseOBJ(result);
+    console.log(modelGeometry);
+  })
+  //var modelData = Geometry.parseOBJ(model)
 }

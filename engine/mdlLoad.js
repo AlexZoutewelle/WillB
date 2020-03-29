@@ -1,23 +1,20 @@
-console.log('mdlload');
-
+/**
+Loads a.obj model
+**/
 function mdlLoad () {
 
 
 }
 
-mdlLoad.log = function() {
-  var prom = this.loadObject("models/cat.obj");
+mdlLoad.loadObject = function(url){
+//Reserved for requesting multiple objects
+  var prom = this.requestObject(url);
 
-  prom.then(function(result) {
-    console.log(result);
-  });
+  return prom;
 
-  prom.catch(function(error){
-    console.log(error);
-  });
 }
 
-mdlLoad.loadObject = function(url){
+mdlLoad.requestObject = function(url){
   console.log("loading model...");
 
   return new Promise(function (resolve, reject) {
