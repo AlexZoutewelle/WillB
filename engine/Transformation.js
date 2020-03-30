@@ -59,7 +59,20 @@ Transformation.prototype.getColumn = function(i) {
 **/
 Transformation.prototype.multiply = function(matrix) {
   var result = new Transformation();
+  for(var row = 0; row < 4; row++){
+    for(var col = 0; col < 4; col++) {
+      var sum = 0;
 
+      for( var i = 0; i < 4; i++) {
+          sum +=
+              this.fields[(row * 4) + i]   //select all numbers on row
+              *
+              matrix.fields[col + (4 * i)]; // select all numbers on column
+      }
+      result.fields[row * 4 + col] = sum;
+    }
+  }
 
+  return result;
 
 }

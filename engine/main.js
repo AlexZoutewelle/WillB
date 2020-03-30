@@ -37,15 +37,9 @@ function main() {
   renderer.draw(imgArray);
 
   var testMatrix = new Transformation();
-  console.log(testMatrix.getRow(0));
-  console.log(testMatrix.getRow(1));
-  console.log(testMatrix.getRow(2));
-  console.log(testMatrix.getRow(3));
-
-  console.log(testMatrix.getColumn(0));
-  console.log(testMatrix.getColumn(1));
-  console.log(testMatrix.getColumn(2));
-  console.log(testMatrix.getColumn(3));
+  var testMatrix2 = new Transformation();
+  console.log(testMatrix.multiply(testMatrix2));
+  
 
 
 
