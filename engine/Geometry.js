@@ -24,7 +24,5 @@ Geometry.parseOBJ = function(object) {
 }
 
 function Vector3(x,y,z) {
-  this.x = x;
-  this.y = y;
-  this.z = z;
+  this.fields = [x,y,z];
 }

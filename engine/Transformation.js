@@ -5,14 +5,6 @@
 *  0 0 1 0
 *  0 0 0 1]
 *
-*1. model is in world coordinates
-*   we must transform to camera coordinates
-*     Transformation.prototype.inverse (matrix)  for the cameraToWorld transformations
-*
-*
-*
-*
-*
 2. objects must be able to transform in world coordinates
 *   it must be able to move around
 *
@@ -102,4 +94,24 @@ Transformation.prototype.inverse = function() {
   }
 
   return this;
+}
+
+
+/**
+*
+* Multiply this Matrix4 with a Vector3
+*/
+
+Transformation.prototype.multVec3 = function(vector){
+  result = new Vector3(1,1,1);
+
+  for(var row = 0; row < 3; row++) {
+    var sum = 0;
+    for(var i = 0; i < 3; i++) {
+      sum += this.fields[(row * 4) + i] * result.fields[row];
+    }
+    result.fields[row] = sum;
+  }
+
+  return result;
 }
