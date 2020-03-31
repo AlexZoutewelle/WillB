@@ -26,16 +26,16 @@ function main() {
   //Drawing a red line on the screen
   var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
-  for(var i = 0; i <100; i += 4) {
-    console.log("oke");
-    imgArray[i] = 255;     //R
-    imgArray[i + 1] = 0;   //G
-    imgArray[i + 2] = 0;   //B
-    imgArray[i + 3] = 255    //A
-  }
+  // for(var i = 0; i <100; i += 4) {
+  //   console.log("oke");
+  //   imgArray[i] = 255;     //R
+  //   imgArray[i + 1] = 0;   //G
+  //   imgArray[i + 2] = 0;   //B
+  //   imgArray[i + 3] = 255    //A
+  // }
 
   var renderer = new Render(screenWidth, screenHeight);
-  renderer.draw(imgArray);
+  // renderer.draw(imgArray);
 
   //trying out some camera stuff
   var camera = new Transformation();
@@ -46,6 +46,9 @@ function main() {
 
   //test point imgArray
   point_array = [];
+  point_pd_array = [];
+  point_ndc_array = [];
+  pixel_array = [];
   model.then(function(result) {
 
     var modelGeometry = Geometry.parseOBJ(result);
@@ -54,16 +57,48 @@ function main() {
     modelGeometry.positions.forEach(position => {
         //multiply each point with the inverse camera
         var point = camera_inverse.multVec3(position);
-        //perspective_divide
-        point_array.push(point);
-        //ndc
+        point_array.push(point.fields[0], point.fields[1], point.fields[2]);
 
-        //raster coords
+        //perspective_divide. Bitwise OR operator to convert to integer
+        var point_pd = new Vector3(0,0,0);
+        point_pd.fields[0] = point.fields[0] / -point.fields[2];
+        point_pd.fields[1] = point.fields[1] / -point.fields[2];
+        point_pd.fields[2] = 1;
+
+        point_pd_array.push(point_pd.fields[0], point_pd.fields[1], point_pd.fields[2]);
+
+        //ndc (range of [0,1])
+        var point_ndc = new Vector3(0,0,0);
+        // console.log(point_pd.fields[0]);
+        // console.log(point_pd.fields[1]);
+        point_ndc.fields[0] = (point_pd.fields[0] + 1) / 2;
+        point_ndc.fields[1] = (1 - point_pd.fields[1]) / 2;
+
+        point_ndc_array.push(point_ndc);
+
+        //raster coords (pixels)
+        var point_raster = new Vector3(0,0,0);
+        point_raster.fields[0] = (point_ndc.fields[0] * screenWidth) | 0;
+        point_raster.fields[1] = (point_ndc.fields[1] * screenHeight) | 0;
+        point_raster.fields[2] = position.fields[2];
+
+        //So we now have the point's pixel location: an x and y.
+        //We need to draw this point:  separate RGBA indices
+        var pixel = point_raster.fields[0] * point_raster.fields[1] * 4;
+        pixel_array.push(pixel);
+
+        imgArray[pixel] = 255;
+        imgArray[pixel + 1] = 255;
+        imgArray[pixel + 2] = 255;
+        imgArray[pixel + 3] = 255;
 
         //raster coords (pixels) that are within screenwidth/height: 255,255,255,255
     });
+    //console.log(point_array);
+    //console.log(point_pd_array);
+    //console.log(point_ndc_array);
+    console.log(pixel_array);
 
-    console.log(point_array);
-    console.log(modelGeometry.positions);
+    renderer.draw(imgArray);
   });
 }
