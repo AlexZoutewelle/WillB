@@ -24,8 +24,13 @@
 *
 */
 
-function Transformation() {
-  this.fields = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+function Transformation(fields) {
+  if(typeof(fields) !== "undefined") {
+    this.fields = fields;
+  }
+  else {
+    this.fields = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  }
 }
 
 /**
@@ -55,7 +60,7 @@ Transformation.prototype.getColumn = function(i) {
 }
 
 /**
-* Multiply this (a Transformation matrix) another one
+* Multiply this (a Transformation matrix) with another one
 **/
 Transformation.prototype.multiply = function(matrix) {
   var result = new Transformation();
@@ -74,5 +79,27 @@ Transformation.prototype.multiply = function(matrix) {
   }
 
   return result;
+}
 
+/**
+* Return the inverse of a matrix
+*
+* 1 5 9  13
+* 2 6 10 14
+* 3 7 11 15
+* 4 8 12 16
+**/
+Transformation.prototype.inverse = function() {
+
+  //Make a copy so we don't lose data
+  var copy = new Transformation(this.fields);
+
+  //Do the inverse
+  for(var col = 0; col < 4; col++) {
+    for(var i = 0; i < 4; i++) {
+      this.fields[(col * 4) + i] = copy.fields[(i * 4) + col]
+    }
+  }
+
+  return this;
 }

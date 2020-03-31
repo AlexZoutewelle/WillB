@@ -9,11 +9,7 @@ Geometry.parseOBJ = function(object) {
   var positions = [];
 
   var lines = object.split('\n');
-  console.log(lines.length);
 
-  if((result = position.exec(lines[0])) != null) {
-    console.log(result);
-  }
   lines.forEach(function(line) {
     var result;
     if((result = position.exec(line)) != null) {

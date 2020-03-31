@@ -21,8 +21,9 @@ function main() {
   var screenWidth = 450;
   var screenHeight = 680;
 
-//Get the context
+  //Get the context
 
+  //Drawing a red line on the screen
   var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
   for(var i = 0; i <100; i += 4) {
@@ -36,10 +37,11 @@ function main() {
   var renderer = new Render(screenWidth, screenHeight);
   renderer.draw(imgArray);
 
+  //Testing out our 4x4 matrices
   var testMatrix = new Transformation();
   var testMatrix2 = new Transformation();
   console.log(testMatrix.multiply(testMatrix2));
-  
+  console.log(testMatrix.inverse());
 
 
 
