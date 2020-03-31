@@ -41,11 +41,6 @@ function main() {
   var camera = new Transformation();
   var camera_inverse = camera.inverse();
 
-
-  // var testMatrix = new Transformation([2,2,2,0,3,3,3,0,4,4,4,0,5,5,5,0]);
-  // var testVector = new Vector3(1,1,1);
-  //
-  // console.log(testMatrix.multVec3(testVector));
   //Load the cat model
   var model = mdlLoad.loadObject("models/cat.obj");
 
@@ -69,5 +64,6 @@ function main() {
     });
 
     console.log(point_array);
+    console.log(modelGeometry.positions);
   });
 }

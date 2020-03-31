@@ -108,7 +108,7 @@ Transformation.prototype.multVec3 = function(vector){
   for(var row = 0; row < 3; row++) {
     var sum = 0;
     for(var i = 0; i < 3; i++) {
-      sum += this.fields[(row * 4) + i] * result.fields[row];
+      sum += this.fields[(row * 4) + i] * vector.fields[row];
     }
     result.fields[row] = sum;
   }
