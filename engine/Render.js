@@ -28,8 +28,7 @@ This array holds 4 elements for each pixel: R G B and A, values are between 0 an
 Render.prototype.draw = function(imageArray) {
   //var currentImage = this.ctx.getImageData(0,0,this.screenWidth, this.screenHeight);
 
-  console.log(this.screenwidth);
-  console.log(this.screenHeight);
+  console.log(imageArray);
   var imageData = new ImageData(imageArray, this.screenWidth, this.screenHeight);
   this.ctx.putImageData(imageData, 0, 0);
 }

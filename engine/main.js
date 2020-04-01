@@ -25,20 +25,27 @@ function main() {
 
   //Drawing a red line on the screen
   var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
+  var testmat = new Transformation([[4, 8, 12, 16],[2, 7, 7, 3],[3, 1, 2.1, 4.6],[0.1, 0.14, 3, 1]]);
+  console.log(testmat.fields[0][0]);
+  console.log(testmat.fields[1][0]);
+  testmat.inverse();
 
-  // for(var i = 0; i <100; i += 4) {
-  //   console.log("oke");
-  //   imgArray[i] = 255;     //R
-  //   imgArray[i + 1] = 0;   //G
-  //   imgArray[i + 2] = 0;   //B
-  //   imgArray[i + 3] = 255    //A
-  // }
+  console.log(testmat.fields);
+
+  for(var i = 0; i <100; i += 4) {
+    console.log("oke");
+    imgArray[i] = 255;     //R
+    imgArray[i + 1] = 0;   //G
+    imgArray[i + 2] = 0;   //B
+    imgArray[i + 3] = 255    //A
+  }
 
   var renderer = new Render(screenWidth, screenHeight);
   // renderer.draw(imgArray);
 
   //trying out some camera stuff
-  var camera = new Transformation();
+
+  var camera = new Transformation([[0.0000271214, 0.0034, 0.490904,0  ], [ -0.192902, 0.319559, -0.000342346, 0],[0.451415, 5.39295, 0.0000012, 0],[0.444534, 3, 4,1]]);
   var camera_inverse = camera.inverse();
 
   //Load the cat model
@@ -88,8 +95,8 @@ function main() {
         pixel_array.push(pixel);
 
         imgArray[pixel] = 255;
-        imgArray[pixel + 1] = 255;
-        imgArray[pixel + 2] = 255;
+        imgArray[pixel + 1] = 0;
+        imgArray[pixel + 2] = 0;
         imgArray[pixel + 3] = 255;
 
         //raster coords (pixels) that are within screenwidth/height: 255,255,255,255
@@ -98,7 +105,7 @@ function main() {
     //console.log(point_pd_array);
     //console.log(point_ndc_array);
     console.log(pixel_array);
-
+    console.log(imgArray);
     renderer.draw(imgArray);
   });
 }
