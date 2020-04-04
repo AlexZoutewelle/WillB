@@ -24,5 +24,12 @@ Geometry.parseOBJ = function(object) {
 }
 
 function Vector3(x,y,z) {
-  this.fields = [x,y,z];
+  this.fields = [x,y,z,1];
+}
+
+Vector3.prototype.translate = function (x,y,z) {
+  this.fields[0] += x;
+  this.fields[1] += y;
+  this.fields[2] += z;
+  //return new Vector(this.x + x, this.y + y, this.z + z);
 }
