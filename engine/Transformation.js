@@ -253,6 +253,6 @@ Transformation.prototype.inverse = function matrix_invert(){
     }
 
     //we've done all operations, C should be the identity
-    //matrix I should be the inverse:
+    //matrix I should be the inverse
     return new Transformation(I);
 }

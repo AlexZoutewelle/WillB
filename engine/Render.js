@@ -33,6 +33,39 @@ Render.prototype.draw = function(imageArray) {
   this.ctx.putImageData(imageData, 0, 0);
 }
 
+//milimeters
+var focalLength = 35;
+var filmWidth = 21.023;
+var filmHeight = 21.328;
+
+var Znear = 1;
+var Zfar = 1000;
+
+var angleOfView = 90;
+//var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
+
+
+
+//canvasSize = 371.65866
+//console.log("canvas size");
+//console.log(canvasSize);
+
+//Canvas dimensions
+var ctop = (filmHeight * 0.5 / focalLength) * Znear;
+var cbottom = -ctop;
+var cright = (filmWidth * 0.5 / focalLength) * Znear;
+var cleft = -cright;
+
+console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
+
+Render.prototype.drawPixel = function(imgArray, x, y) {
+  var pixel = ((x * 4) + (this.screenWidth * y * 4));
+  imgArray[pixel] = 255;
+  imgArray[pixel + 1] = 0;
+  imgArray[pixel + 2] = 0;
+  imgArray[pixel + 3] = 255;
+}
+
 
 
 /**
@@ -42,66 +75,74 @@ Render.prototype.draw = function(imageArray) {
 **/
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform) {
 
-  // point_array = [];
-  // point_pd_array = [];
-  // point_ndc_array = [];
 
-  raster_array = [];
-  pixel_array = [];
   var screenWidth = this.screenWidth;
   var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
   //var arrayBuffer = Array.from(Array(500), () => new Array(500));
   //console.log(arrayBuffer);
 
-  var canvasWidth = 2;
-  var canvasHeight =  2;
+  // The virtual image plane
+  var canvasWidth = 1;
+  var canvasHeight =  1;
 
-  var offsetX = this.screenWidth / 2;
-  var offsetY = this.screenHeight / 2;
-console.log(modelGeometry);
-  modelGeometry.positions.forEach(position => {
+
+  var vertexCount = modelGeometry.positions.length;
+  //console.log(modelGeometry.positions.length);
+  //console.log(modelGeometry.positions[0]);
+  for(var i = 0; i < vertexCount; i++) {
+    var position = modelGeometry.positions[i];
 
       //multiply each point with the inverse camera
 
-      //var point = new Vector3(position.fields[0] + offsetX, position.fields[1] + offsetY, position.fields[2]);
-      //object_transform.fields = object_transform.multiply(camera_inverse);
       var point = object_transform.multMatrixVec3(position)
       point = camera_inverse.multMatrixVec3(point);
-
+      var rgba = [255, 0, 0, 255];
 
       //perspective_divide. Bitwise OR operator to convert to integer
       var point_pd = new Vector3(0,0,0);
-      point_pd.fields[0] = ((point.fields[0] )/ (-point.fields[2]) ) * 120;
-      point_pd.fields[1] = ((point.fields[1] ) / (-point.fields[2]) ) * 120;
+      point_pd.fields[0] = ((point.fields[0] )/ (-point.fields[2]) ) * Znear;
+      point_pd.fields[1] = ((point.fields[1] ) / (-point.fields[2]) ) * Znear;
       point_pd.fields[2] = point.fields[2];
+
 
 
       //ndc (range of [0,1])
       var point_ndc = new Vector3(0,0,0);
 
 
-      point_ndc.fields[0] = (point_pd.fields[0] + (this.screenWidth / 2)) / this.screenWidth;       //x + canvas_width * 0.5    / canvas_width
-      point_ndc.fields[1] = (point_pd.fields[1] + (this.screenHeight / 2)) / this.screenHeight;       //y + canvas_height * 0.5 / canvas_height
-
+      point_ndc.fields[0] = (point_pd.fields[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+      point_ndc.fields[1] = (point_pd.fields[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
 
       //raster coords (pixels)
       var point_raster = new Vector3(0,0,0);
-      point_raster.fields[0] = Math.abs((point_ndc.fields[0] * this.screenWidth) | 0);
-      point_raster.fields[1] = Math.abs(((1 - point_ndc.fields[1] ) * this.screenHeight) | 0);
+      point_raster.fields[0] = ((point_ndc.fields[0] * this.screenWidth) ) | 0;
+      point_raster.fields[1] = (((1 - point_ndc.fields[1] ) * this.screenHeight) ) | 0;
       point_raster.fields[2] = position.fields[2];
+
+
+      if(point_pd.fields[2] < Znear || point_pd.fields[0] < cleft || point_pd.fields[0] > cright || point_pd.fields[1] < cbottom || point_pd.fields[1] > ctop) {
+
+        this.drawPixel(imgArray, 3, 3);
+        this.drawPixel(imgArray, 4, 3);
+        this.drawPixel(imgArray, 3, 4);
+        this.drawPixel(imgArray, 4, 4);
+
+        rgba = [0,255,0,255];
+
+      }
 
       //So we now have the point's pixel location: an x and y.
       //We need to draw this point:  separate RGBA indices
       var pixel = ((point_raster.fields[0]) * 4) + ((screenWidth * (point_raster.fields[1])) * 4);
-      pixel_array.push(pixel);
 
-      imgArray[pixel] = 255;
-      imgArray[pixel + 1] = 0;
-      imgArray[pixel + 2] = 0;
-      imgArray[pixel + 3] = 255;
+      imgArray[pixel] = rgba[0];
+      imgArray[pixel + 1] = rgba[1];
+      imgArray[pixel + 2] = rgba[2];
+      imgArray[pixel + 3] = rgba[3];
+
 
       //raster coords (pixels) that are within screenwidth/height: 255,255,255,255
-  });
+  }
 
   this.draw(imgArray);
 }

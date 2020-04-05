@@ -1,33 +1,4 @@
 //// TODO:
-//goal1:draw wireframe of cat
-//goal2:move around cat
-//  Set up the game loop
-//  'frame' function:  does what needs to be done for each frame
-//  Input event handlers must be recognized for WASD
-//  Implement the transformations on the camera, triggered by WASD
-//    Must be handled in the update() function
-
-
-
-
-//dont tranform the camera. irt doesnt exist
-
-var test = new Transformation([
-  [2, 3, 4, 0],
-  [3, 4, 2, 0],
-  [2, 3, 4, 0],
-  [1, 1, 1, 1]
-]);
-
-var test2 = new Transformation([
-  [2, 3, 4, 5],
-  [4, 6, 2, 1],
-  [3, 6, 7, 5],
-  [3, 4, 5, 6]
-]);
-
-console.log(test.inverse());
-console.log(test2.multiply(test));
 
 var vertex = new Vector3(1,1,1);
 var translation = new Transformation([
@@ -39,8 +10,8 @@ var translation = new Transformation([
 
 console.log(translation.multMatrixVec3(vertex).fields);
 
-var screenWidth = 500;
-var screenHeight = 500;
+var screenWidth = 400;
+var screenHeight = 400;
 
 //Get the context
 
@@ -53,15 +24,15 @@ var renderer = new Render(screenWidth, screenHeight);
 
 
 var camera = new Transformation([
-        [0.5, 0, 0, -50],
-        [0, 0.5, 0, 0],
-        [0, 0, 0.5, -50],
+        [1, 0, 0, -1],
+        [0, 1, 0, 0],
+        [0, 0, 1, -1],
         [0, 0, 0, 1]
 ]);
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/cat.obj");
+var model = mdlLoad.loadObject("models/sphere.obj");
 var modelGeometry = [];
 //test point imgArray
 
@@ -91,42 +62,52 @@ function frame() {
     return;
   }
   if(playerState.input.backward === true) {
-    object_transform.fields =  object_transform.translate(0,0, -2);
+    //console.log("move backward");
+    camera.fields =  camera.translate(0,0, -2);
 
   }
 
   if(playerState.input.forward === true ) {
-    object_transform.fields =  object_transform.translate(0, 0,2);
+    //console.log("move forward");
+    camera.fields =  camera.translate(0, 0,2);
   }
   if(playerState.input.strafeLeft === true) {
-    object_transform.fields = object_transform.translate(2,0,0);
+    //console.log("move left");
+    camera.fields = camera.translate(2,0,0);
   }
   if(playerState.input.strafeRight === true) {
-    object_transform.fields = object_transform.translate(-2,0,0,);
+    //console.log("move right");
+    camera.fields = camera.translate(-2,0,0,);
   }
 
   if(playerState.input.turnLeft === true) {
-    object_transform.fields = object_transform.rotate(0.80,0);
+    //console.log("turn left");
+    camera.fields = camera.rotate(0,0.8);
   }
 
   if(playerState.input.turnRight === true) {
-    object_transform.fields = object_transform.rotate(-0.80,0);
+    //console.log("turn right");
+    camera.fields = camera.rotate(0,-0.8);
 
   }
 
   if(playerState.input.jump === true) {
-    object_transform.fields = object_transform.translate(0,2, 0)
+    //console.log("jump");
+    camera.fields = camera.translate(0,-2, 0)
   }
   if(playerState.input.crouch === true) {
-    object_transform.fields = object_transform.translate(0, -2, 0);
+    //console.log("crouch");
+    camera.fields = camera.translate(0, 2, 0);
   }
 
   if(playerState.input.tiltForward === true) {
-    object_transform.fields = object_transform.rotate(0, 1.1);
+    //console.log("tilt forward");
+    camera.fields = camera.rotate(1.1, 0);
   }
 
   if(playerState.input.tiltBack === true) {
-    object_transform.fields = object_transform.rotate(0, -1.1);
+    //console.log("tilt back");
+    camera.fields = camera.rotate(-1.1, 0);
   }
 
 
@@ -146,12 +127,12 @@ function frame() {
   // console.log("------------------");
 
 
-  console.log("OBJECT TRANSFORM-------");
-  console.log(object_transform.fields[0][0] + " "  + object_transform.fields[0][1] + " " + object_transform.fields[0][2] + " "  + object_transform.fields[0][3]);
-  console.log(object_transform.fields[1][0] + " "  + object_transform.fields[1][1] + " " + object_transform.fields[1][2] + " "  + object_transform.fields[1][3]);
-  console.log(object_transform.fields[2][0] + " "  + object_transform.fields[2][1] + " " + object_transform.fields[2][2] + " "  + object_transform.fields[2][3]);
-  console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
-  console.log("------------------");
+  // console.log("OBJECT TRANSFORM-------");
+  // console.log(object_transform.fields[0][0] + " "  + object_transform.fields[0][1] + " " + object_transform.fields[0][2] + " "  + object_transform.fields[0][3]);
+  // console.log(object_transform.fields[1][0] + " "  + object_transform.fields[1][1] + " " + object_transform.fields[1][2] + " "  + object_transform.fields[1][3]);
+  // console.log(object_transform.fields[2][0] + " "  + object_transform.fields[2][1] + " " + object_transform.fields[2][2] + " "  + object_transform.fields[2][3]);
+  // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
+  // console.log("------------------");
 
 
   requestAnimationFrame(frame);

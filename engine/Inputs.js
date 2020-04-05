@@ -42,28 +42,22 @@ function onkeydown(e, key, pressed) {
 
   switch(key) {
     case KEY.A:
-    console.log("from input: left");
       playerState.input.strafeLeft = pressed;
       e.preventDefault();
       break;
     case KEY.W:
-    console.log("from input: forwards");
       playerState.input.forward = pressed;
       e.preventDefault();
       break;
     case KEY.S:
-      console.log("from input: backwards");
       playerState.input.backward = pressed;
-
       e.preventDefault();
       break;
     case KEY.D:
-      console.log("from input: right");
       playerState.input.strafeRight = pressed;
       e.preventDefault();
       break;
     case KEY.ESC:
-    console.log("escape");
       playerState.input.escape = pressed;
       e.preventDefault();
       break;
@@ -75,11 +69,11 @@ function onkeydown(e, key, pressed) {
       playerState.input.crouch = pressed;
       e.preventDefault();
       break;
-    case KEY.Q:
+    case KEY.LEFT:
       playerState.input.turnLeft = pressed;
       e.preventDefault();
       break;
-    case KEY.E:
+    case KEY.RIGHT:
       playerState.input.turnRight = pressed;
       e.preventDefault();
       break;
@@ -98,28 +92,22 @@ function onkeydown(e, key, pressed) {
 function onkeyup(e, key, pressed) {
   switch(key) {
     case KEY.A:
-    console.log("from input: left");
       playerState.input.strafeLeft = pressed;
       e.preventDefault();
       break;
     case KEY.W:
-    console.log("from input: forwards");
       playerState.input.forward = pressed;
       e.preventDefault();
       break;
     case KEY.S:
-      console.log("from input: backwards");
       playerState.input.backward = pressed;
-
       e.preventDefault();
       break;
     case KEY.D:
-      console.log("from input: right");
       playerState.input.strafeRight = pressed;
       e.preventDefault();
       break;
     case KEY.ESC:
-    console.log("escape");
       playerState.input.escape = pressed;
       e.preventDefault();
       break;
@@ -131,11 +119,11 @@ function onkeyup(e, key, pressed) {
       playerState.input.crouch = pressed;
       e.preventDefault();
       break;
-    case KEY.Q:
+    case KEY.LEFT:
       playerState.input.turnLeft = pressed;
       e.preventDefault();
       break;
-    case KEY.E:
+    case KEY.RIGHT:
       playerState.input.turnRight = pressed;
       e.preventDefault();
       break;
