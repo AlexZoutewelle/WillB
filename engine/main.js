@@ -1,21 +1,10 @@
 //// TODO:
 
-var vertex = new Vector3(1,1,1);
-var translation = new Transformation([
-  [1, 0, 0, 5],
-  [0, 1, 0, 0],
-  [0, 0, 1, 0],
-  [0, 0, 0, 1]
-])
-
-console.log(translation.multMatrixVec3(vertex).fields);
-
 var screenWidth = 400;
 var screenHeight = 400;
 
 //Get the context
 
-//Drawing a red line on the screen
 var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);

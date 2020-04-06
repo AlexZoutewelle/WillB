@@ -25,31 +25,42 @@ var playerState = {
   input: {
     strafeLeft: false, strafeRight: false, backward: false, forward: false,
     escape: false, jump: false, crouch: false, turnLeft: false, turnRight: false, scaleUp: false, scaleBack: false,
-    mouseX: 0, mouseY: 0,
+    mouseX: 0, mouseY: 0, pointerLocked: false
   }
 }
 
+//Pointer lock for mouse movement
+var canvas = document.getElementById('screen');
+
+document.addEventListener('click', function(e) {
+  canvas.requestPointerLock();
+})
+
+document.addEventListener('pointerlockchange', function(e) {
+  console.log(e);
+  if(playerState.input.pointerLocked === false) {
+    playerState.input.pointerLocked = true;
+  }
+  else {
+    playerState.input.pointerLocked = false;
+  }
+},false);
+
 document.addEventListener('mousemove', function(event) {
-  var turnVelocity = 8;
-  var lastX = playerState.input.mouseX;
-  var lastY = playerState.input.mouseY;
+  if(playerState.input.pointerLocked) {
+    var turnVelocity = 8;
+    var lastX = playerState.input.mouseX;
+    var lastY = playerState.input.mouseY;
 
-  var currentX = event.pageX;
-  var currentY = event.pageY;
-
-  playerState.input.mouseX = currentX;
-  playerState.input.mouseY = currentY;
-
-  var xdiff = currentX - lastX;
-  var ydiff = currentY - lastY;
+    var currentX = event.movementX;
+    var currentY = event.movementY;
 
 
-
-
-  var angleX = xdiff * turnVelocity * Math.PI / 180;
-  var angleY = ydiff * turnVelocity * Math.PI / 180;
-  playerState.input.angleX += angleX;
-  playerState.input.angleY += angleY;
+    var angleX = currentX * turnVelocity * Math.PI / 180;
+    var angleY = currentY * turnVelocity * Math.PI / 180;
+    playerState.input.angleX += angleX;
+    playerState.input.angleY += angleY;
+  }
 });
 
 //Add event listeners to record our state

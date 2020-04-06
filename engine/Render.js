@@ -2,7 +2,12 @@
 Draw holds a reference to the context of the canvas
 **/
 function Render(screenWidth, screenHeight) {
-  this.ctx = document.getElementById('screen').getContext('2d');
+  this.canvas = document.getElementById('screen');
+
+  this.ctx = this.canvas.getContext('2d');
+  this.canvas.requestPointerLock();
+
+
   console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
