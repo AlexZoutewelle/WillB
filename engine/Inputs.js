@@ -23,9 +23,34 @@ var KEY = {
 //A global playerState object. The gameloops update() function will use this to compute the next gameworld state
 var playerState = {
   input: {
-    strafeLeft: false, strafeRight: false, backward: false, forward: false, escape: false, jump: false, crouch: false, turnLeft: false, turnRight: false, scaleUp: false, scaleBack: false
+    strafeLeft: false, strafeRight: false, backward: false, forward: false,
+    escape: false, jump: false, crouch: false, turnLeft: false, turnRight: false, scaleUp: false, scaleBack: false,
+    mouseX: 0, mouseY: 0,
   }
 }
+
+document.addEventListener('mousemove', function(event) {
+  var turnVelocity = 8;
+  var lastX = playerState.input.mouseX;
+  var lastY = playerState.input.mouseY;
+
+  var currentX = event.pageX;
+  var currentY = event.pageY;
+
+  playerState.input.mouseX = currentX;
+  playerState.input.mouseY = currentY;
+
+  var xdiff = currentX - lastX;
+  var ydiff = currentY - lastY;
+
+
+
+
+  var angleX = xdiff * turnVelocity * Math.PI / 180;
+  var angleY = ydiff * turnVelocity * Math.PI / 180;
+  playerState.input.angleX += angleX;
+  playerState.input.angleY += angleY;
+});
 
 //Add event listeners to record our state
 document.addEventListener('keydown', function(event) {

@@ -32,7 +32,7 @@ var camera = new Transformation([
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/sphere.obj");
+var model = mdlLoad.loadObject("models/cat.obj");
 var modelGeometry = [];
 //test point imgArray
 
@@ -82,12 +82,12 @@ function frame() {
 
   if(playerState.input.turnLeft === true) {
     //console.log("turn left");
-    camera.fields = camera.rotate(0,0.8);
+    camera.fields = camera.rotate(0,-0.8);
   }
 
   if(playerState.input.turnRight === true) {
     //console.log("turn right");
-    camera.fields = camera.rotate(0,-0.8);
+    camera.fields = camera.rotate(0,0.8);
 
   }
 
@@ -102,13 +102,23 @@ function frame() {
 
   if(playerState.input.tiltForward === true) {
     //console.log("tilt forward");
-    camera.fields = camera.rotate(1.1, 0);
+    camera.fields = camera.rotate(-1.1, 0);
   }
 
   if(playerState.input.tiltBack === true) {
     //console.log("tilt back");
-    camera.fields = camera.rotate(-1.1, 0);
+    camera.fields = camera.rotate(1.1, 0);
   }
+
+  if(playerState.input.angleX !== 0 || playerState.input.angleY !== 0) {
+    camera.fields = camera.rotate(
+        playerState.input.angleY,
+        playerState.input.angleX);
+    playerState.input.angleX = 0;
+    playerState.input.angleY = 0;
+  }
+
+  console.log(playerState.input.mouseX + " " + playerState.input.mouseY);
 
 
   camera_inverse = camera.inverse();
