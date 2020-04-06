@@ -1,4 +1,9 @@
 //// TODO:
+//low prio: Mouse view is not perfect.
+//high prio: wireframe rendering
+//    -draw lines for each triangle in the .obj files
+//high-prio: triangle coloring
+//high-prio: texture mapping
 
 var screenWidth = 400;
 var screenHeight = 400;
@@ -106,9 +111,6 @@ function frame() {
     playerState.input.angleX = 0;
     playerState.input.angleY = 0;
   }
-
-  console.log(playerState.input.mouseX + " " + playerState.input.mouseY);
-
 
   camera_inverse = camera.inverse();
 

@@ -25,6 +25,7 @@ var playerState = {
   input: {
     strafeLeft: false, strafeRight: false, backward: false, forward: false,
     escape: false, jump: false, crouch: false, turnLeft: false, turnRight: false, scaleUp: false, scaleBack: false,
+    angleX: 0, angleY: 0,
     mouseX: 0, mouseY: 0, pointerLocked: false
   }
 }
@@ -49,12 +50,9 @@ document.addEventListener('pointerlockchange', function(e) {
 document.addEventListener('mousemove', function(event) {
   if(playerState.input.pointerLocked) {
     var turnVelocity = 8;
-    var lastX = playerState.input.mouseX;
-    var lastY = playerState.input.mouseY;
 
     var currentX = event.movementX;
     var currentY = event.movementY;
-
 
     var angleX = currentX * turnVelocity * Math.PI / 180;
     var angleY = currentY * turnVelocity * Math.PI / 180;
