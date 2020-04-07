@@ -37,7 +37,7 @@ var Zfar = 1000;
 //var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
 
 //Canvas dimensions
-var ctop = (filmHeight * 0.5 / focalLength) * Znear;
+var ctop = (filmHeight * 0.5 / focalLength) * Znear ;
 var cbottom = -ctop;
 var cright = (filmWidth * 0.5 / focalLength) * Znear;
 var cleft = -cright;
@@ -59,7 +59,7 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 * Main rendering function
 * In the future, it should take an array of modelGeometry
 **/
-Render.prototype.render = function(modelGeometry, camera_inverse, object_transform) {
+Render.prototype.render = function(modelGeometry, camera_inverse, object_transform, camera) {
 
   //console.log(modelGeometry);
   this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
@@ -71,23 +71,24 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var canvasHeight =  1;
 
 
-
-
   //imgArray = this.renderVertices(imgArray, modelGeometry.positions, camera_inverse, object_transform);
-  var imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
+  //var imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
+  //var raster_pixels = this.renderVertices(modelGeometry.positions, camera_inverse, object_transform);
+  this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform, camera);
+
 
   //Actually draw the image array on the canvas
   //this.draw(imgArray);
 }
 
-//Renders a set of vertices
+
+//Renders a set of vertices?   It is right now more just a conversion function.
 //Right now, the vertices used in this function is from a single face
 Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, object_transform) {
   //console.log(vertices);
   var vertexCount = vertices.length;
 
   var pixel_array = [];
-
   for(var i = 0; i < vertexCount; i++) {
       var position = vertices[i];
 
@@ -105,7 +106,7 @@ Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, o
       point_pd.fields[1] = ((point.fields[1] ) / (-point.fields[2]) ) * Znear;
       point_pd.fields[2] = point.fields[2];
 
-      if(point_pd.fields[2] < Znear || point_pd.fields[0] < cleft || point_pd.fields[0] > cright || point_pd.fields[1] < cbottom || point_pd.fields[1] > ctop) {
+      if(point_pd.fields[2] < Znear  || point_pd.fields[0] < (cleft - 10) || point_pd.fields[0] > (cright + 10) || point_pd.fields[1] < (cbottom - 10) || point_pd.fields[1] > (ctop + 10)) {
 
         continue;
 
@@ -154,7 +155,10 @@ Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, o
 }
 
 //Loop over all faces, and get their corresponding set of vertices
-Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse, object_transform) {
+Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse, object_transform, camera) {
+  //store the rasterized_pixels in here
+  //var rasterized_pixels = [];
+
   var facesCount = modelGeometry.faces.length;
   //console.log(facesCount);
   for(var i = 0; i < facesCount; i++) {
@@ -171,11 +175,46 @@ Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse,
         var vertexIndex = currentFaceVerts[j] - 1;
         vertices.push(modelGeometry.positions[vertexIndex]);
 
+
     }
 
+    //Dot product, back culling
     //renderVertices will do all the transformations and conversion to raster_coordinates
     //It returns the indices of the imgArray it should be drawn on
-    var pixels = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
+
+    //To do backface culling: We need the face's normal.
+    //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+    //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+    //If the dot product results in 0 or less, it means the normal is pointing away from us.
+    var line1 = new Vector3(
+        vertices[0].fields[0] - vertices[1].fields[0],
+        vertices[0].fields[1] - vertices[1].fields[1],
+        vertices[0].fields[2] - vertices[1].fields[2]
+      );
+    var line2 = new Vector3(
+        vertices[0].fields[0] - vertices[2].fields[0],
+        vertices[0].fields[1] - vertices[2].fields[1],
+        vertices[0].fields[2] - vertices[2].fields[2]
+    );
+    var normal = line1.cross(line2);
+
+    var view_vec = new Vector3(
+      camera.fields[0][3] - vertices[1].fields[0],
+      camera.fields[1][3] - vertices[1].fields[1],
+      camera.fields[2][3] - vertices[1].fields[2]
+    )
+
+    view_vec.normalize();
+    normal.normalize();
+
+    var dot_result = view_vec.dot(normal);
+    //console.log(dot_result);
+    // console.log(dot_result);
+    if(dot_result < 0) {continue;}
+    // //renderVertices will do all the transformations and conversion to raster_coordinates
+    // //It returns the indices of the imgArray it should be drawn on
+    // var pixels = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
+    var rasterized_pixels  = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
 
 
     //If we want to draw a wireframe, we draw the lines connecting these pixels now
@@ -185,19 +224,22 @@ Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse,
     //               go to pixel 1. Move to pixel 2, draw.
     //               go to pixel 2. Move to pixel 3, draw.
     //               go to pixel 3. Move to pixel 1, draw
-    for(var k = 0; k < pixels.length; k++) {
+
+
+    for(var k = 0; k < rasterized_pixels.length; k++) {
       this.ctx.beginPath();
-      this.ctx.moveTo(pixels[k].fields[0], pixels[k].fields[1])
+
+      this.ctx.moveTo(rasterized_pixels[k].fields[0], rasterized_pixels[k].fields[1])
 
       var next = 0;
-      if(!(k === pixels.length - 1)) {
+      if(!(k === rasterized_pixels.length - 1)) {
         next = k + 1;
       }
-      this.ctx.lineTo(pixels[next].fields[0], pixels[next].fields[1]);
+      this.ctx.lineTo(rasterized_pixels[next].fields[0], rasterized_pixels[next].fields[1]);
       this.ctx.strokeStyle= "red";
       this.ctx.stroke();
-    }
 
+    }
   }
 
   return imgArray;

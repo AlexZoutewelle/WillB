@@ -1,7 +1,12 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 //high prio: wireframe rendering
-//    -draw lines for each triangle in the .obj files
+//    -Wireframe drawing is implemented, with a few caveats:
+//        It cuts off polygons too soon.
+//        it is very slow right Now
+//          Polygon culling needed?
+//          Algorithm unoptimized?
+//          Canvas drawing functions slow?
 //high-prio: triangle coloring
 //high-prio: texture mapping
 
@@ -15,31 +20,32 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 var renderer = new Render(screenWidth, screenHeight);
 
 //trying out some camera stuff
-
+var test = new Vector3(5,8,19);
+var test2 = new Vector3(3, -2, -1);
+console.log(test.dot(test2));
 
 var camera = new Transformation([
         [1, 0, 0, -1],
         [0, 1, 0, 0],
-        [0, 0, 1, -1],
+        [0, 0, 1, -40],
         [0, 0, 0, 1]
 ]);
 
 
 //Load the cat model
 var model = mdlLoad.loadObject("models/sphere.obj");
-var modelGeometry = [];
+//var modelGeometry = [];
 //test point imgArray
 
 
 model.then(function(result) {
   //All models are loaded. We can start parsing the models
-
-  modelGeometry = Geometry.parseOBJ(result);
+  modelGeometry = new Geometry();
+  modelGeometry.parseOBJ(result);
 
   object_transform = new Transformation();
 
   //Models are parsed. We can start the main game loop
-  //console.log(camera);
   frame();
 });
 
@@ -116,7 +122,7 @@ function frame() {
 
 
 
-  renderer.render(modelGeometry, camera_inverse, object_transform);
+  renderer.render(modelGeometry, camera_inverse, object_transform, camera);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
