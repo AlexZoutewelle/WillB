@@ -26,11 +26,11 @@ Render.prototype.draw = function(imageArray) {
 }
 
 //milimeters
-var focalLength = 35;
+var focalLength = 15;
 var filmWidth = 21.023;
 var filmHeight = 21.328;
 
-var Znear = 10;
+var Znear = 1;
 var Zfar = 1000;
 
 // var angleOfView = 90;
@@ -62,6 +62,7 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform) {
 
   //console.log(modelGeometry);
+  this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
   var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
@@ -73,16 +74,20 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
   //imgArray = this.renderVertices(imgArray, modelGeometry.positions, camera_inverse, object_transform);
-  imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
+  var imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
 
   //Actually draw the image array on the canvas
-  this.draw(imgArray);
+  //this.draw(imgArray);
 }
 
-//Only renders points
+//Renders a set of vertices
+//Right now, the vertices used in this function is from a single face
 Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, object_transform) {
   //console.log(vertices);
   var vertexCount = vertices.length;
+
+  var pixel_array = [];
+
   for(var i = 0; i < vertexCount; i++) {
       var position = vertices[i];
 
@@ -100,6 +105,14 @@ Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, o
       point_pd.fields[1] = ((point.fields[1] ) / (-point.fields[2]) ) * Znear;
       point_pd.fields[2] = point.fields[2];
 
+      if(point_pd.fields[2] < Znear || point_pd.fields[0] < cleft || point_pd.fields[0] > cright || point_pd.fields[1] < cbottom || point_pd.fields[1] > ctop) {
+
+        continue;
+
+        //If you want to draw all the pixels that should not be visible, but with a different color (for debugging purposes)
+        //Remove the continue statement, and change the rgba values
+        // rgba = [0,255,0,255];
+      }
 
 
       //ndc (range of [0,1])
@@ -112,47 +125,85 @@ Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, o
       point_raster.fields[0] = ((point_ndc.fields[0] * this.screenWidth) ) | 0;
       point_raster.fields[1] = (((1 - point_ndc.fields[1] ) * this.screenHeight) ) | 0;
 
-      if(point_pd.fields[2] < Znear || point_pd.fields[0] < cleft || point_pd.fields[0] > cright || point_pd.fields[1] < cbottom || point_pd.fields[1] > ctop) {
+      pixel_array.push(point_raster);
 
-        continue;
 
-        //If you want to draw all the pixels that should not be visible, but with a different color (for debugging purposes)
-        //Remove the continue statement, and change the rgba values
-        // rgba = [0,255,0,255];
 
-      }
+      //Now that we have the raster coordinates, we could choose to just draw the pixel on the screen:
+      //this.drawPixel(imgArray, point_raster.fields[0], point_raster.fields[1]);
 
-      //'Draw' the point in the image array:  separate RGBA indices
+
+      //Or we can push this pixel to the array of pixels that belong to the face
+      //Here we compute the index that the pixel is associated with within the imgArray
       var pixel = ((point_raster.fields[0]) * 4) + ((screenWidth * (point_raster.fields[1])) * 4);
 
-      imgArray[pixel] = rgba[0];
-      imgArray[pixel + 1] = rgba[1];
-      imgArray[pixel + 2] = rgba[2];
-      imgArray[pixel + 3] = rgba[3];
+
+
+
   }
 
-  return imgArray;
+
+  // for(var k = 0; k < pixel_array.length; k++) {
+  //   this.drawPixel(imgArray, pixel_array[k].fields[0], pixel_array[k].fields[1]);
+  // }
+
+  return pixel_array;
+
+  //This is JS: everything is a pointer. So, no need to return the imgArray
+  //return imgArray;
 }
 
-//Render a wireframe for now
+//Loop over all faces, and get their corresponding set of vertices
 Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse, object_transform) {
   var facesCount = modelGeometry.faces.length;
   //console.log(facesCount);
   for(var i = 0; i < facesCount; i++) {
     //For each face, get the corresponding vertexIndices
     var currentFaceVerts = modelGeometry.faces[i].vertices;
-    //console.log(currentFaceVerts);
+
     var faceLength = currentFaceVerts.length;
     var vertices = [];
+    //We take each index specified in the face, and push them to the vertices array.
+    //The vertices in the array are to be drawn to the screen
     for(var j = 0; j < faceLength; j++) {
         //console.log("push");
-        vertices.push(modelGeometry.positions[currentFaceVerts[j] - 1]);
+        //Remember, .obj consider themselves starting at index 1. So, we must subtract 1
+        var vertexIndex = currentFaceVerts[j] - 1;
+        vertices.push(modelGeometry.positions[vertexIndex]);
 
     }
 
-    //console.log(vertices);
-    imgArray = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
+    //renderVertices will do all the transformations and conversion to raster_coordinates
+    //It returns the indices of the imgArray it should be drawn on
+    var pixels = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
+
+
+    //If we want to draw a wireframe, we draw the lines connecting these pixels now
+    //For now, we use html5 canvas methods. In the near future, we'll use Bresenham instead
+
+    //Triangle idea is:   start at pixel 0. Move to pixel 1, draw.
+    //               go to pixel 1. Move to pixel 2, draw.
+    //               go to pixel 2. Move to pixel 3, draw.
+    //               go to pixel 3. Move to pixel 1, draw
+    for(var k = 0; k < pixels.length; k++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(pixels[k].fields[0], pixels[k].fields[1])
+
+      var next = 0;
+      if(!(k === pixels.length - 1)) {
+        next = k + 1;
+      }
+      this.ctx.lineTo(pixels[next].fields[0], pixels[next].fields[1]);
+      this.ctx.strokeStyle= "red";
+      this.ctx.stroke();
+    }
+
   }
 
   return imgArray;
+}
+
+//Bresenham algorithm to draw lines
+Render.prototype.bresenham = function(x1, y1, x2, y2) {
+
 }
