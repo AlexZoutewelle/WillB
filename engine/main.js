@@ -116,9 +116,7 @@ function frame() {
 
 
 
-  //console.log(modelGeometry);
   renderer.render(modelGeometry, camera_inverse, object_transform);
-  //console.log(camera);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
@@ -136,7 +134,7 @@ function frame() {
   // console.log("------------------");
 
 
-  requestAnimationFrame(frame);
+  //requestAnimationFrame(frame);
 }
 
 function update() {

@@ -103,11 +103,9 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       if(point_pd.fields[2] < Znear || point_pd.fields[0] < cleft || point_pd.fields[0] > cright || point_pd.fields[1] < cbottom || point_pd.fields[1] > ctop) {
 
         continue;
-        // this.drawPixel(imgArray, 3, 3);
-        // this.drawPixel(imgArray, 4, 3);
-        // this.drawPixel(imgArray, 3, 4);
-        // this.drawPixel(imgArray, 4, 4);
-        //
+
+        //If you want to draw all the pixels that should not be visible, but with a different color (for debugging purposes)
+        //Remove the continue statement, and change the rgba values
         // rgba = [0,255,0,255];
 
       }
