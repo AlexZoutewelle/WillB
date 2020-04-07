@@ -11,7 +11,8 @@ Geometry.parseOBJ = function(object) {
 
   //regex for positions
   var positionRegx = /^v\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
-  var faceRegs = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/;
+  //var faceRegs = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/;
+  var faceRegs = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)/;
   var positions = [];
   var faces = []
 
@@ -30,18 +31,19 @@ Geometry.parseOBJ = function(object) {
       //Creating the face
 
       var vertexIndices = [];
-      for(var i = 1; i < 13; i +=3) {
+      for(var i = 1; i < 10; i +=3) {
         //1, 4, 7, 10
         //Add the vertex to the vertices
         vertexIndices.push(parseFloat(result[i]));
       }
       //Create the face with the captured ImageData
+      //console.log(result);
       faces.push(new Face(vertexIndices));
     }
 
   });
   //console.log(new Geometry(positions, faces))
-  return new Geometry(positions);
+  return new Geometry(positions, faces);
 }
 
 function Vector3(x,y,z) {

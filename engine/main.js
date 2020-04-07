@@ -26,7 +26,7 @@ var camera = new Transformation([
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/cat.obj");
+var model = mdlLoad.loadObject("models/sphere.obj");
 var modelGeometry = [];
 //test point imgArray
 
@@ -134,7 +134,7 @@ function frame() {
   // console.log("------------------");
 
 
-  //requestAnimationFrame(frame);
+  requestAnimationFrame(frame);
 }
 
 function update() {

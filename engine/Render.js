@@ -61,7 +61,7 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 **/
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform) {
 
-
+  //console.log(modelGeometry);
   var screenWidth = this.screenWidth;
   var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
@@ -70,9 +70,21 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var canvasHeight =  1;
 
 
-  var vertexCount = modelGeometry.positions.length;
+
+
+  //imgArray = this.renderVertices(imgArray, modelGeometry.positions, camera_inverse, object_transform);
+  imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
+
+  //Actually draw the image array on the canvas
+  this.draw(imgArray);
+}
+
+//Only renders points
+Render.prototype.renderVertices = function(imgArray, vertices, camera_inverse, object_transform) {
+  //console.log(vertices);
+  var vertexCount = vertices.length;
   for(var i = 0; i < vertexCount; i++) {
-    var position = modelGeometry.positions[i];
+      var position = vertices[i];
 
       //local to world
 
@@ -119,6 +131,28 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       imgArray[pixel + 3] = rgba[3];
   }
 
-  //Actually draw the image array on the canvas
-  this.draw(imgArray);
+  return imgArray;
+}
+
+//Render a wireframe for now
+Render.prototype.renderFaces = function(imgArray, modelGeometry, camera_inverse, object_transform) {
+  var facesCount = modelGeometry.faces.length;
+  //console.log(facesCount);
+  for(var i = 0; i < facesCount; i++) {
+    //For each face, get the corresponding vertexIndices
+    var currentFaceVerts = modelGeometry.faces[i].vertices;
+    //console.log(currentFaceVerts);
+    var faceLength = currentFaceVerts.length;
+    var vertices = [];
+    for(var j = 0; j < faceLength; j++) {
+        //console.log("push");
+        vertices.push(modelGeometry.positions[currentFaceVerts[j] - 1]);
+
+    }
+
+    //console.log(vertices);
+    imgArray = this.renderVertices(imgArray, vertices, camera_inverse, object_transform);
+  }
+
+  return imgArray;
 }
