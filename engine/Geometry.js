@@ -13,7 +13,8 @@ Geometry.prototype.parseOBJ = function(object) {
   //regex for positions
   var positionRegx = /^v\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
   //var faceRegs = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/;
-  var faceRegx = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)/;
+  //var faceRegx = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)/;
+  var faceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
   var positions = [];
   var faces = []
 
@@ -30,15 +31,18 @@ Geometry.prototype.parseOBJ = function(object) {
     }
     else if((result = faceRegx.exec(line)) != null) {
       //Creating the face
-
       var vertexIndices = [];
-      for(var i = 1; i < 10; i +=3) {
-        //1, 4, 7, 10
-        //Add the vertex to the vertices
+      var step = Math.ceil(result.length / 4);
+      for(var i = 1; i < result.length; i += step ) {
         vertexIndices.push(parseFloat(result[i]));
       }
+
+      // for(var i = 1; i < 10; i +=3) {
+      //   //1, 4, 7, 10
+      //   //Add the vertex to the vertices
+      //   vertexIndices.push(parseFloat(result[i]));
+      // }
       //Create the face with the captured ImageData
-      //console.log(result);
       faces.push(new Face(vertexIndices));
     }
   });
@@ -47,8 +51,7 @@ Geometry.prototype.parseOBJ = function(object) {
   var edges = this.createEdgeList(positions, faces);
 
 
-  console.log("edgelist: ");
-  console.log(edges);
+
 
   this.positions = positions;
   this.faces = faces;
@@ -79,29 +82,47 @@ Geometry.prototype.createEdgeList = function(vertices, faces){
 
     //foreach vertex, check its entry in the adjacentVertsList.
     //If these adjacent vertices are not present in the list, add them.
+
     edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[0] - 1), (currentVertices[1] - 1));
+
     edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[1] - 1), (currentVertices[2] - 1));
+
     edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[2] - 1), (currentVertices[0] - 1));
+
 
   }
 
   return edgeList;
 }
 
-Geometry.prototype.insertVertexAdjacency = function(edgeList, current, adj) {
+Geometry.prototype.insertVertexAdjacency = function(edgeList, first, second) {
+
+    //To avoid duplicat edges, we introduce a bit of logic to our insertion.
+    //We check which one of the vertices has the lower index value. It is that vertex' edgelist that will be altered.
+    var lower = 0;
+    var higher = 0;
+    if(first < second) {
+      lower = first;
+      higher = second;
+    }
+    else {
+      lower = second;
+      higher = first;
+    }
+
     //If the current vertex has adjacent vertices, we must check if the current adjacent vertex is already in there or not
-    var adjacentVertices = edgeList[current];
+    var adjacentVertices = edgeList[lower];
     var adjacentVerticesLength = adjacentVertices.length;
 
     for(var i = 0; i < adjacentVerticesLength; i++) {
-      if(adjacentVertices[i] === adj){
+      if(adjacentVertices[i] === higher){
         //Found a duplicate. We are done here
-        return;
+        return edgeList;
       }
     }
 
     //If we are here, this is a new one. So, we add it.
-    edgeList[current].push(adj);
+    edgeList[lower].push(higher);
 
 
   return edgeList

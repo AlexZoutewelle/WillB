@@ -20,9 +20,6 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 var renderer = new Render(screenWidth, screenHeight);
 
 //trying out some camera stuff
-var test = new Vector3(5,8,19);
-var test2 = new Vector3(3, -2, -1);
-console.log(test.dot(test2));
 
 var camera = new Transformation([
         [1, 0, 0, -1],
@@ -33,7 +30,7 @@ var camera = new Transformation([
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/sphere.obj");
+var model = mdlLoad.loadObject("models/axis.obj");
 //var modelGeometry = [];
 //test point imgArray
 
@@ -44,6 +41,7 @@ model.then(function(result) {
   modelGeometry.parseOBJ(result);
 
   object_transform = new Transformation();
+  console.log(modelGeometry.edges);
 
   //Models are parsed. We can start the main game loop
   frame();
@@ -119,7 +117,6 @@ function frame() {
   }
 
   camera_inverse = camera.inverse();
-
 
 
   renderer.render(modelGeometry, camera_inverse, object_transform, camera);
