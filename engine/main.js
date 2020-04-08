@@ -2,11 +2,8 @@
 //low prio: Mouse view is not perfect.
 //high prio: wireframe rendering
 //    -Wireframe drawing is implemented, with a few caveats:
-//        It cuts off polygons too soon.
-//        it is very slow right Now
-//          Polygon culling needed?
-//          Algorithm unoptimized?
-//          Canvas drawing functions slow?
+//        Algorithm is unoptimized  -> We're reprocessing vertices and redrawing edges a lot: O(3N^2)
+//        Not sure how to prevent this.
 //high-prio: triangle coloring
 //high-prio: texture mapping
 
@@ -30,7 +27,7 @@ var camera = new Transformation([
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/axis.obj");
+var model = mdlLoad.loadObject("models/cow.obj");
 //var modelGeometry = [];
 //test point imgArray
 
@@ -39,9 +36,8 @@ model.then(function(result) {
   //All models are loaded. We can start parsing the models
   modelGeometry = new Geometry();
   modelGeometry.parseOBJ(result);
-
-  object_transform = new Transformation();
   console.log(modelGeometry.edges);
+  object_transform = new Transformation();
 
   //Models are parsed. We can start the main game loop
   frame();
