@@ -6,6 +6,7 @@ function Geometry(positions, faces, edges) {
 
 function Face(vertices) {
   this.vertices = vertices;
+  this.culled = false;
 }
 
 Geometry.prototype.parseOBJ = function(object) {

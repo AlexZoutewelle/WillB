@@ -80,16 +80,65 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
     pixels.push( this.renderVertices(imgArray, modelGeometry.positions[i], camera_inverse, object_transform));
   }
 
-  // var faceCount = modelGeometry.faces.length;
-  // for (var i = 0; i < faceCount; i++) {
-  //   this.renderFaces(imgArray, modelGeometry.faces[i], pixels, camera_inverse, object_transform, camera);
+  var faceCount = modelGeometry.faces.length;
+  for (var i = 0; i < faceCount; i++) {
+    this.renderFaces(imgArray, modelGeometry.faces[i], pixels, camera_inverse, object_transform, camera);
+  }
+  // for(var i = 0; i < modelGeometry.faces.length; i++) {
+  //
   // }
-
-  this.renderWireFrame(pixels, modelGeometry.edges);
+  //
+  // this.renderWireFrame(pixels, modelGeometry.edges);
 
 
   //Actually draw the image array on the canvas
   //this.draw(imgArray);
+}
+
+
+Render.prototype.backFaceCull = function(face, vertices, pixels, camera_inverse) {
+  if(vertices.length < 3) {
+    //We cant render the triangle, so we can't cull.
+    return;
+  }
+
+  //Dot product, back culling
+  //renderVertices will do all the transformations and conversion to raster_coordinates
+  //It returns the indices of the imgArray it should be drawn on
+
+  //To do backface culling: We need the face's normal.
+  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+  //If the dot product results in 0 or less, it means the normal is pointing away from us.
+  var line1 = new Vector3(
+      vertices[0].fields[0] - vertices[1].fields[0],
+      vertices[0].fields[1] - vertices[1].fields[1],
+      vertices[0].fields[2] - vertices[1].fields[2]
+    );
+  var line2 = new Vector3(
+      vertices[0].fields[0] - vertices[2].fields[0],
+      vertices[0].fields[1] - vertices[2].fields[1],
+      vertices[0].fields[2] - vertices[2].fields[2]
+  );
+  var normal = line1.cross(line2);
+
+  var view_vec = new Vector3(
+    camera_inverse.fields[0][3] - vertices[1].fields[0],
+    camera_inverse.fields[1][3] - vertices[1].fields[1],
+    camera_inverse.fields[2][3] - vertices[1].fields[2]
+  )
+
+  view_vec.normalize();
+  normal.normalize();
+
+  var dot_result = view_vec.dot(normal);
+
+  if(dot_result < 0) {
+    face.culled = true;
+    return false;
+  }
+
+  return true;
 }
 
 Render.prototype.renderWireFrame = function(pixels, edges) {
@@ -119,8 +168,6 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
           this.ctx.strokeStyle= "red";
           this.ctx.stroke();
         }
-
-
       }
   }
 }
@@ -206,40 +253,15 @@ Render.prototype.renderFaces = function(imgArray, face, pixels, camera_inverse, 
         //console.log("push");
         //Remember, .obj consider themselves starting at index 1. So, we must subtract 1
         var vertexIndex = currentFaceVerts[j] - 1;
-        vertices.push(pixels[vertexIndex]);
+        if(pixels[vertexIndex]) {
+          vertices.push(pixels[vertexIndex]);
+
+        }
     }
-    //Dot product, back culling
-    //renderVertices will do all the transformations and conversion to raster_coordinates
-    //It returns the indices of the imgArray it should be drawn on
 
-    //To do backface culling: We need the face's normal.
-    //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
-    //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
-    //If the dot product results in 0 or less, it means the normal is pointing away from us.
-    var line1 = new Vector3(
-        vertices[0].fields[0] - vertices[1].fields[0],
-        vertices[0].fields[1] - vertices[1].fields[1],
-        vertices[0].fields[2] - vertices[1].fields[2]
-      );
-    var line2 = new Vector3(
-        vertices[0].fields[0] - vertices[2].fields[0],
-        vertices[0].fields[1] - vertices[2].fields[1],
-        vertices[0].fields[2] - vertices[2].fields[2]
-    );
-    var normal = line1.cross(line2);
-
-    var view_vec = new Vector3(
-      camera_inverse.fields[0][3] - vertices[1].fields[0],
-      camera_inverse.fields[1][3] - vertices[1].fields[1],
-      camera_inverse.fields[2][3] - vertices[1].fields[2]
-    )
-
-    view_vec.normalize();
-    normal.normalize();
-
-    var dot_result = view_vec.dot(normal);
-
-    if(dot_result < 0) {return;}
+    if(!this.backFaceCull(face, vertices, pixels, camera_inverse)) {
+      return;
+    }
 
     //If we want to draw a wireframe, we draw the lines connecting these pixels now
     //For now, we use html5 canvas methods. In the near future, we'll use Bresenham instead

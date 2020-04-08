@@ -36,7 +36,6 @@ model.then(function(result) {
   //All models are loaded. We can start parsing the models
   modelGeometry = new Geometry();
   modelGeometry.parseOBJ(result);
-  console.log(modelGeometry.edges);
   object_transform = new Transformation();
 
   //Models are parsed. We can start the main game loop
@@ -132,8 +131,8 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-
-  requestAnimationFrame(frame);
+  console.log(modelGeometry.faces);
+  //requestAnimationFrame(frame);
 }
 
 function update() {
