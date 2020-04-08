@@ -77,18 +77,21 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var vertexCount = modelGeometry.positions.length;
   var pixels = []
   for(var i = 0; i < vertexCount; i++) {
-    pixels.push( this.renderVertices(imgArray, modelGeometry.positions[i], camera_inverse, object_transform));
+    pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
   }
 
-  var faceCount = modelGeometry.faces.length;
-  for (var i = 0; i < faceCount; i++) {
-    this.renderFaces(imgArray, modelGeometry.faces[i], pixels, camera_inverse, object_transform, camera);
+  if(globalState.face === true) {
+    var faceCount = modelGeometry.faces.length;
+    for (var i = 0; i < faceCount; i++) {
+      this.renderFaces(imgArray, modelGeometry.faces[i], pixels, camera_inverse, object_transform, camera);
+    }
+
   }
-  // for(var i = 0; i < modelGeometry.faces.length; i++) {
-  //
-  // }
-  //
-  // this.renderWireFrame(pixels, modelGeometry.edges);
+
+
+  if(globalState.wireFrame === true) {
+    this.renderWireFrame(pixels, modelGeometry.edges);
+  }
 
 
   //Actually draw the image array on the canvas
@@ -175,7 +178,7 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 
 //Renders a set of vertices?   It is right now more just a conversion function.
 //Right now, the vertices used in this function is from a single face
-Render.prototype.renderVertices = function(imgArray, vertex, camera_inverse, object_transform) {
+Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transform) {
 
 
       //local to world
@@ -224,19 +227,7 @@ Render.prototype.renderVertices = function(imgArray, vertex, camera_inverse, obj
       var pixel = ((point_raster.fields[0]) * 4) + ((screenWidth * (point_raster.fields[1])) * 4);
 
 
-
-
-
-
-
-  // for(var k = 0; k < pixel_array.length; k++) {
-    //this.drawPixel(imgArray, point_raster.fields[0], point_raster.fields[1]);
-  // }
-
   return point_raster;
-
-  //This is JS: everything is a pointer. So, no need to return the imgArray
-  //return imgArray;
 }
 
 //Loop over all faces, and get their corresponding set of vertices

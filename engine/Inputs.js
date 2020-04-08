@@ -30,6 +30,10 @@ var playerState = {
   }
 }
 
+var globalState = {
+  wireFrame: false, face: true
+}
+
 //Pointer lock for mouse movement
 var canvas = document.getElementById('screen');
 
@@ -117,6 +121,16 @@ function onkeydown(e, key, pressed) {
       break;
     case KEY.DOWN:
       playerState.input.tiltBack = pressed;
+      e.preventDefault();
+      break;
+    case KEY.Q:
+      globalState.wireFrame = pressed;
+      globalState.face = false;
+      e.preventDefault();
+      break;
+    case KEY.E:
+      globalState.face = pressed
+      globalState.wireFrame = false;
       e.preventDefault();
       break;
   }
