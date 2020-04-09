@@ -4,7 +4,9 @@
 //    -Wireframe drawing is implemented, with a few caveats:
 //        Algorithm is unoptimized  -> We're reprocessing vertices and redrawing edges a lot: O(3N^2)
 //        Not sure how to prevent this.
+//        We now have wireframe with no duplicated edges, but without back-culling
 //high-prio: triangle coloring
+//high-prio: trangle shading
 //high-prio: texture mapping
 
 var screenWidth = 400;
@@ -37,7 +39,7 @@ model.then(function(result) {
   modelGeometry = new Geometry();
   modelGeometry.parseOBJ(result);
   object_transform = new Transformation();
-
+  console.log(modelGeometry);
   //Models are parsed. We can start the main game loop
   frame();
 });
@@ -56,21 +58,20 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -2);
-
+    camera.fields =  camera.translate(0,0, -1);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,2);
+    camera.fields =  camera.translate(0, 0,1);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(2,0,0);
+    camera.fields = camera.translate(1,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-2,0,0,);
+    camera.fields = camera.translate(-1,0,0,);
   }
 
   if(playerState.input.turnLeft === true) {
