@@ -110,7 +110,12 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
         continue;
       }
 
-      this.renderFace(imgArray, vertices);
+      var color = "blue";
+      if(i % 2 == 0) {
+        color = "red";
+      }
+
+      this.renderFace(imgArray, vertices, color);
     }
 
   }
@@ -120,7 +125,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, vertices) {
+Render.prototype.renderFace = function(imgArray, vertices, color) {
 
   //We are going to color the Triangle
 
@@ -135,7 +140,7 @@ Render.prototype.renderFace = function(imgArray, vertices) {
       vertices[0] = vertices[1];
       vertices[1] = temp;
     }
-    this.renderFlatTopFace(vertices);
+    this.renderFlatTopFace(vertices, color);
   }
 
   //Flat bottom
@@ -147,18 +152,18 @@ Render.prototype.renderFace = function(imgArray, vertices) {
       vertices[2] = temp;
     }
 
-    this.renderFlatBottomFace(vertices);
+    this.renderFlatBottomFace(vertices, color);
   }
 
   //General
   else {
-    this.renderGeneralFace(vertices);
+    this.renderGeneralFace(vertices, color);
   }
 
   return imgArray;
 }
 
-Render.prototype.renderFlatBottomFace = function(vertices) {
+Render.prototype.renderFlatBottomFace = function(vertices, color) {
   //console.log("flat bottom");
   var yStart = Math.ceil(vertices[0].fields[1] - 0.5);
   var yEnd = Math.ceil(vertices[1].fields[1] - 0.5);
@@ -166,8 +171,7 @@ Render.prototype.renderFlatBottomFace = function(vertices) {
   var slope1 = (vertices[1].fields[0] - vertices[0].fields[0]) / (vertices[1].fields[1] - vertices[0].fields[1]);
   var slope2 = (vertices[2].fields[0] - vertices[0].fields[0]) / (vertices[2].fields[1] - vertices[0].fields[1])
 
-  // console.log(yStart + " "  + yEnd);
-  // console.log(yStart > yEnd);
+
   for(var y = yStart; y > yEnd; y--) {
     var xStart = slope1 * (y - vertices[0].fields[1] - 0.5) + vertices[0].fields[0];
     var xEnd = slope2 * (y - vertices[0].fields[1] - 0.5) + vertices[0].fields[0];
@@ -183,14 +187,14 @@ Render.prototype.renderFlatBottomFace = function(vertices) {
 
 
     this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= "red";
+    this.ctx.strokeStyle= color;
     this.ctx.stroke();
   }
 
 
 }
 
-Render.prototype.renderFlatTopFace = function(vertices) {
+Render.prototype.renderFlatTopFace = function(vertices, color) {
   //console.log(vertices);
   //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
   var yStart = Math.ceil(vertices[0].fields[1] - 0.5);
@@ -219,7 +223,7 @@ Render.prototype.renderFlatTopFace = function(vertices) {
 
 
     this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= "red";
+    this.ctx.strokeStyle= color;
     this.ctx.stroke();
     //console.log("stroked");
 
@@ -228,7 +232,7 @@ Render.prototype.renderFlatTopFace = function(vertices) {
 }
 
 //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-Render.prototype.renderGeneralFace = function(vertices) {
+Render.prototype.renderGeneralFace = function(vertices, color) {
   //console.log("general");
 
   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
@@ -243,13 +247,13 @@ Render.prototype.renderGeneralFace = function(vertices) {
 
   //Major Right
   if(vi.fields[0] > vertices[1].fields[0] ) {
-    this.renderFlatBottomFace([vertices[0], vertices[1], vi ]);
-    this.renderFlatTopFace([vertices[1], vi, vertices[2]]);
+    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], color);
+    this.renderFlatTopFace([vertices[1], vi, vertices[2]], color);
   }
   //Major Left
   if(vi.fields[0] < vertices[1].fields[0]) {
-    this.renderFlatBottomFace([vertices[0], vi, vertices[1]]);
-    this.renderFlatTopFace([vi, vertices[1], vertices[2]]);
+    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], color);
+    this.renderFlatTopFace([vi, vertices[1], vertices[2]], color);
   }
 }
 
