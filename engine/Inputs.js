@@ -31,7 +31,7 @@ var playerState = {
 }
 
 var globalState = {
-  wireFrame: false, face: true
+  wireFrame: true, face: true
 }
 
 //Pointer lock for mouse movement

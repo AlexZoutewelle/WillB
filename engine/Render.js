@@ -105,13 +105,14 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
             //Triangle is not rendered completely, so ignore this one for now
             break;
           }
-
+          vertices.push(pixels[vertexIndex]);
           //Get the pixel of the vertex
           face.vertices[j].position = pixels[vertexIndex].position;
 
       }
       //console.log(face);
-      if(!this.backFaceCull(face, camera)) {
+      //console.log(pixels);
+      if(!this.backFaceCull(vertices, camera_inverse)) {
         continue;
       }
 
@@ -126,7 +127,53 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   //Actually draw the image array on the canvas
   //this.draw(imgArray);
 }
+Render.prototype.backFaceCull = function(vertices, camera_inverse) {
+  if(vertices.length < 3) {
+    console.log(vertices);
+    //We cant render the triangle, so we can't cull.
+    return;
+  }
 
+  //Dot product, back culling
+  //renderVertices will do all the transformations and conversion to raster_coordinates
+  //It returns the indices of the imgArray it should be drawn on
+
+  //To do backface culling: We need the face's normal.
+  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+  //If the dot product results in 0 or less, it means the normal is pointing away from us.
+  var line1 = new Vector3(
+      vertices[0].position[0] - vertices[1].position[0],
+      vertices[0].position[1] - vertices[1].position[1],
+      vertices[0].position[2] - vertices[1].position[2]
+    );
+  var line2 = new Vector3(
+      vertices[0].position[0] - vertices[2].position[0],
+      vertices[0].position[1] - vertices[2].position[1],
+      vertices[0].position[2] - vertices[2].position[2]
+  );
+  var normal = line1.cross(line2);
+
+  var view_vec = new Vector3(
+    camera_inverse.fields[0][3] - vertices[1].position[0],
+    camera_inverse.fields[1][3] - vertices[1].position[1],
+    camera_inverse.fields[2][3] - vertices[1].position[2]
+  )
+
+  // view_vec.normalize();
+  // normal.normalize();
+  //console.log("ids: " + face.vertices[0].id + "  "  + face.vertices[1].id + "  "  + face.vertices[2].id);
+  var dot_result = view_vec.dot(normal);
+
+  if(dot_result < 0) {
+    console.log("dot wrong");
+
+    //face.culled = true;
+    return false;
+  }
+
+  return true;
+}
 
 //Draw a face
 Render.prototype.renderFace = function(imgArray, face, color) {
@@ -283,53 +330,7 @@ Render.prototype.sortVertices = function(axis, vertices) {
   return vertices;
 }
 
-Render.prototype.backFaceCull = function(face, camera_inverse) {
-  if(face.vertices.length < 3) {
-    console.log(face);
-    //We cant render the triangle, so we can't cull.
-    return;
-  }
 
-  //Dot product, back culling
-  //renderVertices will do all the transformations and conversion to raster_coordinates
-  //It returns the indices of the imgArray it should be drawn on
-
-  //To do backface culling: We need the face's normal.
-  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
-  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
-  //If the dot product results in 0 or less, it means the normal is pointing away from us.
-  var line1 = new Vector3(
-      face.vertices[0].position[0] - face.vertices[1].position[0],
-      face.vertices[0].position[1] - face.vertices[1].position[1],
-      face.vertices[0].position[2] - face.vertices[1].position[2]
-    );
-  var line2 = new Vector3(
-      face.vertices[0].position[0] - face.vertices[2].position[0],
-      face.vertices[0].position[1] - face.vertices[2].position[1],
-      face.vertices[0].position[2] - face.vertices[2].position[2]
-  );
-  var normal = line1.cross(line2);
-
-  var view_vec = new Vector3(
-    camera_inverse.fields[0][3] - face.vertices[1].position[0],
-    camera_inverse.fields[1][3] - face.vertices[1].position[1],
-    camera_inverse.fields[2][3] - face.vertices[1].position[2]
-  )
-
-  // view_vec.normalize();
-  // normal.normalize();
-  //console.log("ids: " + face.vertices[0].id + "  "  + face.vertices[1].id + "  "  + face.vertices[2].id);
-  var dot_result = view_vec.dot(normal);
-
-  if(dot_result < 0) {
-    //console.log(face);
-
-    //face.culled = true;
-    return false;
-  }
-
-  return true;
-}
 
 Render.prototype.renderWireFrame = function(pixels, edges) {
 

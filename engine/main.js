@@ -22,13 +22,18 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -10],
+        [0, 0, 1, -40],
         [0, 0, 0, 1]
 ]);
 
+var test1 = new Vector3(3, 4, 5);
+var test2 = new Vector3(4,6,5);
+
+console.log(test1.cross(test2));
+
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/sphere2.obj");
+var model = mdlLoad.loadObject("models/cube.obj");
 //var modelGeometry = [];
 //test point imgArray
 
@@ -142,8 +147,8 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-    //requestAnimationFrame(frame);
-  
+    requestAnimationFrame(frame);
+
 
 }
 
