@@ -5,7 +5,6 @@
 //        Algorithm is unoptimized  -> We're reprocessing vertices and redrawing edges a lot: O(3N^2)
 //        Not sure how to prevent this.
 //        We now have wireframe with no duplicated edges, but without back-culling
-//high-prio: triangle coloring
 //high-prio: trangle shading
 //high-prio: texture mapping
 
@@ -21,15 +20,15 @@ var renderer = new Render(screenWidth, screenHeight);
 //trying out some camera stuff
 
 var camera = new Transformation([
-        [1, 0, 0, -1],
+        [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -40],
+        [0, 0, 1, -10],
         [0, 0, 0, 1]
 ]);
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/sphere.obj");
+var model = mdlLoad.loadObject("models/sphere2.obj");
 //var modelGeometry = [];
 //test point imgArray
 
@@ -44,12 +43,13 @@ model.then(function(result) {
   frame();
 });
 
-
+var count = 0;
 
 
 
 
 function frame() {
+  console.log("new round");
 
   update();
   if(playerState.input.escape === true) {
@@ -114,8 +114,18 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
-
+  // console.log(modelGeometry.faces);
+  // console.log(modelGeometry.positions);
   renderer.render(modelGeometry, camera_inverse, object_transform, camera);
+  //console.log(modelGeometry.faces);
+
+  var position = modelGeometry.positions[0].position;
+  var faceid = modelGeometry.faces[0].vertices;
+  var facepos = modelGeometry.faces[0].vertices[0].position;
+
+  // console.log(position[0] + " " + position[1] + " " + position[2]);
+  // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
+  // console.log(facepos[0] + " " + facepos[1] + " " + facepos[2]);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
@@ -132,7 +142,9 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-  requestAnimationFrame(frame);
+    //requestAnimationFrame(frame);
+  
+
 }
 
 function update() {

@@ -1,23 +1,38 @@
-function Geometry(positions, faces, edges) {
+function Geometry(positions, faces, edges, uvs) {
   this.positions = positions || [];
   this.faces = faces || [];
   this.edges = edges || [];
 }
 
 function Face(vertices) {
-  this.vertices = vertices;
+  this.vertices = vertices || [];
   this.culled = false;
+}
+
+function Vertex(id, normal, uv) {
+  this.id = id;
+  this.normal = normal || new Vector3();
+  this.uv = uv || new Vector2();
 }
 
 Geometry.prototype.parseOBJ = function(object) {
 
   //regex for positions
   var positionRegx = /^v\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
+
+  //original
   //var faceRegs = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/;
   var faceRegx = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)/;
   //var faceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
+  var normalRegx = /^vn\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
+
+  var uvRegx = /^vt\s+(\d+\.\d+)\s+(\d+\.\d+)/;
+
+
   var positions = [];
   var faces = []
+  var uvs = [];
+  var normals = [];
 
   var lines = object.split('\n');
 
@@ -30,34 +45,48 @@ Geometry.prototype.parseOBJ = function(object) {
         parseFloat(result[3])
       ));
     }
+
+    else if((result = uvRegx.exec(line)) != null) {
+      uvs.push(new Vector2(
+        parseFloat(result[1]),
+        parseFloat(result[2])
+      ));
+    }
+
+    else if((result = normalRegx.exec(line)) != null) {
+      normals.push(new Vector3(
+        parseFloat(result[0]),
+        parseFloat(result[1]),
+        parseFloat(result[2])
+      ));
+    }
+
     else if((result = faceRegx.exec(line)) != null) {
       //Creating the face
-      var vertexIndices = [];
+
+
+      var faceVertices = [];
+
       var step = Math.ceil(result.length / 4);
       for(var i = 1; i < result.length; i += step ) {
-        vertexIndices.push(parseFloat(result[i]));
-      }
+        //We only save the vertex indices here, since we go 3x slower without them
+        var id = parseInt(result[i]);
+        var uv = uvs[parseInt(result[i + 1])];
+        var normal = normals[parseInt(result[i + 2])];
+        faceVertices.push(new Vertex(id, normal, uv));
 
-      // for(var i = 1; i < 10; i +=3) {
-      //   //1, 4, 7, 10
-      //   //Add the vertex to the vertices
-      //   vertexIndices.push(parseFloat(result[i]));
-      // }
-      //Create the face with the captured ImageData
-      faces.push(new Face(vertexIndices));
+      }
+      faces.push(new Face(faceVertices));
     }
+
   });
 
-  //Now that we have parsed all the lines in the .obj file, we must make a list of edges
-  var edges = this.createEdgeList(positions, faces);
+    //Now that we have parsed all the lines in the .obj file, we must make a list of edges
+    var edges = this.createEdgeList(positions, faces);
 
-
-
-
-  this.positions = positions;
-  this.faces = faces;
-  this.edges = edges;
-  //return new Geometry(positions, faces, edges);
+    this.positions = positions;
+    this.faces = faces;
+    this.edges = edges;
 }
 
 //Create edges, no duplicates allowed
@@ -79,8 +108,7 @@ Geometry.prototype.createEdgeList = function(vertices, faces){
   var facesLength = faces.length;
   for(var i = 0; i < facesLength; i++) {
     //A face contains id's of vertices
-    var currentVertices = faces[i].vertices;
-
+    var currentVertices = [faces[i].vertices[0].id, faces[i].vertices[1].id, faces[i].vertices[2].id];
     //foreach vertex, check its entry in the adjacentVertsList.
     //If these adjacent vertices are not present in the list, add them.
 
@@ -130,37 +158,41 @@ Geometry.prototype.insertVertexAdjacency = function(edgeList, first, second) {
 }
 
 function Vector3(x,y,z) {
-  this.fields = [x,y,z,1];
+  this.position = [x || 0, y || 0, z || 0, 1];
 }
 
 Vector3.prototype.translate = function (x,y,z) {
-  this.fields[0] += x;
-  this.fields[1] += y;
-  this.fields[2] += z;
-  //return new Vector(this.x + x, this.fields[1] + y, this.fields[2] + z);
+  this.position[0] += x;
+  this.position[1] += y;
+  this.position[2] += z;
+  //return new Vector(this.x + x, this.position[1] + y, this.position[2] + z);
 }
 
 Vector3.prototype.dot = function(vector) {
   var sum = 0;
-  sum += this.fields[0] * vector.fields[0];
-  sum += this.fields[1] * vector.fields[1];
-  sum += this.fields[2] * vector.fields[2];
+  sum += this.position[0] * vector.position[0];
+  sum += this.position[1] * vector.position[1];
+  sum += this.position[2] * vector.position[2];
 
   return sum;
 }
 
 Vector3.prototype.cross = function(vector) {
   var result = new Vector3();
-  result.fields[0] = (this.fields[1] * vector.fields[2]) - (vector.fields[1] * this.fields[2]);
-  result.fields[1] = (this.fields[2] * vector.fields[0]) - (vector.fields[2] * this.fields[0]) ;
-  result.fields[2] = (this.fields[0] * vector.fields[1]) - (vector.fields[0] * this.fields[1]);
+  result.position[0] = (this.position[1] * vector.position[2]) - (vector.position[1] * this.position[2]);
+  result.position[1] = (this.position[2] * vector.position[0]) - (vector.position[2] * this.position[0]) ;
+  result.position[2] = (this.position[0] * vector.position[1]) - (vector.position[0] * this.position[1]);
 
   return result;
 }
 
 Vector3.prototype.normalize = function() {
-  var length = Math.sqrt( (this.fields[0] **2) + (this.fields[1] ** 2) + (this.fields[2] **2) );
-  this.fields[0] /= length;
-  this.fields[1] /= length;
-  this.fields[2] /= length;
+  var length = Math.sqrt( (this.position[0] **2) + (this.position[1] ** 2) + (this.position[2] **2) );
+  this.position[0] /= length;
+  this.position[1] /= length;
+  this.position[2] /= length;
+}
+
+function Vector2(x,y) {
+  this.position = [x || 0, y || 0];
 }

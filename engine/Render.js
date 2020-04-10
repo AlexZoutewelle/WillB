@@ -79,7 +79,6 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   for(var i = 0; i < vertexCount; i++) {
     pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
   }
-
   //Wireframe mode
   if(globalState.wireFrame === true) {
     this.renderWireFrame(pixels, modelGeometry.edges);
@@ -91,22 +90,28 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
     var faceCount = modelGeometry.faces.length;
     for (var i = 0; i < faceCount; i++) {
 
+      var face = modelGeometry.faces[i];
+
       var vertices = [];
+      var uvs = [];
       //We take each index specified in the face, and push them to the vertices array.
       //The vertices in the array are to be drawn to the screen
 
       for(var j = 0; j < 3; j++) {
-
-          var vertexIndex = modelGeometry.faces[i].vertices[j] - 1
+          var currentVertex = face.vertices[j];
+          var vertexIndex = currentVertex.id -1;
 
           if(!pixels[vertexIndex]) {
             //Triangle is not rendered completely, so ignore this one for now
             break;
           }
-          vertices.push(pixels[vertexIndex]);
-      }
 
-      if(!this.backFaceCull(vertices, camera_inverse)) {
+          //Get the pixel of the vertex
+          face.vertices[j].position = pixels[vertexIndex].position;
+
+      }
+      //console.log(face);
+      if(!this.backFaceCull(face, camera)) {
         continue;
       }
 
@@ -114,8 +119,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       if(i % 2 == 0) {
         color = "red";
       }
-
-      this.renderFace(imgArray, vertices, color);
+      this.renderFace(imgArray, face, color);
     }
 
   }
@@ -125,17 +129,17 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, vertices, color) {
+Render.prototype.renderFace = function(imgArray, face, color) {
 
   //We are going to color the Triangle
 
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
-  vertices = this.sortVertices(1, vertices);
+  var vertices = this.sortVertices(1, face.vertices);
 
   //Flat top
-  if(vertices[0].fields[1] === vertices[1].fields[1]) {
+  if(vertices[0].position[1] === vertices[1].position[1]) {
     //Now, we should sort the top vertices by their x values ASC
-    if(vertices[0].fields[0] > vertices[1].fields[0]) {
+    if(vertices[0].position[0] > vertices[1].position[0]) {
       var temp = vertices[0];
       vertices[0] = vertices[1];
       vertices[1] = temp;
@@ -144,9 +148,9 @@ Render.prototype.renderFace = function(imgArray, vertices, color) {
   }
 
   //Flat bottom
-  else if(vertices[1].fields[1] === vertices[2].fields[1]) {
+  else if(vertices[1].position[1] === vertices[2].position[1]) {
     //Now, we should sort the bottom vertices by their x values  ASC
-    if(vertices[1].fields[0] > vertices[2].fields[0]) {
+    if(vertices[1].position[0] > vertices[2].position[0]) {
       var temp = vertices[1];
       vertices[1] = vertices[2];
       vertices[2] = temp;
@@ -164,21 +168,19 @@ Render.prototype.renderFace = function(imgArray, vertices, color) {
 }
 
 Render.prototype.renderFlatBottomFace = function(vertices, color) {
-  //console.log("flat bottom");
-  var yStart = Math.ceil(vertices[0].fields[1] - 0.5);
-  var yEnd = Math.ceil(vertices[1].fields[1] - 0.5);
+  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
+  var yEnd = Math.ceil(vertices[1].position[1] - 0.5);
 
-  var slope1 = (vertices[1].fields[0] - vertices[0].fields[0]) / (vertices[1].fields[1] - vertices[0].fields[1]);
-  var slope2 = (vertices[2].fields[0] - vertices[0].fields[0]) / (vertices[2].fields[1] - vertices[0].fields[1])
+  var slope1 = (vertices[1].position[0] - vertices[0].position[0]) / (vertices[1].position[1] - vertices[0].position[1]);
+  var slope2 = (vertices[2].position[0] - vertices[0].position[0]) / (vertices[2].position[1] - vertices[0].position[1])
 
 
   for(var y = yStart; y > yEnd; y--) {
-    var xStart = slope1 * (y - vertices[0].fields[1] - 0.5) + vertices[0].fields[0];
-    var xEnd = slope2 * (y - vertices[0].fields[1] - 0.5) + vertices[0].fields[0];
+    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
+    var xEnd = slope2 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
 
     xStart = Math.ceil(xStart - 0.5);
     xEnd = Math.ceil(xEnd - 0.5);
-    //console.log(xStart + " "  + xEnd);
 
     //Now draw the horizontal line!
     this.ctx.beginPath();
@@ -187,7 +189,7 @@ Render.prototype.renderFlatBottomFace = function(vertices, color) {
 
 
     this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= color;
+    this.ctx.strokeStyle = color;
     this.ctx.stroke();
   }
 
@@ -195,23 +197,27 @@ Render.prototype.renderFlatBottomFace = function(vertices, color) {
 }
 
 Render.prototype.renderFlatTopFace = function(vertices, color) {
-  //console.log(vertices);
   //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
-  var yStart = Math.ceil(vertices[0].fields[1] - 0.5);
-  var yEnd = Math.ceil(vertices[2].fields[1] - 0.5);
+  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
+  var yEnd = Math.ceil(vertices[2].position[1] - 0.5);
 
   //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
   //These are inverted so as to not get inf values
-  var slope1 = (vertices[2].fields[0] - vertices[0].fields[0] )  /  (vertices[2].fields[1] - vertices[0].fields[1]);
-  var slope2 = (vertices[2].fields[0] - vertices[1].fields[0] )  /  (vertices[2].fields[1] - vertices[1].fields[1]);
+  var slope1 = (vertices[2].position[0] - vertices[0].position[0] )  /  (vertices[2].position[1] - vertices[0].position[1]);
+  var slope2 = (vertices[2].position[0] - vertices[1].position[0] )  /  (vertices[2].position[1] - vertices[1].position[1]);
   //console.log(yStart + " "  + yEnd);
+
+
+  //UV coordinates
+
+
 
   for(var y = yStart; y > yEnd; y-- ) {
     //y = a(x - x0) + y0
     // y - y0 = a(x - x0)
     // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
-    var xStart = slope1 * (y - vertices[0].fields[1] - 0.5) + vertices[0].fields[0];
-    var xEnd =   slope2 * (y - vertices[1].fields[1] - 0.5) + vertices[1].fields[0]
+    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
+    var xEnd =   slope2 * (y - vertices[1].position[1] - 0.5) + vertices[1].position[0]
 
     //We need to subtract 0.5 from the x values as well
     xStart = Math.ceil(xStart - 0.5);
@@ -236,22 +242,22 @@ Render.prototype.renderGeneralFace = function(vertices, color) {
   //console.log("general");
 
   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
-  var alpha = (vertices[1].fields[1] - vertices[0].fields[1]) /
-              (vertices[2].fields[1] - vertices[0].fields[1]);
+  var alpha = (vertices[1].position[1] - vertices[0].position[1]) /
+              (vertices[2].position[1] - vertices[0].position[1]);
 
   var vi = new Vector3();
 
   //vi = v0*(1 - a) + v2*a
-  vi.fields[0] = vertices[0].fields[0] + alpha*(vertices[2].fields[0] - vertices[0].fields[0]);
-  vi.fields[1] = vertices[0].fields[1] + alpha*(vertices[2].fields[1] - vertices[0].fields[1])
+  vi.position[0] = vertices[0].position[0] + alpha*(vertices[2].position[0] - vertices[0].position[0]);
+  vi.position[1] = vertices[0].position[1] + alpha*(vertices[2].position[1] - vertices[0].position[1])
 
   //Major Right
-  if(vi.fields[0] > vertices[1].fields[0] ) {
+  if(vi.position[0] > vertices[1].position[0] ) {
     this.renderFlatBottomFace([vertices[0], vertices[1], vi ], color);
     this.renderFlatTopFace([vertices[1], vi, vertices[2]], color);
   }
   //Major Left
-  if(vi.fields[0] < vertices[1].fields[0]) {
+  if(vi.position[0] < vertices[1].position[0]) {
     this.renderFlatBottomFace([vertices[0], vi, vertices[1]], color);
     this.renderFlatTopFace([vi, vertices[1], vertices[2]], color);
   }
@@ -266,7 +272,7 @@ Render.prototype.sortVertices = function(axis, vertices) {
       next = 1;
     }
 
-    if(vertices[current].fields[axis] < vertices[next].fields[axis]) {
+    if(vertices[current].position[axis] < vertices[next].position[axis]) {
         var temp = vertices[current];
         vertices[current] = vertices[next];
         vertices[next] = temp;
@@ -277,8 +283,9 @@ Render.prototype.sortVertices = function(axis, vertices) {
   return vertices;
 }
 
-Render.prototype.backFaceCull = function(vertices, camera_inverse) {
-  if(vertices.length < 3) {
+Render.prototype.backFaceCull = function(face, camera_inverse) {
+  if(face.vertices.length < 3) {
+    console.log(face);
     //We cant render the triangle, so we can't cull.
     return;
   }
@@ -292,29 +299,31 @@ Render.prototype.backFaceCull = function(vertices, camera_inverse) {
   //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
   //If the dot product results in 0 or less, it means the normal is pointing away from us.
   var line1 = new Vector3(
-      vertices[0].fields[0] - vertices[1].fields[0],
-      vertices[0].fields[1] - vertices[1].fields[1],
-      vertices[0].fields[2] - vertices[1].fields[2]
+      face.vertices[0].position[0] - face.vertices[1].position[0],
+      face.vertices[0].position[1] - face.vertices[1].position[1],
+      face.vertices[0].position[2] - face.vertices[1].position[2]
     );
   var line2 = new Vector3(
-      vertices[0].fields[0] - vertices[2].fields[0],
-      vertices[0].fields[1] - vertices[2].fields[1],
-      vertices[0].fields[2] - vertices[2].fields[2]
+      face.vertices[0].position[0] - face.vertices[2].position[0],
+      face.vertices[0].position[1] - face.vertices[2].position[1],
+      face.vertices[0].position[2] - face.vertices[2].position[2]
   );
   var normal = line1.cross(line2);
 
   var view_vec = new Vector3(
-    camera_inverse.fields[0][3] - vertices[1].fields[0],
-    camera_inverse.fields[1][3] - vertices[1].fields[1],
-    camera_inverse.fields[2][3] - vertices[1].fields[2]
+    camera_inverse.fields[0][3] - face.vertices[1].position[0],
+    camera_inverse.fields[1][3] - face.vertices[1].position[1],
+    camera_inverse.fields[2][3] - face.vertices[1].position[2]
   )
 
   // view_vec.normalize();
   // normal.normalize();
-
+  //console.log("ids: " + face.vertices[0].id + "  "  + face.vertices[1].id + "  "  + face.vertices[2].id);
   var dot_result = view_vec.dot(normal);
 
   if(dot_result < 0) {
+    //console.log(face);
+
     //face.culled = true;
     return false;
   }
@@ -342,10 +351,10 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
         if(pixels[adjId] && pixels[vId]) {
           this.ctx.beginPath();
 
-          this.ctx.moveTo(pixels[vId].fields[0], pixels[vId].fields[1])
+          this.ctx.moveTo(pixels[vId].position[0], pixels[vId].position[1])
 
 
-          this.ctx.lineTo(pixels[adjId].fields[0], pixels[adjId].fields[1]);
+          this.ctx.lineTo(pixels[adjId].position[0], pixels[adjId].position[1]);
           this.ctx.strokeStyle= "red";
           this.ctx.stroke();
         }
@@ -369,11 +378,11 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
 
       //perspective_divide.
       var point_pd = new Vector3(0,0,0);
-      point_pd.fields[0] = ((point.fields[0] )/ (-point.fields[2]) ) * Znear;
-      point_pd.fields[1] = ((point.fields[1] ) / (-point.fields[2]) ) * Znear;
-      point_pd.fields[2] = point.fields[2];
+      point_pd.position[0] = ((point.position[0] )/ (-point.position[2]) ) * Znear;
+      point_pd.position[1] = ((point.position[1] ) / (-point.position[2]) ) * Znear;
+      point_pd.position[2] = point.position[2];
 
-      if(point_pd.fields[2] < Znear  || point_pd.fields[0] < (cleft - 10) || point_pd.fields[0] > (cright + 10) || point_pd.fields[1] < (cbottom - 10) || point_pd.fields[1] > (ctop + 10)) {
+      if(point_pd.position[2] < Znear  || point_pd.position[0] < (cleft - 10) || point_pd.position[0] > (cright + 10) || point_pd.position[1] < (cbottom - 10) || point_pd.position[1] > (ctop + 10)) {
 
         return 0;
 
@@ -385,24 +394,24 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
 
       //ndc (range of [0,1])
       var point_ndc = new Vector3(0,0,0);
-      point_ndc.fields[0] = (point_pd.fields[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-      point_ndc.fields[1] = (point_pd.fields[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
+      point_ndc.position[0] = (point_pd.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+      point_ndc.position[1] = (point_pd.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
 
       //raster coords (pixels)
       var point_raster = new Vector3(0,0,0);
-      point_raster.fields[0] = ((point_ndc.fields[0] * this.screenWidth) ) | 0;
-      point_raster.fields[1] = (((1 - point_ndc.fields[1] ) * this.screenHeight) ) | 0;
+      point_raster.position[0] = ((point_ndc.position[0] * this.screenWidth) ) | 0;
+      point_raster.position[1] = (((1 - point_ndc.position[1] ) * this.screenHeight) ) | 0;
 
 
 
 
       //Now that we have the raster coordinates, we could choose to just draw the pixel on the screen:
-      //this.drawPixel(imgArray, point_raster.fields[0], point_raster.fields[1]);
+      //this.drawPixel(imgArray, point_raster.position[0], point_raster.position[1]);
 
 
       //Or we can push this pixel to the array of pixels that belong to the face
       //Here we compute the index that the pixel is associated with within the imgArray
-      var pixel = ((point_raster.fields[0]) * 4) + ((screenWidth * (point_raster.fields[1])) * 4);
+      var pixel = ((point_raster.position[0]) * 4) + ((screenWidth * (point_raster.position[1])) * 4);
 
 
   return point_raster;

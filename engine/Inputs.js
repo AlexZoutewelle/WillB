@@ -124,13 +124,12 @@ function onkeydown(e, key, pressed) {
       e.preventDefault();
       break;
     case KEY.Q:
-      globalState.wireFrame = pressed;
-      globalState.face = false;
+
+      globalState.wireFrame = !globalState.wireFrame;
       e.preventDefault();
       break;
     case KEY.E:
-      globalState.face = pressed
-      globalState.wireFrame = false;
+      globalState.face = !globalState.face;
       e.preventDefault();
       break;
   }
