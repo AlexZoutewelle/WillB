@@ -143,8 +143,6 @@ Render.prototype.renderFace = function(imgArray, face, c) {
     color = "red";
   }
 
-  var uvs = '';
-
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
   var set = [0,1,2];
 
@@ -176,8 +174,8 @@ Render.prototype.renderFace = function(imgArray, face, c) {
 
     this.renderFlatTopFace([face.vertices[set[0]],
                             face.vertices[set[1]],
-                            face.vertices[set[2]] ],
-                            uvs, color);
+                            face.vertices[set[2]]],
+                            color);
   }
 
   //Flat bottom
@@ -192,8 +190,8 @@ Render.prototype.renderFace = function(imgArray, face, c) {
 
     this.renderFlatBottomFace([face.vertices[set[0]],
                                face.vertices[set[1]],
-                               face.vertices[set[2]] ],
-                               uvs, color);
+                               face.vertices[set[2]]],
+                               color);
   }
 
   //General
@@ -201,13 +199,13 @@ Render.prototype.renderFace = function(imgArray, face, c) {
     this.renderGeneralFace([face.vertices[set[0]],
                             face.vertices[set[1]],
                             face.vertices[set[2]] ],
-                            uvs, color);
+                            color);
   }
 
   return imgArray;
 }
 
-Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
+Render.prototype.renderFlatBottomFace = function(vertices, color) {
   console.log("render flat bot");
   console.log(vertices);
 
@@ -243,7 +241,7 @@ Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
 
 }
 
-Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
+Render.prototype.renderFlatTopFace = function(vertices, color) {
 
   console.log(vertices);
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
@@ -281,7 +279,7 @@ Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
 
 
     this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= color;
+    this.ctx.strokeStyle = color;
     this.ctx.stroke();
     //console.log("stroked");
 
@@ -290,7 +288,7 @@ Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
 }
 
 //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-Render.prototype.renderGeneralFace = function(vertices, uvs, color) {
+Render.prototype.renderGeneralFace = function(vertices, color) {
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
 
   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
@@ -303,25 +301,18 @@ Render.prototype.renderGeneralFace = function(vertices, uvs, color) {
   vi.position.position[0] = positions[0].position[0] + alpha*(positions[2].position[0] - positions[0].position[0]) | 0;
   vi.position.position[1] = positions[0].position[1] + alpha*(positions[2].position[1] - positions[0].position[1]) | 0;
 
+  //We also need to interpolate UV's for vi
+
+
   //Major Right
   if(vi.position.position[0] > positions[1].position[0] ) {
-    console.log("from general");
-    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], uvs, color);
-    this.renderFlatTopFace([vertices[1], vi, vertices[2]], uvs, color);
+    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], color);
+    this.renderFlatTopFace([vertices[1], vi, vertices[2]], color);
   }
   //Major Left
   if(vi.position.position[0] < positions[1].position[0]) {
-    console.log("from general");
-
-    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], uvs, color);
-    this.renderFlatTopFace([vi, vertices[1], vertices[2]], uvs, color);
-  }
-
-  else {
-    console.log("nope");
-    console.log(vi.position.position[0] + " < " + vertices[1].position[0]);
-
-
+    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], color);
+    this.renderFlatTopFace([vi, vertices[1], vertices[2]], color);
   }
 }
 
