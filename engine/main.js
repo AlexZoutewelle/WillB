@@ -20,16 +20,14 @@ var renderer = new Render(screenWidth, screenHeight);
 //trying out some camera stuff
 
 var camera = new Transformation([
-        [1, 0, 0, 50],
-        [0, 1, 0, -100],
-        [0, 0, 1, -250],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, -10],
         [0, 0, 0, 1]
 ]);
 
 var test1 = new Vector3(3, 4, 5);
 var test2 = new Vector3(4,6,5);
-
-console.log(test1.cross(test2));
 
 
 //Load the cat model
@@ -54,7 +52,6 @@ var count = 0;
 
 
 function frame() {
-  console.log("new round");
 
   update();
   if(playerState.input.escape === true) {

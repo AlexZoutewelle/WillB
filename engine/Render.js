@@ -104,7 +104,6 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
           if(!pixels[vertexIndex]) {
-            console.log("triangle not complete")
             complete = false;
             //Triangle is not rendered completely, so ignore this one for now
             break;
@@ -123,7 +122,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
 
-      this.renderFace(imgArray, face, 'uvs', i);
+      this.renderFace(imgArray, face, i);
     }
 
   }
@@ -135,13 +134,6 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 }
 
 Render.prototype.backFaceCull = function(face, camera_inverse) {
-
-  //console.log(face.vertices);
-  if(face.vertices.length < 3) {
-    //We cant render the triangle, so we can't cull.
-    return;
-  }
-
   //Dot product, back culling
   //renderVertices will do all the transformations and conversion to raster_coordinates
   //It returns the indices of the imgArray it should be drawn on
@@ -150,7 +142,6 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
   //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
   //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
   //If the dot product results in 0 or less, it means the normal is pointing away from us.
-  //console.log(face);
   var line1 = new Vector3(
       face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
       face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
@@ -172,9 +163,6 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
     camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
   )
 
-  // view_vec.normalize();
-  // normal.normalize();
-
   var dot_result = view_vec.dot(normal);
   if(dot_result < 0) {
     //face.culled = true;
@@ -185,7 +173,7 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
 }
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, face, uvs, c) {
+Render.prototype.renderFace = function(imgArray, face, c) {
 
   //We are going to color the Triangle
   var color = "blue";
@@ -193,6 +181,9 @@ Render.prototype.renderFace = function(imgArray, face, uvs, c) {
   if(c % 2 == 0) {
     color = "red";
   }
+
+  var uvs = '';
+
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
   var set = [0,1,2];
 
@@ -246,7 +237,8 @@ Render.prototype.renderFace = function(imgArray, face, uvs, c) {
 }
 
 Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
-
+  console.log("render flat bot");
+  console.log(vertices);
   var yStart = Math.ceil(vertices[0].position[1] - 0.5);
   var yEnd = Math.ceil(vertices[1].position[1] - 0.5);
 
