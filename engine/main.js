@@ -33,7 +33,7 @@ console.log(test1.cross(test2));
 
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/cube.obj");
+var model = mdlLoad.loadObject("models/sphere2.obj");
 //var modelGeometry = [];
 //test point imgArray
 

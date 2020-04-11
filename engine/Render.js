@@ -95,7 +95,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       var uvs = [];
       //We take each index specified in the face, and push them to the vertices array.
       //The vertices in the array are to be drawn to the screen
-
+      var complete = true;
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
           var vertexIndex = currentVertex.id- 1;
@@ -104,6 +104,8 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
           if(!pixels[vertexIndex]) {
+            console.log("triangle not complete")
+            complete = false;
             //Triangle is not rendered completely, so ignore this one for now
             break;
           }
@@ -115,7 +117,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
           //Get the uv coordinates belonging to the vertex
       }
 
-      if(!this.backFaceCull(face, camera_inverse)) {
+      if(!complete || !this.backFaceCull(face, camera_inverse)) {
         continue;
       }
 
@@ -132,13 +134,62 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   //this.draw(imgArray);
 }
 
+Render.prototype.backFaceCull = function(face, camera_inverse) {
+
+  //console.log(face.vertices);
+  if(face.vertices.length < 3) {
+    //We cant render the triangle, so we can't cull.
+    return;
+  }
+
+  //Dot product, back culling
+  //renderVertices will do all the transformations and conversion to raster_coordinates
+  //It returns the indices of the imgArray it should be drawn on
+
+  //To do backface culling: We need the face's normal.
+  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+  //If the dot product results in 0 or less, it means the normal is pointing away from us.
+  //console.log(face);
+  var line1 = new Vector3(
+      face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
+      face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
+      face.vertices[0].position.position[2] - face.vertices[1].position.position[2]
+    );
+  var line2 = new Vector3(
+      face.vertices[0].position.position[0] - face.vertices[2].position.position[0],
+      face.vertices[0].position.position[1] - face.vertices[2].position.position[1],
+      face.vertices[0].position.position[2] - face.vertices[2].position.position[2]
+  );
+
+  // console.log(line1);
+  // console.log(line2);
+  var normal = line1.cross(line2);
+
+  var view_vec = new Vector3(
+    camera_inverse.fields[0][3] - face.vertices[1].position.position[0],
+    camera_inverse.fields[1][3] - face.vertices[1].position.position[1],
+    camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
+  )
+
+  // view_vec.normalize();
+  // normal.normalize();
+
+  var dot_result = view_vec.dot(normal);
+  if(dot_result < 0) {
+    //face.culled = true;
+    return false;
+  }
+
+  return true;
+}
 
 //Draw a face
 Render.prototype.renderFace = function(imgArray, face, uvs, c) {
 
   //We are going to color the Triangle
   var color = "blue";
-  console.log(c);
+  //console.log(c);
   if(c % 2 == 0) {
     color = "red";
   }
@@ -294,54 +345,7 @@ Render.prototype.renderGeneralFace = function(vertices, uvs, color) {
   }
 }
 
-Render.prototype.backFaceCull = function(face, camera_inverse) {
 
-  if(face.vertices.length < 3) {
-    //We cant render the triangle, so we can't cull.
-    return;
-  }
-
-  //Dot product, back culling
-  //renderVertices will do all the transformations and conversion to raster_coordinates
-  //It returns the indices of the imgArray it should be drawn on
-
-  //To do backface culling: We need the face's normal.
-  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
-  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
-  //If the dot product results in 0 or less, it means the normal is pointing away from us.
-  console.log(face);
-  var line1 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[1].position.position[2]
-    );
-  var line2 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[2].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[2].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[2].position.position[2]
-  );
-
-  // console.log(line1);
-  // console.log(line2);
-  var normal = line1.cross(line2);
-
-  var view_vec = new Vector3(
-    camera_inverse.fields[0][3] - face.vertices[1].position.position[0],
-    camera_inverse.fields[1][3] - face.vertices[1].position.position[1],
-    camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
-  )
-
-  // view_vec.normalize();
-  // normal.normalize();
-
-  var dot_result = view_vec.dot(normal);
-  if(dot_result < 0) {
-    //face.culled = true;
-    return false;
-  }
-
-  return true;
-}
 
 Render.prototype.renderWireFrame = function(pixels, edges) {
 
