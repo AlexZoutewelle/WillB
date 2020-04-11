@@ -298,8 +298,8 @@ Render.prototype.renderGeneralFace = function(vertices, color) {
   var vi = new Vertex();
   //vi = v0*(1 - a) + v2*a
   //interpolate positions to get vi's position
-  vi.position.position[0] = positions[0].position[0] + alpha*(positions[2].position[0] - positions[0].position[0]) | 0;
-  vi.position.position[1] = positions[0].position[1] + alpha*(positions[2].position[1] - positions[0].position[1]) | 0;
+  vi.position.position[0] = positions[0].position[0] + alpha*(positions[2].position[0] - positions[0].position[0]);
+  vi.position.position[1] = positions[0].position[1] + alpha*(positions[2].position[1] - positions[0].position[1]);
 
   //We also need to interpolate UV's for vi
 
