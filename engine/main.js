@@ -1,8 +1,11 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 //high prio: wireframe rendering
-//    -draw lines for each triangle in the .obj files
-//high-prio: triangle coloring
+//    -Wireframe drawing is implemented, with a few caveats:
+//        Algorithm is unoptimized  -> We're reprocessing vertices and redrawing edges a lot: O(3N^2)
+//        Not sure how to prevent this.
+//        We now have wireframe with no duplicated edges, but without back-culling
+//high-prio: trangle shading
 //high-prio: texture mapping
 
 var screenWidth = 400;
@@ -16,34 +19,34 @@ var renderer = new Render(screenWidth, screenHeight);
 
 //trying out some camera stuff
 
-
 var camera = new Transformation([
-        [1, 0, 0, -1],
+        [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -1],
+        [0, 0, 1, -10],
         [0, 0, 0, 1]
 ]);
 
+var test1 = new Vector3(3, 4, 5);
+var test2 = new Vector3(4,6,5);
+
 
 //Load the cat model
-var model = mdlLoad.loadObject("models/cat.obj");
-var modelGeometry = [];
+var model = mdlLoad.loadObject("models/sphere2.obj");
+//var modelGeometry = [];
 //test point imgArray
 
 
 model.then(function(result) {
   //All models are loaded. We can start parsing the models
-
-  modelGeometry = Geometry.parseOBJ(result);
-
+  modelGeometry = new Geometry();
+  modelGeometry.parseOBJ(result);
   object_transform = new Transformation();
-
+  console.log(modelGeometry);
   //Models are parsed. We can start the main game loop
-  //console.log(camera);
   frame();
 });
 
-
+var count = 0;
 
 
 
@@ -57,21 +60,20 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -2);
-
+    camera.fields =  camera.translate(0,0, -1);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,2);
+    camera.fields =  camera.translate(0, 0,1);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(2,0,0);
+    camera.fields = camera.translate(1,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-2,0,0,);
+    camera.fields = camera.translate(-1,0,0,);
   }
 
   if(playerState.input.turnLeft === true) {
@@ -114,9 +116,25 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
+  // console.log(modelGeometry.faces);
+  // console.log(modelGeometry.positions);
+  renderer.render(modelGeometry, camera_inverse, object_transform, camera);
+  //console.log(modelGeometry.faces);
+
+  var position = modelGeometry.positions[0].position;
+  var position1 = modelGeometry.positions[1].position;
+  var position2 = modelGeometry.positions[2].position;
+
+  var faceid = modelGeometry.faces[0].vertices;
+  var facepos = modelGeometry.faces[0].vertices[0].position;
+
+  // console.log(position[0] + " " + position[1] + " " + position[2]);
+  // console.log(position1[0] + " " + position1[1] + " " + position1[2]);
+  // console.log(position2[0] + " " + position2[1] + " " + position2[2]);
 
 
-  renderer.render(modelGeometry, camera_inverse, object_transform);
+  // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
+  // console.log(facepos[0] + " " + facepos[1] + " " + facepos[2]);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
@@ -133,8 +151,9 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
+    requestAnimationFrame(frame);
 
-  //requestAnimationFrame(frame);
+
 }
 
 function update() {

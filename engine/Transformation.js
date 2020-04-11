@@ -54,7 +54,6 @@ Transformation.prototype.multiply = function(matrix) {
       result.fields[row][col] = sum;
     }
   }
-
   return result;
 }
 
@@ -119,7 +118,6 @@ Transformation.prototype.translate = function(x = 0, y = 0, z = 0) {
     [0, 0, 1, z],
     [0, 0, 0, 1]
   ]);
-
   return this.multiply(translation).fields;
 }
 
@@ -130,17 +128,23 @@ Transformation.prototype.translate = function(x = 0, y = 0, z = 0) {
 */
 
 Transformation.prototype.multMatrixVec3 = function(vector){
-  result = new Vector3(1,1,1);
+  try {
+    result = new Vector3(1,1,1);
 
-  for(var row = 0; row < 4; row++) {
-    var sum = 0;
-    for(var i = 0; i < 4; i++) {
-      sum += this.fields[row][i] * vector.fields[i];
+    for(var row = 0; row < 4; row++) {
+      var sum = 0;
+      for(var i = 0; i < 4; i++) {
+        sum += this.fields[row][i] * vector.position[i];
+      }
+      result.position[row] = sum;
     }
-    result.fields[row] = sum;
+    return result;
+  }
+  catch(error) {
+    console.log(error);
+    console.log(this);
   }
 
-  return result;
 }
 
 Transformation.prototype.multVec3Matrix = function(vector){
@@ -149,9 +153,9 @@ Transformation.prototype.multVec3Matrix = function(vector){
   for(var row = 0; row < 3; row++) {
     var sum = 0;
     for(var i = 0; i < 3; i++) {
-      sum += this.fields[i][row] * vector.fields[i];
+      sum += this.fields[i][row] * vector.position[i];
     }
-    result.fields[row] = sum;
+    result.position[row] = sum;
   }
 
   return result;
