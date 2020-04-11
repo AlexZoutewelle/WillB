@@ -79,7 +79,10 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   for(var i = 0; i < vertexCount; i++) {
     pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
   }
-
+  //Wireframe mode
+  if(globalState.wireFrame === true) {
+    this.renderWireFrame(pixels, modelGeometry.edges);
+  }
 
   //Coloring triangles
   if(globalState.face === true) {
@@ -116,19 +119,13 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
         continue;
       }
 
-      var color = "blue";
-      if(i % 2 == 0) {
-        color = "red";
-      }
 
-      this.renderFace(imgArray, face, 'uvs', color);
+
+      this.renderFace(imgArray, face, 'uvs', i);
     }
 
   }
-  //Wireframe mode
-  if(globalState.wireFrame === true) {
-    this.renderWireFrame(pixels, modelGeometry.edges);
-  }
+
 
 
   //Actually draw the image array on the canvas
@@ -137,10 +134,14 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, face, uvs, color) {
+Render.prototype.renderFace = function(imgArray, face, uvs, c) {
 
   //We are going to color the Triangle
-
+  var color = "blue";
+  console.log(c);
+  if(c % 2 == 0) {
+    color = "red";
+  }
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
   var set = [0,1,2];
 
@@ -182,21 +183,19 @@ Render.prototype.renderFace = function(imgArray, face, uvs, color) {
       set[2] = temp;
     }
 
-    this.renderFlatBottomFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], color);
+    this.renderFlatBottomFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
   }
 
   //General
   else {
-    this.renderGeneralFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], color);
+    this.renderGeneralFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
   }
 
   return imgArray;
 }
 
 Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
-  //console.log("flat bottom");
-  //console.log(vertices);
-  //color = 'red';
+
   var yStart = Math.ceil(vertices[0].position[1] - 0.5);
   var yEnd = Math.ceil(vertices[1].position[1] - 0.5);
 
