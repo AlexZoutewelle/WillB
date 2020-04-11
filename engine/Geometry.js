@@ -71,8 +71,8 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
       for(var i = 1; i < result.length; i += step ) {
         //We only save the vertex indices here, since we go 3x slower without them
         var id = parseInt(result[i]);
-        var uv = uvs[parseInt(result[i + 1])];
-        var normal = normals[parseInt(result[i + 2])];
+        var uv = uvs[parseInt(result[i + 1] - 1)];
+        var normal = normals[parseInt(result[i + 2] -1)];
         faceVertices.push(new Vertex(id, normal, uv));
 
       }

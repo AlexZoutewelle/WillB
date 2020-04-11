@@ -8,7 +8,7 @@ function Render(screenWidth, screenHeight) {
   this.canvas.requestPointerLock();
 
 
-  console.log(this.ctx);
+  //console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
 }
@@ -120,7 +120,8 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
         continue;
       }
 
-
+      //console.log("current id: " + face.vertices[0].id);
+      //console.log(face.vertices[0].uv.position[0] + " " + face.vertices[0].uv.position[1])
 
       this.renderFace(imgArray, face, i);
     }
@@ -206,8 +207,8 @@ Render.prototype.renderFace = function(imgArray, face, c) {
 }
 
 Render.prototype.renderFlatBottomFace = function(vertices, color) {
-  console.log("render flat bot");
-  console.log(vertices);
+  //console.log("render flat bot");
+  //console.log(vertices);
 
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
@@ -243,25 +244,45 @@ Render.prototype.renderFlatBottomFace = function(vertices, color) {
 
 Render.prototype.renderFlatTopFace = function(vertices, color) {
 
-  console.log(vertices);
+  //onsole.log(vertices);
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
-  //color = 'blue';
+
   //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
   var yStart = Math.ceil(positions[0].position[1] - 0.5);
   var yEnd = Math.ceil(positions[2].position[1] - 0.5);
 
+
+                                        //UV
   //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
   //These are inverted so as to not get inf values
   var slope1 = (positions[2].position[0] - positions[0].position[0] )  /  (positions[2].position[1] - positions[0].position[1]);
   var slope2 = (positions[2].position[0] - positions[1].position[0] )  /  (positions[2].position[1] - positions[1].position[1]);
-  //console.log(yStart + " "  + yEnd);
+
+
+  //These are the edges of our texture coordinates.
+  //We have to create a new vector for this, to avoid JS standard referencing
+  var txEdgeL = new Vector2(uvs[0].position[0], uvs[0].position[1]);
+  var txEdgeR = new Vector2(uvs[1].position[0], uvs[1].position[1]);
+  var txEdgeB = new Vector2(uvs[2].position[0], uvs[2].position[1]);
+
+  //Now we need to compute the unit steps in Y for the texture coordinates. (for each y in model space, how much y in uv space?)
+  var txEdgeStepL = (txEdgeB.position[1] - txEdgeL.position[1]) / (positions[2].position[1] - positions[0].position[1]);
+  var txEdgeStepR = (txEdgeB.position[1] - txEdgeR.position[1]) / (positions[2].position[1] - positions[1].position[1]);
+
+
+  //console.log((txEdgeB.position[1] - txEdgeL.position[1]) / (positions[2].position[1] - positions[0].position[1]));
+  //console.log((txEdgeB.position[1] - txEdgeL.position[1]));
+  //console.log((positions[2].position[1] - positions[0].position[1]));
+  //Now, we need to do the prestep. Since we're working with centers of pixels, the uv coordinates must reflect that as well
+  //Since this is a flat top, we can use either v0 or v1 for the offset
+  txEdgeL.position[1] += txEdgeStepL * (yStart + 0.5 - positions[1].position[1]);
+  txEdgeR.position[1] += txEdgeStepR * (yStart + 0.5 - positions[1].position[1]);
+  console.log(txEdgeL);
 
 
   //UV coordinates
-
-
-
+  this.ctx.beginPath();
 
   for(var y = yStart; y > yEnd; y-- ) {
     //y = a(x - x0) + y0
@@ -273,16 +294,19 @@ Render.prototype.renderFlatTopFace = function(vertices, color) {
     //We need to subtract 0.5 from the x values as well
     xStart = Math.ceil(xStart - 0.5);
     xEnd = Math.ceil(xEnd - 0.5);
-    //Now draw the horizontal line!
-    this.ctx.beginPath();
 
-    this.ctx.moveTo(xStart, y)
+    for(var x = xStart; x < xEnd; x++) {
+      this.ctx.beginPath();
+
+      this.ctx.moveTo(x, y)
 
 
-    this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
-    //console.log("stroked");
+      this.ctx.lineTo(x + 1, y);
+      this.ctx.strokeStyle = color;
+      this.ctx.stroke();
+      //console.log("stroked");
+    }
+
 
 
   }
@@ -303,9 +327,8 @@ Render.prototype.renderGeneralFace = function(vertices, color) {
   vi.position.position[1] = positions[0].position[1] + alpha * (positions[2].position[1] - positions[0].position[1]);
 
   //We also need to interpolate UV's for vi
-  vi.uv[0] = vertices[0].uv[0] + alpha * (vertices[2].uv[0] - vertices[0].uv[0]);
-  vi.uv[1] = vertices[0].uv[1] + alpha * (vertices[2].uv[1] - vertices[0].uv[1]);
-
+  vi.uv.position[0] = vertices[0].uv.position[0] + alpha * (vertices[2].uv.position[0] - vertices[0].uv.position[0]);
+  vi.uv.position[1] = vertices[0].uv.position[1] + alpha * (vertices[2].uv.position[1] - vertices[0].uv.position[1]);
 
   //Major Right
   if(vi.position.position[0] > positions[1].position[0] ) {
