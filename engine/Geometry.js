@@ -16,8 +16,7 @@ function Vertex(id, normal, uv) {
   this.uv = uv || new Vector2();
 }
 
-Geometry.prototype.parseOBJ = function(object) {
-
+Geometry.prototype.parseOBJ = function(object, object_name) {
   //regex for positions
   var positionRegx = /^v\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
 
@@ -85,6 +84,16 @@ Geometry.prototype.parseOBJ = function(object) {
     //Now that we have parsed all the lines in the .obj file, we must make a list of edges
     var edges = this.createEdgeList(positions, faces);
 
+    //Finally, get its texture image, and create a context for it
+    var image = document.getElementById(object_name);
+    var canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+    console.log(canvas);
+
+
+    this.texture = canvas;
     this.positions = positions;
     this.faces = faces;
     this.edges = edges;

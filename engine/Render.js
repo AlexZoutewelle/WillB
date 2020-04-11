@@ -262,6 +262,7 @@ Render.prototype.renderFlatTopFace = function(vertices, color) {
 
 
 
+
   for(var y = yStart; y > yEnd; y-- ) {
     //y = a(x - x0) + y0
     // y - y0 = a(x - x0)
@@ -298,10 +299,12 @@ Render.prototype.renderGeneralFace = function(vertices, color) {
   var vi = new Vertex();
   //vi = v0*(1 - a) + v2*a
   //interpolate positions to get vi's position
-  vi.position.position[0] = positions[0].position[0] + alpha*(positions[2].position[0] - positions[0].position[0]);
-  vi.position.position[1] = positions[0].position[1] + alpha*(positions[2].position[1] - positions[0].position[1]);
+  vi.position.position[0] = positions[0].position[0] + alpha * (positions[2].position[0] - positions[0].position[0]);
+  vi.position.position[1] = positions[0].position[1] + alpha * (positions[2].position[1] - positions[0].position[1]);
 
   //We also need to interpolate UV's for vi
+  vi.uv[0] = vertices[0].uv[0] + alpha * (vertices[2].uv[0] - vertices[0].uv[0]);
+  vi.uv[1] = vertices[0].uv[1] + alpha * (vertices[2].uv[1] - vertices[0].uv[1]);
 
 
   //Major Right

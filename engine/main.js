@@ -30,8 +30,10 @@ var test1 = new Vector3(3, 4, 5);
 var test2 = new Vector3(4,6,5);
 
 
-//Load the cat model
-var model = mdlLoad.loadObject("models/sphere2.obj");
+//Load ad model
+var model_name = "sphere2";
+var model = mdlLoad.loadObject("models/" + model_name + ".obj");
+console.log(model);
 //var modelGeometry = [];
 //test point imgArray
 
@@ -39,7 +41,7 @@ var model = mdlLoad.loadObject("models/sphere2.obj");
 model.then(function(result) {
   //All models are loaded. We can start parsing the models
   modelGeometry = new Geometry();
-  modelGeometry.parseOBJ(result);
+  modelGeometry.parseOBJ(result, model_name);
   object_transform = new Transformation();
   console.log(modelGeometry);
   //Models are parsed. We can start the main game loop
