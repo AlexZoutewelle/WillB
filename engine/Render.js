@@ -133,45 +133,6 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   //this.draw(imgArray);
 }
 
-Render.prototype.backFaceCull = function(face, camera_inverse) {
-  //Dot product, back culling
-  //renderVertices will do all the transformations and conversion to raster_coordinates
-  //It returns the indices of the imgArray it should be drawn on
-
-  //To do backface culling: We need the face's normal.
-  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
-  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
-  //If the dot product results in 0 or less, it means the normal is pointing away from us.
-  var line1 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[1].position.position[2]
-    );
-  var line2 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[2].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[2].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[2].position.position[2]
-  );
-
-  // console.log(line1);
-  // console.log(line2);
-  var normal = line1.cross(line2);
-
-  var view_vec = new Vector3(
-    camera_inverse.fields[0][3] - face.vertices[1].position.position[0],
-    camera_inverse.fields[1][3] - face.vertices[1].position.position[1],
-    camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
-  )
-
-  var dot_result = view_vec.dot(normal);
-  if(dot_result < 0) {
-    //face.culled = true;
-    return false;
-  }
-
-  return true;
-}
-
 //Draw a face
 Render.prototype.renderFace = function(imgArray, face, c) {
 
@@ -212,8 +173,11 @@ Render.prototype.renderFace = function(imgArray, face, c) {
       set[0] = set[1];
       set[1] = temp;
     }
-    //console.log(set);
-    this.renderFlatTopFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
+
+    this.renderFlatTopFace([face.vertices[set[0]],
+                            face.vertices[set[1]],
+                            face.vertices[set[2]] ],
+                            uvs, color);
   }
 
   //Flat bottom
@@ -225,12 +189,19 @@ Render.prototype.renderFace = function(imgArray, face, c) {
       set[2] = temp;
     }
 
-    this.renderFlatBottomFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
+
+    this.renderFlatBottomFace([face.vertices[set[0]],
+                               face.vertices[set[1]],
+                               face.vertices[set[2]] ],
+                               uvs, color);
   }
 
   //General
   else {
-    this.renderGeneralFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
+    this.renderGeneralFace([face.vertices[set[0]],
+                            face.vertices[set[1]],
+                            face.vertices[set[2]] ],
+                            uvs, color);
   }
 
   return imgArray;
@@ -239,16 +210,20 @@ Render.prototype.renderFace = function(imgArray, face, c) {
 Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
   console.log("render flat bot");
   console.log(vertices);
-  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
-  var yEnd = Math.ceil(vertices[1].position[1] - 0.5);
 
-  var slope1 = (vertices[1].position[0] - vertices[0].position[0]) / (vertices[1].position[1] - vertices[0].position[1]);
-  var slope2 = (vertices[2].position[0] - vertices[0].position[0]) / (vertices[2].position[1] - vertices[0].position[1]);
+  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
+  var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
+
+  var yStart = Math.ceil(positions[0].position[1] - 0.5);
+  var yEnd = Math.ceil(positions[1].position[1] - 0.5);
+
+  var slope1 = (positions[1].position[0] - positions[0].position[0]) / (positions[1].position[1] - positions[0].position[1]);
+  var slope2 = (positions[2].position[0] - positions[0].position[0]) / (positions[2].position[1] - positions[0].position[1]);
 
 
   for(var y = yStart; y > yEnd; y--) {
-    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
-    var xEnd = slope2 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
+    var xStart = slope1 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
+    var xEnd = slope2 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
 
     xStart = Math.ceil(xStart - 0.5);
     xEnd = Math.ceil(xEnd - 0.5);
@@ -269,16 +244,19 @@ Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
 }
 
 Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
-  //console.log(uvs);
+
+  console.log(vertices);
+  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
+  var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
   //color = 'blue';
   //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
-  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
-  var yEnd = Math.ceil(vertices[2].position[1] - 0.5);
+  var yStart = Math.ceil(positions[0].position[1] - 0.5);
+  var yEnd = Math.ceil(positions[2].position[1] - 0.5);
 
   //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
   //These are inverted so as to not get inf values
-  var slope1 = (vertices[2].position[0] - vertices[0].position[0] )  /  (vertices[2].position[1] - vertices[0].position[1]);
-  var slope2 = (vertices[2].position[0] - vertices[1].position[0] )  /  (vertices[2].position[1] - vertices[1].position[1]);
+  var slope1 = (positions[2].position[0] - positions[0].position[0] )  /  (positions[2].position[1] - positions[0].position[1]);
+  var slope2 = (positions[2].position[0] - positions[1].position[0] )  /  (positions[2].position[1] - positions[1].position[1]);
   //console.log(yStart + " "  + yEnd);
 
 
@@ -290,8 +268,8 @@ Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
     //y = a(x - x0) + y0
     // y - y0 = a(x - x0)
     // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
-    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
-    var xEnd =   slope2 * (y - vertices[1].position[1] - 0.5) + vertices[1].position[0]
+    var xStart = slope1 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
+    var xEnd =   slope2 * (y - positions[1].position[1] - 0.5) + positions[1].position[0]
 
     //We need to subtract 0.5 from the x values as well
     xStart = Math.ceil(xStart - 0.5);
@@ -313,27 +291,37 @@ Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
 
 //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
 Render.prototype.renderGeneralFace = function(vertices, uvs, color) {
-  //console.log("general");
-  //console.log(vertices);
+  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
+
   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
-  var alpha = (vertices[1].position[1] - vertices[0].position[1]) /
-              (vertices[2].position[1] - vertices[0].position[1]);
+  var alpha = (positions[1].position[1] - positions[0].position[1]) /
+              (positions[2].position[1] - positions[0].position[1]);
 
-  var vi = new Vector3();
-
+  var vi = new Vertex();
   //vi = v0*(1 - a) + v2*a
-  vi.position[0] = vertices[0].position[0] + alpha*(vertices[2].position[0] - vertices[0].position[0]);
-  vi.position[1] = vertices[0].position[1] + alpha*(vertices[2].position[1] - vertices[0].position[1])
+  //interpolate positions to get vi's position
+  vi.position.position[0] = positions[0].position[0] + alpha*(positions[2].position[0] - positions[0].position[0]) | 0;
+  vi.position.position[1] = positions[0].position[1] + alpha*(positions[2].position[1] - positions[0].position[1]) | 0;
 
   //Major Right
-  if(vi.position[0] > vertices[1].position[0] ) {
+  if(vi.position.position[0] > positions[1].position[0] ) {
+    console.log("from general");
     this.renderFlatBottomFace([vertices[0], vertices[1], vi ], uvs, color);
     this.renderFlatTopFace([vertices[1], vi, vertices[2]], uvs, color);
   }
   //Major Left
-  if(vi.position[0] < vertices[1].position[0]) {
+  if(vi.position.position[0] < positions[1].position[0]) {
+    console.log("from general");
+
     this.renderFlatBottomFace([vertices[0], vi, vertices[1]], uvs, color);
     this.renderFlatTopFace([vi, vertices[1], vertices[2]], uvs, color);
+  }
+
+  else {
+    console.log("nope");
+    console.log(vi.position.position[0] + " < " + vertices[1].position[0]);
+
+
   }
 }
 
@@ -425,6 +413,45 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
   return point_raster;
 }
 
+
+Render.prototype.backFaceCull = function(face, camera_inverse) {
+  //Dot product, back culling
+  //renderVertices will do all the transformations and conversion to raster_coordinates
+  //It returns the indices of the imgArray it should be drawn on
+
+  //To do backface culling: We need the face's normal.
+  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+  //If the dot product results in 0 or less, it means the normal is pointing away from us.
+  var line1 = new Vector3(
+      face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
+      face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
+      face.vertices[0].position.position[2] - face.vertices[1].position.position[2]
+    );
+  var line2 = new Vector3(
+      face.vertices[0].position.position[0] - face.vertices[2].position.position[0],
+      face.vertices[0].position.position[1] - face.vertices[2].position.position[1],
+      face.vertices[0].position.position[2] - face.vertices[2].position.position[2]
+  );
+
+  // console.log(line1);
+  // console.log(line2);
+  var normal = line1.cross(line2);
+
+  var view_vec = new Vector3(
+    camera_inverse.fields[0][3] - face.vertices[1].position.position[0],
+    camera_inverse.fields[1][3] - face.vertices[1].position.position[1],
+    camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
+  )
+
+  var dot_result = view_vec.dot(normal);
+  if(dot_result < 0) {
+    //face.culled = true;
+    return false;
+  }
+
+  return true;
+}
 
 //Bresenham algorithm to draw lines
 Render.prototype.bresenham = function(x1, y1, x2, y2) {

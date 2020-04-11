@@ -11,6 +11,7 @@ function Face(vertices) {
 
 function Vertex(id, normal, uv) {
   this.id = id;
+  this.position = new Vector3();
   this.normal = normal || new Vector3();
   this.uv = uv || new Vector2();
 }
