@@ -20,9 +20,9 @@ var renderer = new Render(screenWidth, screenHeight);
 //trying out some camera stuff
 
 var camera = new Transformation([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -40],
+        [1, 0, 0, 50],
+        [0, 1, 0, -100],
+        [0, 0, 1, -250],
         [0, 0, 0, 1]
 ]);
 
@@ -125,10 +125,17 @@ function frame() {
   //console.log(modelGeometry.faces);
 
   var position = modelGeometry.positions[0].position;
+  var position1 = modelGeometry.positions[1].position;
+  var position2 = modelGeometry.positions[2].position;
+
   var faceid = modelGeometry.faces[0].vertices;
   var facepos = modelGeometry.faces[0].vertices[0].position;
 
   // console.log(position[0] + " " + position[1] + " " + position[2]);
+  // console.log(position1[0] + " " + position1[1] + " " + position1[2]);
+  // console.log(position2[0] + " " + position2[1] + " " + position2[2]);
+
+
   // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
   // console.log(facepos[0] + " " + facepos[1] + " " + facepos[2]);
 
