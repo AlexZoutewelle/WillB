@@ -61,7 +61,7 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 **/
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform, camera) {
 
-  //console.log(modelGeometry);
+  console.log(modelGeometry.texture);
   this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
   var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
@@ -123,7 +123,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       //console.log("current id: " + face.vertices[0].id);
       //console.log(face.vertices[0].uv.position[0] + " " + face.vertices[0].uv.position[1])
 
-      this.renderFace(imgArray, face, i);
+      this.renderFace(imgArray, face, modelGeometry.texture, i);
     }
 
   }
@@ -135,8 +135,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 }
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, face, c) {
-
+Render.prototype.renderFace = function(imgArray, face, texture, c) {
   //We are going to color the Triangle
   var color = "blue";
   //console.log(c);
@@ -176,7 +175,7 @@ Render.prototype.renderFace = function(imgArray, face, c) {
     this.renderFlatTopFace([face.vertices[set[0]],
                             face.vertices[set[1]],
                             face.vertices[set[2]]],
-                            color);
+                            color, texture);
   }
 
   //Flat bottom
@@ -192,7 +191,7 @@ Render.prototype.renderFace = function(imgArray, face, c) {
     this.renderFlatBottomFace([face.vertices[set[0]],
                                face.vertices[set[1]],
                                face.vertices[set[2]]],
-                               color);
+                               color, texture);
   }
 
   //General
@@ -200,16 +199,15 @@ Render.prototype.renderFace = function(imgArray, face, c) {
     this.renderGeneralFace([face.vertices[set[0]],
                             face.vertices[set[1]],
                             face.vertices[set[2]] ],
-                            color);
+                            color, texture);
   }
 
   return imgArray;
 }
 
-Render.prototype.renderFlatBottomFace = function(vertices, color) {
+Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
   //console.log("render flat bot");
   //console.log(vertices);
-
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
 
@@ -242,9 +240,8 @@ Render.prototype.renderFlatBottomFace = function(vertices, color) {
 
 }
 
-Render.prototype.renderFlatTopFace = function(vertices, color) {
-
-  //onsole.log(vertices);
+Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
+  //console.log(texture);
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
 
@@ -259,7 +256,7 @@ Render.prototype.renderFlatTopFace = function(vertices, color) {
   var slope1 = (positions[2].position[0] - positions[0].position[0] )  /  (positions[2].position[1] - positions[0].position[1]);
   var slope2 = (positions[2].position[0] - positions[1].position[0] )  /  (positions[2].position[1] - positions[1].position[1]);
 
-
+                                //UV
   //These are the edges of our texture coordinates.
   //We have to create a new vector for this, to avoid JS standard referencing
   var txEdgeL = new Vector2(uvs[0].position[0], uvs[0].position[1]);
@@ -278,16 +275,24 @@ Render.prototype.renderFlatTopFace = function(vertices, color) {
   //Since this is a flat top, we can use either v0 or v1 for the offset
   txEdgeL.position[1] += txEdgeStepL * (yStart + 0.5 - positions[1].position[1]);
   txEdgeR.position[1] += txEdgeStepR * (yStart + 0.5 - positions[1].position[1]);
-  console.log(txEdgeL);
 
+  //Now, we need to make sure we can clamp our uv coordinates later on when we draw them
+  var texture_width = texture.width;
+  var texture_height = texture.height;
+  var tex_clamp_x = texture_width - 1.0;
+  var tex_clamp_y = texture_height - 1.0;
 
-  //UV coordinates
-  this.ctx.beginPath();
+  //This is the vector we will use to actually get the pixel color from the texture. This vector holds the texture coordinates
+  var tc = new Vector2();
 
-  for(var y = yStart; y > yEnd; y-- ) {
+                        //UV coordinates
+
+  for(var y = yStart; y > yEnd; y--) {
     //y = a(x - x0) + y0
     // y - y0 = a(x - x0)
     // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
+
+    //console.log(txEdgeL.position[0] + " "  + txEdgeL.position[1]);
     var xStart = slope1 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
     var xEnd =   slope2 * (y - positions[1].position[1] - 0.5) + positions[1].position[0]
 
@@ -295,25 +300,40 @@ Render.prototype.renderFlatTopFace = function(vertices, color) {
     xStart = Math.ceil(xStart - 0.5);
     xEnd = Math.ceil(xEnd - 0.5);
 
+                      //UV coordinates
+    //We need to do the same for the UV coordinates: foreach x in pixel coordinates, what is the x in UV coordinates?
+    var tcScanStep = (txEdgeR.position[0] - txEdgeL.position[0]) / (positions[1].position[0] - positions[0].position[0]);
+    //prestep
+    tc.position[0] += txEdgeL.position[0] + tcScanStep * (xStart + 0.5 - positions[0].position[0]);
+    tc.position[1] = txEdgeL.position[1];
+
     for(var x = xStart; x < xEnd; x++) {
+
+      //Finally, we need to read the color from the texture image
+      var textureX = Math.min(tc.position[0] * texture_width, tex_clamp_x ) | 0;
+      var textureY = Math.min(tc.position[1] * texture_height, tex_clamp_y ) | 0;
+      var pos = (textureX * texture_width + textureY) * 4
+      var textureRGBA = "rgba(" + texture.data[pos] + "," + texture.data[pos + 1] + "," + texture.data[pos + 2] + "," + texture.data[pos + 3] + ")";
+      //console.log(textureRGBA);
+
       this.ctx.beginPath();
 
       this.ctx.moveTo(x, y)
 
-
       this.ctx.lineTo(x + 1, y);
-      this.ctx.strokeStyle = color;
+      this.ctx.strokeStyle = textureRGBA;
       this.ctx.stroke();
-      //console.log("stroked");
+
+      tc.addScalar(tcScanStep, 0);
     }
 
-
-
+    txEdgeL.addScalar(txEdgeStepL);
+    txEdgeR.addScalar(txEdgeStepR);
   }
 }
 
 //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-Render.prototype.renderGeneralFace = function(vertices, color) {
+Render.prototype.renderGeneralFace = function(vertices, color, texture) {
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
 
   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
@@ -332,13 +352,13 @@ Render.prototype.renderGeneralFace = function(vertices, color) {
 
   //Major Right
   if(vi.position.position[0] > positions[1].position[0] ) {
-    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], color);
-    this.renderFlatTopFace([vertices[1], vi, vertices[2]], color);
+    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], color, texture);
+    this.renderFlatTopFace([vertices[1], vi, vertices[2]], color, texture);
   }
   //Major Left
   if(vi.position.position[0] < positions[1].position[0]) {
-    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], color);
-    this.renderFlatTopFace([vi, vertices[1], vertices[2]], color);
+    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], color, texture);
+    this.renderFlatTopFace([vi, vertices[1], vertices[2]], color, texture);
   }
 }
 

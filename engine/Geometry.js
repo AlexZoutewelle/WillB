@@ -93,7 +93,7 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     console.log(canvas);
 
 
-    this.texture = canvas;
+    this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
     this.positions = positions;
     this.faces = faces;
     this.edges = edges;
@@ -205,4 +205,14 @@ Vector3.prototype.normalize = function() {
 
 function Vector2(x,y) {
   this.position = [x || 0, y || 0];
+}
+
+Vector2.prototype.addScalar = function(scalar, position) {
+  if(position) {
+    this.position[position] += scalar;
+  }
+  else {
+    this.position[0] += scalar;
+    this.position[1] += scalar;
+  }
 }
