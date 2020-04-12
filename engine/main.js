@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -10],
+        [0, 0, 1, -50],
         [0, 0, 0, 1]
 ]);
 
@@ -31,7 +31,7 @@ var test2 = new Vector3(4,6,5);
 
 
 //Load ad model
-var model_name = "sphere2";
+var model_name = "cube";
 var model = mdlLoad.loadObject("models/" + model_name + ".obj");
 console.log(model);
 //var modelGeometry = [];

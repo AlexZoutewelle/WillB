@@ -97,7 +97,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       var complete = true;
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
-          var vertexIndex = currentVertex.id - 1;
+          var vertexIndex = currentVertex.id;
           //console.log(vertexIndex);
           //console.log(pixels[vertexIndex]);
 
@@ -250,10 +250,11 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
   //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
   //These are inverted so as to not get inf values
   var dx1 = (positions[2].position[0] - positions[0].position[0] );
-  var dx2 = (positions[2].position[0] - positions[1].position[0] );
-  var dy1 = (positions[2].position[1] - positions[0].position[1] ) | 1;
-  var dy2 = (positions[2].position[1] - positions[1].position[1] ) | 1;
+  var dy1 = (positions[2].position[1] - positions[0].position[1] ) ;
   var slope1 = dx1 /  dy1;
+
+  var dx2 = (positions[2].position[0] - positions[1].position[0] );
+  var dy2 = (positions[2].position[1] - positions[1].position[1] );
   var slope2 = dx2 /  dy2;
 
                                 //UV
@@ -316,10 +317,10 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
 
     for(var x = xStart; x < xEnd; x++) {
       //Finally, we need to read the color from the texture image
-      var textureX = Math.ceil(tc.position[0] * texture_width) ;
-      var textureY = Math.ceil(tc.position[1] * texture_height) ;
+      var textureX = Math.trunc(tc.position[0] * texture_width) ;
+      var textureY = Math.trunc(tc.position[1] * texture_height) ;
 
-      var pos = (textureX * 4)+(texture_width * textureY * 4);
+      var pos = (textureX * 4)+(texture_width * textureY * 4) + 148;
 
       //Set a flag to check if we go out of bounds or not
       var textureRGBA = "rgba(" + texture.data[pos] + "," + texture.data[pos + 1] + "," + texture.data[pos + 2] + "," + texture.data[pos + 3] + ")";

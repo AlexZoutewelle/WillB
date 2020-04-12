@@ -70,7 +70,7 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
       var step = Math.ceil(result.length / 4);
       for(var i = 1; i < result.length; i += step ) {
         //We only save the vertex indices here, since we go 3x slower without them
-        var id = parseInt(result[i]);
+        var id = parseInt(result[i] - 1);
         var uv = uvs[parseInt(result[i + 1] - 1)];
         var normal = normals[parseInt(result[i + 2] -1)];
         faceVertices.push(new Vertex(id, normal, uv));
@@ -122,11 +122,11 @@ Geometry.prototype.createEdgeList = function(vertices, faces){
     //foreach vertex, check its entry in the adjacentVertsList.
     //If these adjacent vertices are not present in the list, add them.
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[0] - 1), (currentVertices[1] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[0] ), (currentVertices[1] ));
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[1] - 1), (currentVertices[2] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[1] ), (currentVertices[2] ));
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[2] - 1), (currentVertices[0] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[2] ), (currentVertices[0] ));
 
 
   }
