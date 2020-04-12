@@ -22,6 +22,7 @@ Render.prototype.draw = function(imageArray) {
 
   //console.log(imageArray);
   var imageData = new ImageData(imageArray, this.screenWidth, this.screenHeight);
+
   this.ctx.putImageData(imageData, 0, 0);
 }
 
@@ -44,14 +45,15 @@ var cleft = -cright;
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-Render.prototype.drawPixel = function(imgArray, x, y) {
+Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
-  imgArray[pixel] = 255;
-  imgArray[pixel + 1] = 0;
-  imgArray[pixel + 2] = 0;
-  imgArray[pixel + 3] = 255;
-}
+  imgArray[pixel] = r;
+  imgArray[pixel + 1] = g;
+  imgArray[pixel + 2] = b;
+  imgArray[pixel + 3] = a;
 
+  return imgArray;
+}
 
 
 /**
@@ -61,10 +63,10 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 **/
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform, camera) {
 
-  this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
+  //this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
   var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
-
+  this.imgArray = imgArray;
   // The virtual image plane
   var canvasWidth = 1;
   var canvasHeight =  1;
@@ -130,7 +132,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
   //Actually draw the image array on the canvas
-  //this.draw(imgArray);
+  this.draw(imgArray);
 }
 
 //Draw a face
@@ -320,19 +322,18 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
       var textureX = Math.trunc(tc.position[0] * texture_width) ;
       var textureY = Math.trunc(tc.position[1] * texture_height) ;
 
-      var pos = (textureX * 4)+(texture_width * textureY * 4) + 148;
+      var pos = (textureX * 4)+(texture_width * textureY * 4);
 
       //Set a flag to check if we go out of bounds or not
       var textureRGBA = "rgba(" + texture.data[pos] + "," + texture.data[pos + 1] + "," + texture.data[pos + 2] + "," + texture.data[pos + 3] + ")";
       //console.log(textureRGBA);
 
-      this.ctx.beginPath();
-
-      this.ctx.moveTo(x, y)
-
-      this.ctx.lineTo(x + 1, y);
-      this.ctx.strokeStyle = textureRGBA;
-      this.ctx.stroke();
+      this.drawPixel(this.imgArray,
+                    x, y,
+                    texture.data[pos],
+                    texture.data[pos + 1],
+                    texture.data[pos + 2],
+                    texture.data[pos + 3]);
 
       tc = tc.addVector(tcScanStep);
     }
