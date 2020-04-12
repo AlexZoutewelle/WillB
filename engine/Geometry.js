@@ -208,11 +208,48 @@ function Vector2(x,y) {
 }
 
 Vector2.prototype.addScalar = function(scalar, position) {
+  var result = new Vector2();
   if(position) {
-    this.position[position] += scalar;
+    result.position[position] += scalar;
   }
   else {
-    this.position[0] += scalar;
-    this.position[1] += scalar;
+    result.position[0] += scalar;
+    result.position[1] += scalar;
   }
+
+  return result;
+}
+
+Vector2.prototype.addVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] + vector.position[0];
+  result.position[1] = this.position[1] + vector.position[1];
+  return result;
+}
+
+Vector2.prototype.divideScalar = function(scalar) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] / scalar;
+  result.position[1] = this.position[1] / scalar;
+  return result;
+}
+
+Vector2.prototype.multiplyScalar = function(scalar) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] * scalar;
+  result.position[1] = this.position[1] * scalar;
+  return result;
+}
+
+Vector2.prototype.subtractVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] - vector.position[0];
+  result.position[1] = this.position[1] - vector.position[1];
+  return result;
+}
+
+Vector2.prototype.divideVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] / vector.position[0];
+  result.position[1] = this.position[1] / vector.position[1];
 }
