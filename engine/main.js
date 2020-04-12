@@ -8,8 +8,8 @@
 //high-prio: trangle shading
 //high-prio: texture mapping
 
-var screenWidth = 400;
-var screenHeight = 400;
+var screenWidth = 100;
+var screenHeight = 100;
 
 //Get the context
 

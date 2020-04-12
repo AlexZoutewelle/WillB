@@ -11,6 +11,7 @@ function Render(screenWidth, screenHeight) {
   //console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
+
 }
 
 
@@ -20,8 +21,8 @@ This array holds 4 elements for each pixel: R G B and A, values are between 0 an
 **/
 Render.prototype.draw = function(imageArray) {
 
-  //console.log(imageArray);
-  var imageData = new ImageData(imageArray, this.screenWidth, this.screenHeight);
+  //console.log(imgArray);
+  var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
 
   this.ctx.putImageData(imageData, 0, 0);
 }
@@ -47,12 +48,16 @@ console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
 Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
-  imgArray[pixel] = r;
-  imgArray[pixel + 1] = g;
-  imgArray[pixel + 2] = b;
-  imgArray[pixel + 3] = a;
 
-  return imgArray;
+  //console.log(pixel);
+  if(pixel > 10000) {
+    //console.log(pixel);
+  }
+  this.imgArray[pixel] = r;
+  this.imgArray[pixel + 1] = g;
+  this.imgArray[pixel + 2] = b;
+  this.imgArray[pixel + 3] = a;
+
 }
 
 
@@ -65,8 +70,10 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
   //this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
-  var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
-  this.imgArray = imgArray;
+  this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
+
+
+
   // The virtual image plane
   var canvasWidth = 1;
   var canvasHeight =  1;
@@ -80,10 +87,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   for(var i = 0; i < vertexCount; i++) {
     pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
   }
-  //Wireframe mode
-  if(globalState.wireFrame === true) {
-    this.renderWireFrame(pixels, modelGeometry.edges);
-  }
+
 
   //Coloring triangles
   if(globalState.face === true) {
@@ -100,11 +104,10 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
           var vertexIndex = currentVertex.id;
-          //console.log(vertexIndex);
-          //console.log(pixels[vertexIndex]);
+          // console.log(vertexIndex);
+          // console.log(pixels[vertexIndex]);
 
-
-          if(!pixels[vertexIndex]) {
+          if(pixels[vertexIndex] ===  -1) {
             complete = false;
             //Triangle is not rendered completely, so ignore this one for now
             break;
@@ -125,11 +128,22 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       //console.log(face.vertices[0].uv.position[0] + " " + face.vertices[0].uv.position[1])
 
       this.renderFace(imgArray, face, modelGeometry.texture, i);
+
+      //Wireframe mode
+      // if(globalState.wireFrame === true) {
+      //   this.renderWireFrame(pixels, modelGeometry.edges);
+      // }
     }
 
   }
 
-
+  for(var t = 0; t < 20; t++) {
+    this.imgArray[4000 + t] = 255;
+    this.imgArray[4000 + t + 1] = 255;
+    this.imgArray[4000 + t + 2] = 255;
+    this.imgArray[4000 + t + 3] = 255;
+  }
+  console.log(this.imgArray[4000 + 4])
 
   //Actually draw the image array on the canvas
   this.draw(imgArray);
@@ -210,30 +224,38 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
 
-  var yStart = Math.ceil(positions[0].position[1] - 0.5);
-  var yEnd = Math.ceil(positions[1].position[1] - 0.5);
+  var yStart = Math.ceil(positions[1].position[1] + 0.5);
+  var yEnd =Math.ceil(positions[0].position[1] + 0.5);
 
   var slope1 = (positions[1].position[0] - positions[0].position[0]) / (positions[1].position[1] - positions[0].position[1]);
   var slope2 = (positions[2].position[0] - positions[0].position[0]) / (positions[2].position[1] - positions[0].position[1]);
 
 
-  for(var y = yStart; y > yEnd; y--) {
+  for(var y = yStart; y < yEnd; y++) {
     var xStart = slope1 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
     var xEnd = slope2 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
 
-    xStart = Math.ceil(xStart - 0.5);
-    xEnd = Math.ceil(xEnd - 0.5);
+    xStart = Math.floor(xStart - 0.5);
+    xEnd = Math.floor(xEnd - 0.5);
+    if(xStart < 0) {
+      xStart = 0;
+    }
+    if(xEnd > this.screenWidth) {
+      xEnd = this.screenWidth;
+    }
     //console.log(xStart + " "  + xEnd);
-
-    //Now draw the horizontal line!
-    this.ctx.beginPath();
-
-    this.ctx.moveTo(xStart, y)
+    //
+    for(var x = xStart; x < xEnd; x++) {
 
 
-    this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= color;
-    this.ctx.stroke();
+      this.drawPixel(this.imgArray,
+                    x, y,
+                    0,
+                    0,
+                    255,
+                    255);
+
+    }
   }
 
 
@@ -271,11 +293,6 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
   var txEdgeStepL = txEdgeB.subtractVector(txEdgeL).divideScalar(dy1);
   var txEdgeStepR = txEdgeB.subtractVector(txEdgeR).divideScalar(dy2);
 
-  //var txEdgeStepL = (txEdgeB.position[1] - txEdgeL.position[1]) / (positions[2].position[1] - positions[0].position[1]);
-
-  //console.log((txEdgeB.position[1] - txEdgeL.position[1]) / (positions[2].position[1] - positions[0].position[1]));
-  //console.log((txEdgeB.position[1] - txEdgeL.position[1]));
-  //console.log((positions[2].position[1] - positions[0].position[1]));
 
   //Now, we need to do the prestep. Since we're working with centers of pixels, the uv coordinates must reflect that as well
   //Since this is a flat top, we can use either v0 or v1 for the offset
@@ -306,7 +323,11 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
 
     //We need to subtract 0.5 from the x values as well
     var xStart = Math.ceil(px0 - 0.5);
+    if(xStart < 0) {xStart = 0;}
     var xEnd = Math.ceil(px1 - 0.5);
+    if(xEnd > this.screenWidth) {
+      xEnd = this.screenWidth;
+    }
     //console.log(txEdgeR.position[0] + " " + txEdgeL.position[1])
 
                       //UV coordinates
@@ -393,6 +414,7 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 
         var adjId = adjacentList[k];
         if(pixels[adjId] && pixels[vId]) {
+
           this.ctx.beginPath();
 
           this.ctx.moveTo(pixels[vId].position[0], pixels[vId].position[1])
@@ -426,14 +448,14 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
       point_pd.position[1] = ((point.position[1] ) / (-point.position[2]) ) * Znear;
       point_pd.position[2] = point.position[2];
 
-      if(point_pd.position[2] < Znear  || point_pd.position[0] < (cleft - 10) || point_pd.position[0] > (cright + 10) || point_pd.position[1] < (cbottom - 10) || point_pd.position[1] > (ctop + 10)) {
+      // console.log(point_pd.position[0] + " " +  point_pd.position[1] + " " + point_pd.position[2]);
+      // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
+      //console.log("new");
+      //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
 
-        return 0;
 
-        //If you want to draw all the pixels that should not be visible, but with a different color (for debugging purposes)
-        //Remove the continue statement, and change the rgba values
-        // rgba = [0,255,0,255];
-      }
+
+
 
 
       //ndc (range of [0,1])
@@ -447,6 +469,10 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
       point_raster.position[1] = (((1 - point_ndc.position[1] ) * this.screenHeight) ) | 0;
 
 
+      // if(point_pd.position[2] < Znear  || point_pd.position[0] < (cleft) || point_pd.position[0] > (cright) || point_pd.position[1] < (cbottom) || point_pd.position[1] > (ctop )) {
+      //   console.log(point_raster.position[0] + " " +  point_raster.position[1] + " " + point_raster.position[2]);
+      //
+      // }
 
 
       //Now that we have the raster coordinates, we could choose to just draw the pixel on the screen:
@@ -455,7 +481,7 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
 
       //Or we can push this pixel to the array of pixels that belong to the face
       //Here we compute the index that the pixel is associated with within the imgArray
-      var pixel = ((point_raster.position[0]) * 4) + ((screenWidth * (point_raster.position[1])) * 4);
+      //var pixel = ((point_raster.position[0]) * 4) + ((screenWidth * (point_raster.position[1])) * 4);
 
 
   return point_raster;
