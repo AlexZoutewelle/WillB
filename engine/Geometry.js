@@ -26,7 +26,7 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
   //var faceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
   var normalRegx = /^vn\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
 
-  var uvRegx = /^vt\s+(\d+\.\d+)\s+(\d+\.\d+)/;
+  var uvRegx = /^vt\s+(\d+\.*\d*)\s+(\d+\.*\d*)/;
 
 
   var positions = [];
@@ -64,7 +64,6 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     else if((result = faceRegx.exec(line)) != null) {
       //Creating the face
 
-
       var faceVertices = [];
 
       var step = Math.ceil(result.length / 4);
@@ -72,7 +71,8 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
         //We only save the vertex indices here, since we go 3x slower without them
         var id = parseInt(result[i] - 1);
         var uv = uvs[parseInt(result[i + 1] - 1)];
-        var normal = normals[parseInt(result[i + 2] -1)];
+        var normal = normals[parseInt(result[i + 2] - 1)];
+
         faceVertices.push(new Vertex(id, normal, uv));
 
       }
@@ -231,6 +231,18 @@ Vector2.prototype.divideScalar = function(scalar) {
   var result = new Vector2();
   result.position[0] = this.position[0] / scalar;
   result.position[1] = this.position[1] / scalar;
+  return result;
+}
+
+Vector2.prototype.subtractScalar = function(scalar, axis) {
+  var result = new Vector2();
+  if(axis) {
+    result.position[axis] = this.position[axis] - scalar;
+  }
+  else {
+    result.position[0] = this.position[0] - scalar;
+    result.position[1] = this.position[1] - scalar;
+  }
   return result;
 }
 

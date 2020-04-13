@@ -8,8 +8,8 @@
 //high-prio: trangle shading
 //high-prio: texture mapping
 
-var screenWidth = 100;
-var screenHeight = 100;
+var screenWidth = 300;
+var screenHeight = 300;
 
 //Get the context
 
@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -50],
+        [0, 0, 1, -400],
         [0, 0, 0, 1]
 ]);
 
