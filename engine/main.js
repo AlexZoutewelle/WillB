@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -400],
+        [0, 0, 1, -250],
         [0, 0, 0, 1]
 ]);
 
@@ -62,40 +62,40 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -1);
+    camera.fields =  camera.translate(0,0, -0.45);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,1);
+    camera.fields =  camera.translate(0, 0,.45);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(1,0,0);
+    camera.fields = camera.translate(0.45,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-1,0,0,);
+    camera.fields = camera.translate(-0.45,0,0);
   }
 
   if(playerState.input.turnLeft === true) {
     //console.log("turn left");
-    camera.fields = camera.rotate(0,-0.8);
+    camera.fields = camera.rotate(0,-0.3);
   }
 
   if(playerState.input.turnRight === true) {
     //console.log("turn right");
-    camera.fields = camera.rotate(0,0.8);
+    camera.fields = camera.rotate(0,0.3);
 
   }
 
   if(playerState.input.jump === true) {
     //console.log("jump");
-    camera.fields = camera.translate(0,-2, 0)
+    camera.fields = camera.translate(0,-0.5, 0)
   }
   if(playerState.input.crouch === true) {
     //console.log("crouch");
-    camera.fields = camera.translate(0, 2, 0);
+    camera.fields = camera.translate(0, 0.5, 0);
   }
 
   if(playerState.input.tiltForward === true) {
