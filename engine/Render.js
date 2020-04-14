@@ -251,7 +251,7 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
   var tex_clamp_x = texture_width;
   var tex_clamp_y = texture_height;
 
-  for(var y = yStart; y > yEnd; y--) {
+  for(var y = yStart; y > yEnd -1; y--) {
 
 
     var px0 = slope1 * (y - positions[0].position[1] + 0.5) + positions[0].position[0];
@@ -371,8 +371,8 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
     // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
 
     //console.log(txEdgeL.position[0] + " "  + txEdgeL.position[1]);
-    var px0 = slope1 * (y - positions[0].position[1] - 0.5) + positions[0].position[0];
-    var px1 = slope2 * (y - positions[1].position[1] - 0.5) + positions[1].position[0]
+    var px0 = slope1 * (y - positions[0].position[1] + 0.5) + positions[0].position[0];
+    var px1 = slope2 * (y - positions[1].position[1] + 0.5) + positions[1].position[0]
     px0 = Math.ceil(px0 - 0.5);
     px1 = Math.ceil(px1 - 0.5);
     //We need to subtract 0.5 from the x values as well
