@@ -8,9 +8,10 @@ function Render(screenWidth, screenHeight) {
   this.canvas.requestPointerLock();
 
 
-  console.log(this.ctx);
+  //console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
+
 }
 
 
@@ -20,8 +21,9 @@ This array holds 4 elements for each pixel: R G B and A, values are between 0 an
 **/
 Render.prototype.draw = function(imageArray) {
 
-  //console.log(imageArray);
-  var imageData = new ImageData(imageArray, this.screenWidth, this.screenHeight);
+  //console.log(imgArray);
+  var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
+
   this.ctx.putImageData(imageData, 0, 0);
 }
 
@@ -44,14 +46,19 @@ var cleft = -cright;
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-Render.prototype.drawPixel = function(imgArray, x, y) {
+Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
-  imgArray[pixel] = 255;
-  imgArray[pixel + 1] = 0;
-  imgArray[pixel + 2] = 0;
-  imgArray[pixel + 3] = 255;
-}
 
+  //console.log(pixel);
+  if(pixel > 10000) {
+    //console.log(pixel);
+  }
+  this.imgArray[pixel] = r;
+  this.imgArray[pixel + 1] = g;
+  this.imgArray[pixel + 2] = b;
+  this.imgArray[pixel + 3] = a;
+
+}
 
 
 /**
@@ -61,10 +68,11 @@ Render.prototype.drawPixel = function(imgArray, x, y) {
 **/
 Render.prototype.render = function(modelGeometry, camera_inverse, object_transform, camera) {
 
-  //console.log(modelGeometry);
-  this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
+  //this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
-  var imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
+  this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
+
+
 
   // The virtual image plane
   var canvasWidth = 1;
@@ -79,10 +87,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   for(var i = 0; i < vertexCount; i++) {
     pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
   }
-  //Wireframe mode
-  if(globalState.wireFrame === true) {
-    this.renderWireFrame(pixels, modelGeometry.edges);
-  }
+
 
   //Coloring triangles
   if(globalState.face === true) {
@@ -98,20 +103,10 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       var complete = true;
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
-          var vertexIndex = currentVertex.id- 1;
-          //console.log(vertexIndex);
-          //console.log(pixels[vertexIndex]);
-
-
-          if(!pixels[vertexIndex]) {
-            complete = false;
-            //Triangle is not rendered completely, so ignore this one for now
-            break;
-          }
+          var vertexIndex = currentVertex.id;
 
           //Get the pixel of the vertex
           currentVertex.position = pixels[vertexIndex];
-          //console.log(currentVertex);
 
           //Get the uv coordinates belonging to the vertex
       }
@@ -120,18 +115,288 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
         continue;
       }
 
+      //console.log("current id: " + face.vertices[0].id);
+      //console.log(face.vertices[0].uv.position[0] + " " + face.vertices[0].uv.position[1])
 
+      this.renderFace(imgArray, face, modelGeometry.texture, i);
 
-      this.renderFace(imgArray, face, i);
+      //Wireframe mode
+      // if(globalState.wireFrame === true) {
+      //   this.renderWireFrame(pixels, modelGeometry.edges);
+      // }
     }
 
   }
 
 
-
   //Actually draw the image array on the canvas
-  //this.draw(imgArray);
+  this.draw(imgArray);
 }
+
+//Draw a face
+Render.prototype.renderFace = function(imgArray, face, texture, c) {
+  //We are going to color the Triangle
+  var color = "blue";
+  //console.log(c);
+  if(c % 2 == 0) {
+    color = "red";
+  }
+
+  //First, we have to sort the triangles based on their Y values DESC, to determine the case
+  var set = [0,1,2];
+
+  for(var i = 0; i < 3; i++) {
+    var current = i;
+    var next = i + 1;
+    if(current === 2) {
+      current = 0;
+      next = 1;
+    }
+
+    if(face.vertices[set[current]].position.position[1] < face.vertices[set[next]].position.position[1]) {
+        var temp = set[current];
+        set[current] = set[next];
+        set[next] = temp;
+    }
+  }
+
+
+  //Flat top
+  if(face.vertices[set[0]].position.position[1] === face.vertices[set[1]].position.position[1]) {
+    //Now, we should sort the top vertices by their x values ASC
+    if(face.vertices[set[0]].position.position[0] > face.vertices[set[1]].position.position[0]) {
+      var temp = set[0];
+      set[0] = set[1];
+      set[1] = temp;
+    }
+    this.renderFlatTopFace( face.vertices[set[0]],
+                            face.vertices[set[1]],
+                            face.vertices[set[2]],
+                            color, texture);
+  }
+
+  //Flat bottom
+  else if(face.vertices[set[1]].position.position[1] === face.vertices[set[2]].position.position[1]) {
+    //Now, we should sort the bottom vertices by their x values  ASC
+    if(face.vertices[set[1]].position.position[0] > face.vertices[set[2]].position.position[0]) {
+      var temp = set[1];
+      set[1] = set[2];
+      set[2] = temp;
+    }
+
+    this.renderFlatBottomFace( face.vertices[set[0]],
+                               face.vertices[set[1]],
+                               face.vertices[set[2]],
+                               [0,0,255], texture);
+  }
+
+  //General
+  else {
+    //Interpolate vertices
+    var alpha = (face.vertices[set[1]].position.position[1] - face.vertices[set[0]].position.position[1]) /
+                (face.vertices[set[2]].position.position[1] - face.vertices[set[0]].position.position[1]);
+    var vi =  face.vertices[set[0]].interpolateTo(face.vertices[set[2]], alpha);
+
+
+    //major right
+    if(vi.position.position[0] > face.vertices[set[1]].position.position[0]) {
+
+      this.renderFlatBottomFace(face.vertices[set[0]], face.vertices[set[1]], vi , color, texture);
+      this.renderFlatTopFace(face.vertices[set[1]], vi, face.vertices[set[2]], color, texture);
+    }
+    //major left
+    if(vi.position.position[0] < face.vertices[set[1]].position.position[0]) {
+
+      this.renderFlatBottomFace(face.vertices[set[0]], vi, face.vertices[set[1]], color, texture);
+      this.renderFlatTopFace(vi, face.vertices[set[1]], face.vertices[set[2]], color, texture);
+    }
+  }
+
+}
+
+Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
+
+  var dy = (v0.position.position[1] - v2.position.position[1]);
+
+  //dv0 and dv1 are the edge steps
+  var dv0 = v1.subtract(v0).divideScalar(dy);
+  var dv1 = v2.subtract(v0).divideScalar(dy);
+
+  //Right edge interpolant    //Maybe make a copying function for vertices?
+  var itEdge1 = v0.copy();
+
+  this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
+}
+
+Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
+  var dy = (v2.position.position[1] - v0.position.position[1]);
+
+  //dv0 and dv1 are the edge raster_pixels
+  var dv0 = v0.subtract(v2).divideScalar(dy);
+  var dv1 = v1.subtract(v2).divideScalar(dy);
+
+  var itEdge1 = v1.copy();
+
+  this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
+}
+
+Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
+
+  //left edge interpolant is always the same, no matter the case.
+  var itEdge0 = v0.copy();
+
+  var yStart = Math.ceil(v0.position.position[1] - 0.5);
+  var yEnd = Math.ceil(v2.position.position[1] - 0.5);
+
+
+  itEdge0 = itEdge0.add(dv0.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
+  itEdge1 = itEdge1.add(dv1.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
+
+
+  //uv texture coords clamp
+  var texture_width = texture.width;
+  var texture_height = texture.height;
+  var tex_clamp_x = texture_width;
+  var tex_clamp_y = texture_height;
+
+
+
+
+  for(var y = yStart; y > yEnd; y--) {
+
+    var xStart = Math.ceil(itEdge0.position.position[0] - 0.5);
+    var xEnd = Math.ceil(itEdge1.position.position[0] - 0.5);
+
+    if(xStart < 0) {
+      xStart = 0;
+    }
+    if(xEnd > this.screenWidth) {
+      xEnd = this.screenWidth ;
+    }
+
+    //UV only now, we got our x's  and y's already.
+    var tcScanStep = itEdge1.uv.subtractVector(itEdge0.uv).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
+
+
+    var tc = new Vector2();
+    tc = itEdge0.uv.addVector(tcScanStep.multiplyScalar(xStart - 0.5 - itEdge0.position.position[0]));
+
+
+
+
+
+    for(var x = xStart; x < xEnd; x++) {
+      //console.log(tc.position[0] + " " + tc.position[1]);
+      var textureX = Math.max(Math.min(Math.trunc(tc.position[0] * texture_width), tex_clamp_x), 0);
+      if(textureX < 0) {
+        textureX = 0;
+        //console.log(textureX);
+      }
+      var textureY = Math.max(Math.min(Math.trunc(tc.position[1] * texture_height), tex_clamp_y), 0);
+      if(textureY < 0) {
+        textureY = 0;
+        //console.log(textureY);
+      }
+      //console.log(textureX + " " + textureY);
+
+      var pos = (textureX * 4)+(texture_width * textureY * 4);
+
+
+        this.drawPixel(this.imgArray,
+                      x, y,
+                      texture.data[pos],
+                      texture.data[pos + 1],
+                      texture.data[pos + 2],
+                      texture.data[pos + 3]);
+
+
+      tc = tc.addVector(tcScanStep);
+    }
+
+      itEdge0 = itEdge0.add(dv0);
+      itEdge1 = itEdge1.add(dv1);
+  }
+}
+
+
+
+
+
+Render.prototype.renderWireFrame = function(pixels, edges) {
+
+  for(var vId = 0; vId < pixels.length;  vId++) {
+    //vId is the id of the current vertex. We get all the ids of the vertices that are adjacent to it
+      var adjacentList = edges[vId];
+
+      //If we want to draw a wireframe, we draw the lines connecting these pixels now
+      //For now, we use html5 canvas methods. In the near future, we'll use Bresenham instead
+
+      //Triangle idea is:   start at pixel 0. Move to pixel 1, draw.
+      //               go to pixel 1. Move to pixel 2, draw.
+      //               go to pixel 2. Move to pixel 3, draw.
+      //               go to pixel 3. Move to pixel 1, draw
+
+      for(var k = 0; k < adjacentList.length; k++) {
+
+        var adjId = adjacentList[k];
+        if(pixels[adjId] && pixels[vId]) {
+
+          this.ctx.beginPath();
+
+          this.ctx.moveTo(pixels[vId].position[0], pixels[vId].position[1])
+
+
+          this.ctx.lineTo(pixels[adjId].position[0], pixels[adjId].position[1]);
+          this.ctx.strokeStyle= "black";
+          this.ctx.stroke();
+        }
+      }
+  }
+}
+
+
+//Renders a set of vertices?   It is right now more just a conversion function.
+//Right now, the vertices used in this function is from a single face
+Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transform) {
+
+
+      //local to world
+
+      var point = object_transform.multMatrixVec3(vertex)
+      //world to camera
+      point = camera_inverse.multMatrixVec3(point);
+
+      var rgba = [255, 0, 0, 255];
+
+      //perspective_divide.
+      var point_pd = new Vector3(0,0,0);
+      point_pd.position[0] = ((point.position[0] )/ (-point.position[2]) ) * Znear;
+      point_pd.position[1] = ((point.position[1] ) / (-point.position[2]) ) * Znear;
+      point_pd.position[2] = point.position[2];
+
+      // console.log(point_pd.position[0] + " " +  point_pd.position[1] + " " + point_pd.position[2]);
+      // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
+      //console.log("new");
+      //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
+
+
+
+
+
+
+      //ndc (range of [0,1])
+      var point_ndc = new Vector3(0,0,0);
+      point_ndc.position[0] = (point_pd.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+      point_ndc.position[1] = (point_pd.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
+
+      //raster coords (pixels)
+      var point_raster = new Vector3(0,0,0);
+      point_raster.position[0] = ((point_ndc.position[0] * this.screenWidth) ) | 0;
+      point_raster.position[1] = (((1 - point_ndc.position[1] ) * this.screenHeight) ) | 0;
+
+  return point_raster;
+}
+
 
 Render.prototype.backFaceCull = function(face, camera_inverse) {
   //Dot product, back culling
@@ -171,260 +436,6 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
 
   return true;
 }
-
-//Draw a face
-Render.prototype.renderFace = function(imgArray, face, c) {
-
-  //We are going to color the Triangle
-  var color = "blue";
-  //console.log(c);
-  if(c % 2 == 0) {
-    color = "red";
-  }
-
-  var uvs = '';
-
-  //First, we have to sort the triangles based on their Y values DESC, to determine the case
-  var set = [0,1,2];
-
-  for(var i = 0; i < 3; i++) {
-    var current = i;
-    var next = i + 1;
-    if(current === 2) {
-      current = 0;
-      next = 1;
-    }
-
-    if(face.vertices[set[current]].position.position[1] < face.vertices[set[next]].position.position[1]) {
-        var temp = set[current];
-        set[current] = set[next];
-        set[next] = temp;
-    }
-  }
-
-
-  //console.log(set);
-  //Flat top
-  if(face.vertices[set[0]].position.position[1] === face.vertices[set[1]].position.position[1]) {
-    //Now, we should sort the top vertices by their x values ASC
-    if(face.vertices[set[0]].position.position[0] > face.vertices[set[1]].position.position[0]) {
-      var temp = set[0];
-      set[0] = set[1];
-      set[1] = temp;
-    }
-    //console.log(set);
-    this.renderFlatTopFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
-  }
-
-  //Flat bottom
-  else if(face.vertices[set[0]].position.position[1] === face.vertices[set[2]].position.position[1]) {
-    //Now, we should sort the bottom vertices by their x values  ASC
-    if(face.vertices[set[1]].position.position[0] > face.vertices[set[2]].position.position[0]) {
-      var temp = set[1];
-      set[1] = set[2];
-      set[2] = temp;
-    }
-
-    this.renderFlatBottomFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
-  }
-
-  //General
-  else {
-    this.renderGeneralFace([face.vertices[set[0]].position,face.vertices[set[1]].position,face.vertices[set[2]].position ], uvs, color);
-  }
-
-  return imgArray;
-}
-
-Render.prototype.renderFlatBottomFace = function(vertices, uvs, color) {
-  console.log("render flat bot");
-  console.log(vertices);
-  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
-  var yEnd = Math.ceil(vertices[1].position[1] - 0.5);
-
-  var slope1 = (vertices[1].position[0] - vertices[0].position[0]) / (vertices[1].position[1] - vertices[0].position[1]);
-  var slope2 = (vertices[2].position[0] - vertices[0].position[0]) / (vertices[2].position[1] - vertices[0].position[1]);
-
-
-  for(var y = yStart; y > yEnd; y--) {
-    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
-    var xEnd = slope2 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
-
-    xStart = Math.ceil(xStart - 0.5);
-    xEnd = Math.ceil(xEnd - 0.5);
-    //console.log(xStart + " "  + xEnd);
-
-    //Now draw the horizontal line!
-    this.ctx.beginPath();
-
-    this.ctx.moveTo(xStart, y)
-
-
-    this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= color;
-    this.ctx.stroke();
-  }
-
-
-}
-
-Render.prototype.renderFlatTopFace = function(vertices, uvs, color) {
-  //console.log(uvs);
-  //color = 'blue';
-  //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
-  var yStart = Math.ceil(vertices[0].position[1] - 0.5);
-  var yEnd = Math.ceil(vertices[2].position[1] - 0.5);
-
-  //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
-  //These are inverted so as to not get inf values
-  var slope1 = (vertices[2].position[0] - vertices[0].position[0] )  /  (vertices[2].position[1] - vertices[0].position[1]);
-  var slope2 = (vertices[2].position[0] - vertices[1].position[0] )  /  (vertices[2].position[1] - vertices[1].position[1]);
-  //console.log(yStart + " "  + yEnd);
-
-
-  //UV coordinates
-
-
-
-  for(var y = yStart; y > yEnd; y-- ) {
-    //y = a(x - x0) + y0
-    // y - y0 = a(x - x0)
-    // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
-    var xStart = slope1 * (y - vertices[0].position[1] - 0.5) + vertices[0].position[0];
-    var xEnd =   slope2 * (y - vertices[1].position[1] - 0.5) + vertices[1].position[0]
-
-    //We need to subtract 0.5 from the x values as well
-    xStart = Math.ceil(xStart - 0.5);
-    xEnd = Math.ceil(xEnd - 0.5);
-    //Now draw the horizontal line!
-    this.ctx.beginPath();
-
-    this.ctx.moveTo(xStart, y)
-
-
-    this.ctx.lineTo(xEnd, y);
-    this.ctx.strokeStyle= color;
-    this.ctx.stroke();
-    //console.log("stroked");
-
-
-  }
-}
-
-//Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-Render.prototype.renderGeneralFace = function(vertices, uvs, color) {
-  //console.log("general");
-  //console.log(vertices);
-  //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
-  var alpha = (vertices[1].position[1] - vertices[0].position[1]) /
-              (vertices[2].position[1] - vertices[0].position[1]);
-
-  var vi = new Vector3();
-
-  //vi = v0*(1 - a) + v2*a
-  vi.position[0] = vertices[0].position[0] + alpha*(vertices[2].position[0] - vertices[0].position[0]);
-  vi.position[1] = vertices[0].position[1] + alpha*(vertices[2].position[1] - vertices[0].position[1])
-
-  //Major Right
-  if(vi.position[0] > vertices[1].position[0] ) {
-    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], uvs, color);
-    this.renderFlatTopFace([vertices[1], vi, vertices[2]], uvs, color);
-  }
-  //Major Left
-  if(vi.position[0] < vertices[1].position[0]) {
-    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], uvs, color);
-    this.renderFlatTopFace([vi, vertices[1], vertices[2]], uvs, color);
-  }
-}
-
-
-
-Render.prototype.renderWireFrame = function(pixels, edges) {
-
-  for(var vId = 0; vId < pixels.length;  vId++) {
-    //vId is the id of the current vertex. We get all the ids of the vertices that are adjacent to it
-      var adjacentList = edges[vId];
-
-      //If we want to draw a wireframe, we draw the lines connecting these pixels now
-      //For now, we use html5 canvas methods. In the near future, we'll use Bresenham instead
-
-      //Triangle idea is:   start at pixel 0. Move to pixel 1, draw.
-      //               go to pixel 1. Move to pixel 2, draw.
-      //               go to pixel 2. Move to pixel 3, draw.
-      //               go to pixel 3. Move to pixel 1, draw
-
-      for(var k = 0; k < adjacentList.length; k++) {
-
-        var adjId = adjacentList[k];
-        if(pixels[adjId] && pixels[vId]) {
-          this.ctx.beginPath();
-
-          this.ctx.moveTo(pixels[vId].position[0], pixels[vId].position[1])
-
-
-          this.ctx.lineTo(pixels[adjId].position[0], pixels[adjId].position[1]);
-          this.ctx.strokeStyle= "black";
-          this.ctx.stroke();
-        }
-      }
-  }
-}
-
-
-//Renders a set of vertices?   It is right now more just a conversion function.
-//Right now, the vertices used in this function is from a single face
-Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transform) {
-
-
-      //local to world
-
-      var point = object_transform.multMatrixVec3(vertex)
-      //world to camera
-      point = camera_inverse.multMatrixVec3(point);
-
-      var rgba = [255, 0, 0, 255];
-
-      //perspective_divide.
-      var point_pd = new Vector3(0,0,0);
-      point_pd.position[0] = ((point.position[0] )/ (-point.position[2]) ) * Znear;
-      point_pd.position[1] = ((point.position[1] ) / (-point.position[2]) ) * Znear;
-      point_pd.position[2] = point.position[2];
-
-      if(point_pd.position[2] < Znear  || point_pd.position[0] < (cleft - 10) || point_pd.position[0] > (cright + 10) || point_pd.position[1] < (cbottom - 10) || point_pd.position[1] > (ctop + 10)) {
-
-        return 0;
-
-        //If you want to draw all the pixels that should not be visible, but with a different color (for debugging purposes)
-        //Remove the continue statement, and change the rgba values
-        // rgba = [0,255,0,255];
-      }
-
-
-      //ndc (range of [0,1])
-      var point_ndc = new Vector3(0,0,0);
-      point_ndc.position[0] = (point_pd.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-      point_ndc.position[1] = (point_pd.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
-
-      //raster coords (pixels)
-      var point_raster = new Vector3(0,0,0);
-      point_raster.position[0] = ((point_ndc.position[0] * this.screenWidth) ) | 0;
-      point_raster.position[1] = (((1 - point_ndc.position[1] ) * this.screenHeight) ) | 0;
-
-
-
-
-      //Now that we have the raster coordinates, we could choose to just draw the pixel on the screen:
-      //this.drawPixel(imgArray, point_raster.fields[0], point_raster.fields[1]);
-
-
-      //Or we can push this pixel to the array of pixels that belong to the face
-      //Here we compute the index that the pixel is associated with within the imgArray
-      var pixel = ((point_raster.position[0]) * 4) + ((screenWidth * (point_raster.position[1])) * 4);
-
-
-  return point_raster;
-}
-
 
 //Bresenham algorithm to draw lines
 Render.prototype.bresenham = function(x1, y1, x2, y2) {

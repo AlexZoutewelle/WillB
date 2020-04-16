@@ -8,8 +8,8 @@
 //high-prio: trangle shading
 //high-prio: texture mapping
 
-var screenWidth = 400;
-var screenHeight = 400;
+var screenWidth = 800;
+var screenHeight = 800;
 
 //Get the context
 
@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -10],
+        [0, 0, 1, -90],
         [0, 0, 0, 1]
 ]);
 
@@ -30,16 +30,17 @@ var test1 = new Vector3(3, 4, 5);
 var test2 = new Vector3(4,6,5);
 
 
-//Load the cat model
-var model = mdlLoad.loadObject("models/sphere2.obj");
-//var modelGeometry = [];
-//test point imgArray
+//Load ad model
+var model_name = "cube";
+var model = mdlLoad.loadObject("models/" + model_name + ".obj");
+console.log(model);
+
 
 
 model.then(function(result) {
   //All models are loaded. We can start parsing the models
   modelGeometry = new Geometry();
-  modelGeometry.parseOBJ(result);
+  modelGeometry.parseOBJ(result, model_name);
   object_transform = new Transformation();
   console.log(modelGeometry);
   //Models are parsed. We can start the main game loop
@@ -60,40 +61,40 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -1);
+    camera.fields =  camera.translate(0,0, -0.15);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,1);
+    camera.fields =  camera.translate(0, 0,0.15);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(1,0,0);
+    camera.fields = camera.translate(0.15,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-1,0,0,);
+    camera.fields = camera.translate(-0.15,0,0);
   }
 
   if(playerState.input.turnLeft === true) {
     //console.log("turn left");
-    camera.fields = camera.rotate(0,-0.8);
+    camera.fields = camera.rotate(0,-0.3);
   }
 
   if(playerState.input.turnRight === true) {
     //console.log("turn right");
-    camera.fields = camera.rotate(0,0.8);
+    camera.fields = camera.rotate(0,0.3);
 
   }
 
   if(playerState.input.jump === true) {
     //console.log("jump");
-    camera.fields = camera.translate(0,-2, 0)
+    camera.fields = camera.translate(0,-0.5, 0)
   }
   if(playerState.input.crouch === true) {
     //console.log("crouch");
-    camera.fields = camera.translate(0, 2, 0);
+    camera.fields = camera.translate(0, 0.5, 0);
   }
 
   if(playerState.input.tiltForward === true) {
@@ -151,6 +152,7 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
+  //console.log(modelGeometry);
     requestAnimationFrame(frame);
 
 

@@ -9,14 +9,9 @@ function Face(vertices) {
   this.culled = false;
 }
 
-function Vertex(id, normal, uv) {
-  this.id = id;
-  this.normal = normal || new Vector3();
-  this.uv = uv || new Vector2();
-}
 
-Geometry.prototype.parseOBJ = function(object) {
 
+Geometry.prototype.parseOBJ = function(object, object_name) {
   //regex for positions
   var positionRegx = /^v\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
 
@@ -26,7 +21,7 @@ Geometry.prototype.parseOBJ = function(object) {
   //var faceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
   var normalRegx = /^vn\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
 
-  var uvRegx = /^vt\s+(\d+\.\d+)\s+(\d+\.\d+)/;
+  var uvRegx = /^vt\s+(\d+\.*\d*)\s+(\d+\.*\d*)/;
 
 
   var positions = [];
@@ -64,15 +59,15 @@ Geometry.prototype.parseOBJ = function(object) {
     else if((result = faceRegx.exec(line)) != null) {
       //Creating the face
 
-
       var faceVertices = [];
 
       var step = Math.ceil(result.length / 4);
       for(var i = 1; i < result.length; i += step ) {
         //We only save the vertex indices here, since we go 3x slower without them
-        var id = parseInt(result[i]);
-        var uv = uvs[parseInt(result[i + 1])];
-        var normal = normals[parseInt(result[i + 2])];
+        var id = parseInt(result[i] - 1);
+        var uv = uvs[parseInt(result[i + 1] - 1)];
+        var normal = normals[parseInt(result[i + 2] - 1)];
+
         faceVertices.push(new Vertex(id, normal, uv));
 
       }
@@ -84,6 +79,16 @@ Geometry.prototype.parseOBJ = function(object) {
     //Now that we have parsed all the lines in the .obj file, we must make a list of edges
     var edges = this.createEdgeList(positions, faces);
 
+    //Finally, get its texture image, and create a context for it
+    var image = document.getElementById(object_name);
+    var canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+    console.log(canvas);
+
+
+    this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
     this.positions = positions;
     this.faces = faces;
     this.edges = edges;
@@ -112,11 +117,11 @@ Geometry.prototype.createEdgeList = function(vertices, faces){
     //foreach vertex, check its entry in the adjacentVertsList.
     //If these adjacent vertices are not present in the list, add them.
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[0] - 1), (currentVertices[1] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[0] ), (currentVertices[1] ));
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[1] - 1), (currentVertices[2] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[1] ), (currentVertices[2] ));
 
-    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[2] - 1), (currentVertices[0] - 1));
+    edgeList = this.insertVertexAdjacency(edgeList, (currentVertices[2] ), (currentVertices[0] ));
 
 
   }
@@ -193,6 +198,132 @@ Vector3.prototype.normalize = function() {
   this.position[2] /= length;
 }
 
+Vector3.prototype.multiplyVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] * vector.position[0];
+  result.position[1] = this.position[1] * vector.position[1];
+  result.position[2] = this.position[2] * vector.position[2];
+  return result;
+}
+
+Vector3.prototype.divideVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] / vector.position[0];
+  result.position[1] = this.position[1] / vector.position[1];
+  result.position[2] = this.position[2] / vector.position[2];
+}
+Vector3.prototype.subtractVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] - vector.position[0];
+  result.position[1] = this.position[1] - vector.position[1];
+  result.position[2] = this.position[2] - vector.position[2];
+  return result;
+}
+
+Vector3.prototype.addVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] + vector.position[0];
+  result.position[1] = this.position[1] + vector.position[1];
+  result.position[2] = this.position[2] + vector.position[2];
+  return result;
+}
+
+Vector3.prototype.multiplyScalar = function(scalar) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] * scalar;
+  result.position[1] = this.position[1] * scalar;
+  result.position[2] = this.position[2] * scalar;
+  return result;
+}
+
+Vector3.prototype.divideScalar = function(scalar) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] / scalar;
+  result.position[1] = this.position[1] / scalar;
+  result.position[2] = this.position[2] / scalar;
+  return result;
+
+}
+
+
+
+Vector3.prototype.interpolateTo = function(vector, alpha) {
+  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  return result;
+}
+
 function Vector2(x,y) {
   this.position = [x || 0, y || 0];
+}
+
+Vector2.prototype.addScalar = function(scalar, position) {
+  var result = new Vector2();
+  if(position) {
+    result.position[position] += scalar;
+  }
+  else {
+    result.position[0] += scalar;
+    result.position[1] += scalar;
+  }
+
+  return result;
+}
+
+Vector2.prototype.addVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] + vector.position[0];
+  result.position[1] = this.position[1] + vector.position[1];
+  return result;
+}
+
+Vector2.prototype.divideScalar = function(scalar) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] / scalar;
+  result.position[1] = this.position[1] / scalar;
+  return result;
+}
+
+Vector2.prototype.subtractScalar = function(scalar, axis) {
+  var result = new Vector2();
+  if(axis) {
+    result.position[axis] = this.position[axis] - scalar;
+  }
+  else {
+    result.position[0] = this.position[0] - scalar;
+    result.position[1] = this.position[1] - scalar;
+  }
+  return result;
+}
+
+Vector2.prototype.multiplyScalar = function(scalar) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] * scalar;
+  result.position[1] = this.position[1] * scalar;
+  return result;
+}
+
+Vector2.prototype.subtractVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] - vector.position[0];
+  result.position[1] = this.position[1] - vector.position[1];
+  return result;
+}
+
+Vector2.prototype.divideVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] / vector.position[0];
+  result.position[1] = this.position[1] / vector.position[1];
+  return result;
+}
+
+Vector2.prototype.multiplyVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] * vector.position[0];
+  result.position[1] = this.position[1] * vector.position[1];
+  return result;
+}
+
+Vector2.prototype.interpolateTo = function(vector, alpha) {
+  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  return result;
 }

@@ -2,14 +2,22 @@
 <head>
   <style>
     canvas {
+    }
+    img {
       width: 50%;
-      ;
+      height: 50%;
     }
   </style>
 </head>
+
+
 <body>
-  <canvas id="screen" width="400" height="400" style="border: 1px solid black; padding: 2px; margin: 2px;"></canvas>
+  <img id = "cube" src="models/cube.jpg"/>
+
+
+  <canvas id="screen" width="800" height="800" style="border: 1px solid black; padding: 2px; margin: 2px;"></canvas>
   <script src="engine/mdlLoad.js"></script>
+  <script src="engine/Vertex.js"></script>
   <script src="engine/Geometry.js"></script>
   <script src="engine/Render.js"></script>
   <script src="engine/Transformation.js"></script>
