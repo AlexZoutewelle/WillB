@@ -9,12 +9,7 @@ function Face(vertices) {
   this.culled = false;
 }
 
-function Vertex(id, normal, uv) {
-  this.id = id;
-  this.position = new Vector3();
-  this.normal = normal || new Vector3();
-  this.uv = uv || new Vector2();
-}
+
 
 Geometry.prototype.parseOBJ = function(object, object_name) {
   //regex for positions
@@ -203,6 +198,51 @@ Vector3.prototype.normalize = function() {
   this.position[2] /= length;
 }
 
+Vector3.prototype.multiplyVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] * vector.position[0];
+  result.position[1] = this.position[1] * vector.position[1];
+  result.position[2] = this.position[2] * vector.position[2];
+  return result;
+}
+
+Vector3.prototype.divideVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] / vector.position[0];
+  result.position[1] = this.position[1] / vector.position[1];
+  result.position[2] = this.position[2] / vector.position[2];
+}
+Vector3.prototype.subtractVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] - vector.position[0];
+  result.position[1] = this.position[1] - vector.position[1];
+  result.position[2] = this.position[2] - vector.position[2];
+  return result;
+}
+
+Vector3.prototype.addVector = function(vector) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] + vector.position[0];
+  result.position[1] = this.position[1] + vector.position[1];
+  result.position[2] = this.position[2] + vector.position[2];
+  return result;
+}
+
+Vector3.prototype.multiplyScalar = function(scalar) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] * scalar;
+  result.position[1] = this.position[1] * scalar;
+  result.position[2] = this.position[2] * scalar;
+  return result;
+}
+
+
+
+Vector3.prototype.interpolateTo = function(vector, alpha) {
+  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  return result;
+}
+
 function Vector2(x,y) {
   this.position = [x || 0, y || 0];
 }
@@ -264,4 +304,16 @@ Vector2.prototype.divideVector = function(vector) {
   var result = new Vector2();
   result.position[0] = this.position[0] / vector.position[0];
   result.position[1] = this.position[1] / vector.position[1];
+  return result;
+}
+
+Vector2.prototype.multiplyVector = function(vector) {
+  var result = new Vector2();
+  result.position[0] = this.position[0] * vector.position[0];
+  result.position[1] = this.position[1] * vector.position[1];
+}
+
+Vector2.prototype.interpolateTo = function(vector, alpha) {
+  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  return result;
 }

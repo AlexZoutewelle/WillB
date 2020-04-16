@@ -194,14 +194,61 @@ Render.prototype.renderFace = function(imgArray, face, texture, c) {
 
   //General
   else {
-    this.renderGeneralFace([face.vertices[set[0]],
-                            face.vertices[set[1]],
-                            face.vertices[set[2]] ],
-                            color, texture);
+
+    //Interpolate vertices
+    var alpha = (face.vertices[set[1]].position.position[1] - face.vertices[set[0]].position.position[1]) /
+                (face.vertices[set[2]].position.position[1] - face.vertices[set[0]].position.position[1]);
+    var vi =  face.vertices[set[0]].interpolateTo(face.vertices[set[2]], alpha);
+
+
+    //major right
+    if(vi.position.position[0] > face.vertices[set[1]].position.position[0]) {
+      this.renderFlatBottomFace([face.vertices[set[0]], face.vertices[set[1]], vi ], color, texture);
+      this.renderFlatTopFace([face.vertices[set[1]], vi, face.vertices[set[2]] ], color, texture);
+    }
+    //major left
+    if(vi.position.position[0] < face.vertices[set[1]].position.position[0]) {
+
+      this.renderFlatBottomFace([face.vertices[set[0]], vi, face.vertices[set[1]] ], color, texture);
+      this.renderFlatTopFace([ vi, face.vertices[set[1]], face.vertices[set[2]] ], color, texture);
+    }
   }
 
-  return imgArray;
 }
+
+
+// //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
+// Render.prototype.renderGeneralFace = function(vertices, color, texture) {
+//   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
+//   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
+//
+//   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
+//   var alpha = (positions[1].position[1] - positions[0].position[1]) /
+//               (positions[2].position[1] - positions[0].position[1]);
+//
+//   var vi = new Vertex();
+//   //vi = v0*(1 - a) + v2*a
+//   //interpolate positions to get vi's position
+//   vi.position.position[0] = positions[0].position[0] + alpha * (positions[2].position[0] - positions[0].position[0]);
+//   vi.position.position[1] = positions[0].position[1] + alpha * (positions[2].position[1] - positions[0].position[1]);
+//
+//   //We also need to interpolate UV's for vi
+//   vi.uv.position[0] = vertices[0].uv.position[0] + alpha * (vertices[2].uv.position[0] - vertices[0].uv.position[0]);
+//   vi.uv.position[1] = vertices[0].uv.position[1] + alpha * (vertices[2].uv.position[1] - vertices[0].uv.position[1]);
+//
+//   //Major Right
+//   if(vi.position.position[0] > positions[1].position[0] ) {
+//
+//     this.renderFlatBottomFace([vertices[0], vertices[1], vi ], [255,0,0], texture);
+//     this.renderFlatTopFace([vertices[1], vi, vertices[2]], color, texture);
+//   }
+//   //Major Left
+//   if(vi.position.position[0] < positions[1].position[0]) {
+//     this.renderFlatBottomFace([vertices[0], vi, vertices[1]], [0,255,0], texture);
+//     this.renderFlatTopFace([vi, vertices[1], vertices[2]], color, texture);
+//   }
+// }
+//
 
 Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
@@ -410,38 +457,6 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
 
     txEdgeL = txEdgeL.addVector(txEdgeStepL);
     txEdgeR = txEdgeR.addVector(txEdgeStepR);
-  }
-}
-
-//Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-Render.prototype.renderGeneralFace = function(vertices, color, texture) {
-  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
-  var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
-
-  //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
-  var alpha = (positions[1].position[1] - positions[0].position[1]) /
-              (positions[2].position[1] - positions[0].position[1]);
-
-  var vi = new Vertex();
-  //vi = v0*(1 - a) + v2*a
-  //interpolate positions to get vi's position
-  vi.position.position[0] = positions[0].position[0] + alpha * (positions[2].position[0] - positions[0].position[0]);
-  vi.position.position[1] = positions[0].position[1] + alpha * (positions[2].position[1] - positions[0].position[1]);
-
-  //We also need to interpolate UV's for vi
-  vi.uv.position[0] = vertices[0].uv.position[0] + alpha * (vertices[2].uv.position[0] - vertices[0].uv.position[0]);
-  vi.uv.position[1] = vertices[0].uv.position[1] + alpha * (vertices[2].uv.position[1] - vertices[0].uv.position[1]);
-
-  //Major Right
-  if(vi.position.position[0] > positions[1].position[0] ) {
-
-    this.renderFlatBottomFace([vertices[0], vertices[1], vi ], [255,0,0], texture);
-    this.renderFlatTopFace([vertices[1], vi, vertices[2]], color, texture);
-  }
-  //Major Left
-  if(vi.position.position[0] < positions[1].position[0]) {
-    this.renderFlatBottomFace([vertices[0], vi, vertices[1]], [0,255,0], texture);
-    this.renderFlatTopFace([vi, vertices[1], vertices[2]], color, texture);
   }
 }
 
