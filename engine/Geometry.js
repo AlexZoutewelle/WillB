@@ -236,6 +236,15 @@ Vector3.prototype.multiplyScalar = function(scalar) {
   return result;
 }
 
+Vector3.prototype.divideScalar = function(scalar) {
+  var result = new Vector3();
+  result.position[0] = this.position[0] / scalar;
+  result.position[1] = this.position[1] / scalar;
+  result.position[2] = this.position[2] / scalar;
+  return result;
+
+}
+
 
 
 Vector3.prototype.interpolateTo = function(vector, alpha) {
@@ -311,6 +320,7 @@ Vector2.prototype.multiplyVector = function(vector) {
   var result = new Vector2();
   result.position[0] = this.position[0] * vector.position[0];
   result.position[1] = this.position[1] * vector.position[1];
+  return result;
 }
 
 Vector2.prototype.interpolateTo = function(vector, alpha) {

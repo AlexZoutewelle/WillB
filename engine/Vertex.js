@@ -7,24 +7,37 @@ function Vertex(id, normal, uv) {
 
 //Operations between vertices
 Vertex.prototype.subtract = function(vertex) {
-  this.position = this.position.subtractVector(vertex.position);
-  this.uv = this.uv.subtractVector(vertex.uv);
-  return this;
+  var result = new Vertex();
+  result.position = this.position.subtractVector(vertex.position);
+  result.uv = this.uv.subtractVector(vertex.uv);
+  return result;
 }
 
 Vertex.prototype.add = function(vertex) {
-  this.position = this.position.addVector(vertex.position);
-  this.uv = this.uv.addVector()(vertex.uv);
+  var result = new Vertex();
+
+  result.position = this.position.addVector(vertex.position);
+  result.uv = this.uv.addVector(vertex.uv);
+  return result;
+
 }
 
 Vertex.prototype.divide = function(vertex) {
-  this.position = this.position.divideVector(vertex.position);
-  this.uv = this.position.divideVector(vertex.uv);
+  var result = new Vertex();
+
+  result.position = this.position.divideVector(vertex.position);
+  result.uv = this.uv.divideVector(vertex.uv);
+  return result;
+
 }
 
 Vertex.prototype.multiply = function(vertex) {
-  this.position = this.position.multiplyVector(vertex.position);
-  this.uv = this.uv.multiplyVector(vertex.uv);
+  var result = new Vertex();
+
+  result.position = this.position.multiplyVector(vertex.position);
+  result.uv = this.uv.multiplyVector(vertex.uv);
+  return result;
+
 }
 
 Vertex.prototype.interpolateTo = function(vertex, alpha) {
@@ -32,4 +45,27 @@ Vertex.prototype.interpolateTo = function(vertex, alpha) {
   result.position = this.position.interpolateTo(vertex.position, alpha);
   result.uv = this.uv.interpolateTo(vertex.uv, alpha);
   return result;
+}
+
+Vertex.prototype.divideScalar = function(scalar) {
+  var result = new Vertex();
+
+  result.position = this.position.divideScalar(scalar);
+  result.uv = this.uv.divideScalar(scalar);
+  return result;
+}
+
+Vertex.prototype.multiplyScalar = function(scalar) {
+  var result = new Vertex();
+
+  result.position = this.position.multiplyScalar(scalar);
+  result.uv = this.uv.multiplyScalar(scalar);
+  return result;
+}
+
+Vertex.prototype.copy = function() {
+  var newV = new Vertex();
+  newV.position = this.position;
+  newV.uv = this.uv;
+  return newV;
 }

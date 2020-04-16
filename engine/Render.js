@@ -169,15 +169,14 @@ Render.prototype.renderFace = function(imgArray, face, texture, c) {
       set[0] = set[1];
       set[1] = temp;
     }
-
-    this.renderFlatTopFace([face.vertices[set[0]],
+    this.renderFlatTopFace( face.vertices[set[0]],
                             face.vertices[set[1]],
-                            face.vertices[set[2]]],
+                            face.vertices[set[2]],
                             color, texture);
   }
 
   //Flat bottom
-  else if(face.vertices[set[0]].position.position[1] === face.vertices[set[2]].position.position[1]) {
+  else if(face.vertices[set[1]].position.position[1] === face.vertices[set[2]].position.position[1]) {
     //Now, we should sort the bottom vertices by their x values  ASC
     if(face.vertices[set[1]].position.position[0] > face.vertices[set[2]].position.position[0]) {
       var temp = set[1];
@@ -185,16 +184,14 @@ Render.prototype.renderFace = function(imgArray, face, texture, c) {
       set[2] = temp;
     }
 
-
-    this.renderFlatBottomFace([face.vertices[set[0]],
+    this.renderFlatBottomFace( face.vertices[set[0]],
                                face.vertices[set[1]],
-                               face.vertices[set[2]]],
+                               face.vertices[set[2]],
                                [0,0,255], texture);
   }
 
   //General
   else {
-
     //Interpolate vertices
     var alpha = (face.vertices[set[1]].position.position[1] - face.vertices[set[0]].position.position[1]) /
                 (face.vertices[set[2]].position.position[1] - face.vertices[set[0]].position.position[1]);
@@ -203,84 +200,57 @@ Render.prototype.renderFace = function(imgArray, face, texture, c) {
 
     //major right
     if(vi.position.position[0] > face.vertices[set[1]].position.position[0]) {
-      this.renderFlatBottomFace([face.vertices[set[0]], face.vertices[set[1]], vi ], color, texture);
-      this.renderFlatTopFace([face.vertices[set[1]], vi, face.vertices[set[2]] ], color, texture);
+
+      this.renderFlatBottomFace(face.vertices[set[0]], face.vertices[set[1]], vi , color, texture);
+      this.renderFlatTopFace(face.vertices[set[1]], vi, face.vertices[set[2]], color, texture);
     }
     //major left
     if(vi.position.position[0] < face.vertices[set[1]].position.position[0]) {
 
-      this.renderFlatBottomFace([face.vertices[set[0]], vi, face.vertices[set[1]] ], color, texture);
-      this.renderFlatTopFace([ vi, face.vertices[set[1]], face.vertices[set[2]] ], color, texture);
+      this.renderFlatBottomFace(face.vertices[set[0]], vi, face.vertices[set[1]], color, texture);
+      this.renderFlatTopFace(vi, face.vertices[set[1]], face.vertices[set[2]], color, texture);
     }
   }
 
 }
 
+Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
 
-// //Divide and conquer: split the general face into 2 smaller faces: a flatTop and a flatbottom
-// Render.prototype.renderGeneralFace = function(vertices, color, texture) {
-//   var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
-//   var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
-//
-//   //Find the vertex that will split this general face into a FlatBottom and FlatTop using interpolation
-//   var alpha = (positions[1].position[1] - positions[0].position[1]) /
-//               (positions[2].position[1] - positions[0].position[1]);
-//
-//   var vi = new Vertex();
-//   //vi = v0*(1 - a) + v2*a
-//   //interpolate positions to get vi's position
-//   vi.position.position[0] = positions[0].position[0] + alpha * (positions[2].position[0] - positions[0].position[0]);
-//   vi.position.position[1] = positions[0].position[1] + alpha * (positions[2].position[1] - positions[0].position[1]);
-//
-//   //We also need to interpolate UV's for vi
-//   vi.uv.position[0] = vertices[0].uv.position[0] + alpha * (vertices[2].uv.position[0] - vertices[0].uv.position[0]);
-//   vi.uv.position[1] = vertices[0].uv.position[1] + alpha * (vertices[2].uv.position[1] - vertices[0].uv.position[1]);
-//
-//   //Major Right
-//   if(vi.position.position[0] > positions[1].position[0] ) {
-//
-//     this.renderFlatBottomFace([vertices[0], vertices[1], vi ], [255,0,0], texture);
-//     this.renderFlatTopFace([vertices[1], vi, vertices[2]], color, texture);
-//   }
-//   //Major Left
-//   if(vi.position.position[0] < positions[1].position[0]) {
-//     this.renderFlatBottomFace([vertices[0], vi, vertices[1]], [0,255,0], texture);
-//     this.renderFlatTopFace([vi, vertices[1], vertices[2]], color, texture);
-//   }
-// }
-//
+  var dy = (v0.position.position[1] - v2.position.position[1]);
 
-Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
-  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
-  var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
+  //dv0 and dv1 are the edge steps
+  var dv0 = v1.subtract(v0).divideScalar(dy);
+  var dv1 = v2.subtract(v0).divideScalar(dy);
 
-  var yStart = Math.ceil(positions[0].position[1] - 0.5);
-  var yEnd = Math.ceil(positions[2].position[1] - 0.5);
+  //Right edge interpolant    //Maybe make a copying function for vertices?
+  var itEdge1 = v0.copy();
 
-  var dx1 = (positions[1].position[0] - positions[0].position[0]);
-  var dy1 = (positions[1].position[1] - positions[0].position[1]);
-  var slope1 = dx1 / dy1;
+  this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
+}
 
-  var dx2 = ( positions[2].position[0] - positions[0].position[0] );
-  var dy2 = (positions[2].position[1] - positions[0].position[1]);
-  var slope2 = dx2 / dy2;
+Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
+  var dy = (v2.position.position[1] - v0.position.position[1]);
+
+  //dv0 and dv1 are the edge raster_pixels
+  var dv0 = v0.subtract(v2).divideScalar(dy);
+  var dv1 = v1.subtract(v2).divideScalar(dy);
+
+  var itEdge1 = v1.copy();
+
+  this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
+}
+
+Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
+
+  //left edge interpolant is always the same, no matter the case.
+  var itEdge0 = v0.copy();
+
+  var yStart = Math.ceil(v0.position.position[1] - 0.5);
+  var yEnd = Math.ceil(v2.position.position[1] - 0.5);
 
 
-                      //UV
-    var txEdgeL = new Vector2(uvs[0].position[0], uvs[0].position[1]);
-    var txEdgeR = new Vector2(uvs[0].position[0], uvs[0].position[1]);
-    var txEdgeBL = new Vector2(uvs[2].position[0], uvs[2].position[1]);
-    var txEdgeBR = new Vector2(uvs[1].position[0], uvs[1].position[1]);
-
-
-  //unit steps
-  var txEdgeStepR = (txEdgeBL.subtractVector(txEdgeL)).divideScalar(dy1);
-  var txEdgeStepL = (txEdgeBR.subtractVector(txEdgeR)).divideScalar(dy2);
-
-
-  //prestep
-  txEdgeL = txEdgeL.addVector( txEdgeStepL.multiplyScalar( yStart - positions[0].position[1] + 0.5));
-  txEdgeR = txEdgeR.addVector( txEdgeStepR.multiplyScalar( yStart - positions[0].position[1] + 0.5));
+  itEdge0 = itEdge0.add(dv0.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
+  itEdge1 = itEdge1.add(dv1.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
 
 
   //uv texture coords clamp
@@ -289,17 +259,13 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
   var tex_clamp_x = texture_width;
   var tex_clamp_y = texture_height;
 
-  for(var y = yStart; y > yEnd -1; y--) {
 
 
-    var px0 = slope1 * (y - positions[0].position[1] + 0.5) + positions[0].position[0];
-    var px1 = slope2 * (y - positions[0].position[1] + 0.5) + positions[0].position[0];
 
-    px0 = Math.ceil(px0 - 0.5);
-    px1 = Math.ceil(px1 - 0.5);
+  for(var y = yStart; y > yEnd; y--) {
 
-    var xStart = Math.ceil(px0 - 0.5);
-    var xEnd = Math.ceil(px1 - 0.5);
+    var xStart = Math.ceil(itEdge0.position.position[0] - 0.5);
+    var xEnd = Math.ceil(itEdge1.position.position[0] - 0.5);
 
     if(xStart < 0) {
       xStart = 0;
@@ -308,10 +274,16 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
       xEnd = this.screenWidth ;
     }
 
-    var tcScanStep = txEdgeR.subtractVector(txEdgeL).divideScalar(px1 - px0);
+    //UV only now, we got our x's  and y's already.
+    var tcScanStep = itEdge1.uv.subtractVector(itEdge0.uv).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
+
 
     var tc = new Vector2();
-    tc = txEdgeL.addVector(tcScanStep.multiplyScalar(xStart - 0.5 - px0))
+    tc = itEdge0.uv.addVector(tcScanStep.multiplyScalar(xStart - 0.5 - itEdge0.position.position[0]));
+
+
+
+
 
     for(var x = xStart; x < xEnd; x++) {
       //console.log(tc.position[0] + " " + tc.position[1]);
@@ -337,128 +309,16 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
                       texture.data[pos + 2],
                       texture.data[pos + 3]);
 
-        // this.drawPixel(this.imgArray,
-        //               x, y,
-        //               0,
-        //               0,
-        //               255,
-        //               255);
-
 
       tc = tc.addVector(tcScanStep);
     }
 
-      txEdgeL = txEdgeL.subtractVector(txEdgeStepL);
-      txEdgeR = txEdgeR.subtractVector(txEdgeStepR);
+      itEdge0 = itEdge0.add(dv0);
+      itEdge1 = itEdge1.add(dv1);
   }
 }
 
-Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
-  //console.log(texture);
-  var positions = [vertices[0].position, vertices[1].position, vertices[2].position];
-  var uvs = [vertices[0].uv, vertices[1].uv, vertices[2].uv];
 
-  //initiate values to loop over entire face's y range. Subtracting 0.5 to find the correct pixel to start on
-  var yStart = Math.ceil(positions[2].position[1] - 0.5);
-  var yEnd = Math.ceil(positions[0].position[1] - 0.5);
-
-                                        //UV
-  //Get the slopes of the lines. We'll use this to compute the start and end x's for each line we'll draw
-  //These are inverted so as to not get inf values
-  var dx1 = (positions[2].position[0] - positions[0].position[0] );
-  var dy1 = (positions[2].position[1] - positions[0].position[1] ) ;
-  var slope1 = dx1 /  dy1;
-
-  var dx2 = (positions[2].position[0] - positions[1].position[0] );
-  var dy2 = (positions[2].position[1] - positions[1].position[1] );
-  var slope2 = dx2 /  dy2;
-
-                                //UV
-  //These are the edges of our texture coordinates.
-  //We have to create a new vector for this, to avoid JS standard referencing
-  var txEdgeL = new Vector2(uvs[0].position[0], uvs[0].position[1]);
-  var txEdgeR = new Vector2(uvs[1].position[0], uvs[1].position[1]);
-  var txEdgeB = new Vector2(uvs[2].position[0], uvs[2].position[1]);
-
-  //Now we need to compute the unit steps for the texture coordinates.
-  //This must have a vector as result. Meaning: for each step of y we go down, what must be the unit vector step for the UV coords?
-  var txEdgeStepL = txEdgeB.subtractVector(txEdgeL).divideScalar(dy1);
-  var txEdgeStepR = txEdgeB.subtractVector(txEdgeR).divideScalar(dy2);
-
-
-  //Now, we need to do the prestep. Since we're working with centers of pixels, the uv coordinates must reflect that as well
-  //Since this is a flat top, we can use either v0 or v1 for the offset
-
-
-  txEdgeL = txEdgeL.addVector( txEdgeStepL.multiplyScalar( yStart - positions[0].position[1] + 0.5 ));
-  txEdgeR = txEdgeR.addVector( txEdgeStepR.multiplyScalar( yStart - positions[0].position[1] + 0.5 ));
-  //console.log(txEdgeR.position[0] + " " + txEdgeL.position[1])
-
-  //Now, we need to make sure we can clamp our uv coordinates later on when we draw them
-  var texture_width = texture.width;
-  var texture_height = texture.height;
-  var tex_clamp_x = texture_width - 1.0;
-  var tex_clamp_y = texture_height - 1.0;
-
-  //This is the vector we will use to actually get the pixel color from the texture. This vector holds the texture coordinates
-
-                        //UV coordinates
-
-  for(var y = yStart; y < yEnd; y++) {
-    //y = a(x - x0) + y0
-    // y - y0 = a(x - x0)
-    // (y - y0)*a + x0 = x      We work with pixel-centers however, so we need to subtract 0.5 from y
-
-    //console.log(txEdgeL.position[0] + " "  + txEdgeL.position[1]);
-    var px0 = slope1 * (y - positions[0].position[1] + 0.5) + positions[0].position[0];
-    var px1 = slope2 * (y - positions[1].position[1] + 0.5) + positions[1].position[0]
-    px0 = Math.ceil(px0 - 0.5);
-    px1 = Math.ceil(px1 - 0.5);
-    //We need to subtract 0.5 from the x values as well
-    var xStart = Math.ceil(px0 - 0.5);
-    if(xStart < 0) {xStart = 0;}
-    var xEnd = Math.ceil(px1 - 0.5);
-    if(xEnd > this.screenWidth) {
-      xEnd = this.screenWidth;
-    }
-    //console.log(txEdgeR.position[0] + " " + txEdgeL.position[1])
-
-                      //UV coordinates
-    //We need to do the same for the UV coordinates: foreach x in pixel coordinates, what is the x in UV coordinates?
-    var tcScanStep = txEdgeR.subtractVector(txEdgeL).divideScalar(px1 - px0);
-
-    //prestep 18:56
-    var tc = new Vector2();
-    tc = txEdgeL.addVector(tcScanStep.multiplyScalar(Math.ceil(xStart - 0.5 - px0)))
-    for(var x = xStart; x < xEnd; x++) {
-      //Finally, we need to read the color from the texture image
-      var textureX = Math.max(Math.min(Math.trunc(tc.position[0] * texture_width), tex_clamp_x ), 0);
-      var textureY = Math.max(Math.min(Math.trunc(tc.position[1] * texture_height), tex_clamp_y), 0) ;
-
-      var pos = (textureX * 4)+(texture_width * textureY * 4);
-
-
-      this.drawPixel(this.imgArray,
-                    x, y,
-                    texture.data[pos],
-                    texture.data[pos + 1],
-                    texture.data[pos + 2],
-                    texture.data[pos + 3]);
-
-      // this.drawPixel(this.imgArray,
-      //               x, y,
-      //               255,
-      //               0,
-      //               0,
-      //               255);
-
-      tc = tc.addVector(tcScanStep);
-    }
-
-    txEdgeL = txEdgeL.addVector(txEdgeStepL);
-    txEdgeR = txEdgeR.addVector(txEdgeStepR);
-  }
-}
 
 
 
