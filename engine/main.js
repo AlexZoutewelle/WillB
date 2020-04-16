@@ -8,8 +8,8 @@
 //high-prio: trangle shading
 //high-prio: texture mapping
 
-var screenWidth = 300;
-var screenHeight = 300;
+var screenWidth = 800;
+var screenHeight = 800;
 
 //Get the context
 
@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -250],
+        [0, 0, 1, -90],
         [0, 0, 0, 1]
 ]);
 
@@ -34,8 +34,7 @@ var test2 = new Vector3(4,6,5);
 var model_name = "cube";
 var model = mdlLoad.loadObject("models/" + model_name + ".obj");
 console.log(model);
-//var modelGeometry = [];
-//test point imgArray
+
 
 
 model.then(function(result) {
@@ -62,20 +61,20 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -0.45);
+    camera.fields =  camera.translate(0,0, -0.15);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,.45);
+    camera.fields =  camera.translate(0, 0,0.15);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(0.45,0,0);
+    camera.fields = camera.translate(0.15,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-0.45,0,0);
+    camera.fields = camera.translate(-0.15,0,0);
   }
 
   if(playerState.input.turnLeft === true) {

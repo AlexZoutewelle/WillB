@@ -104,18 +104,9 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
           var vertexIndex = currentVertex.id;
-          // console.log(vertexIndex);
-          // console.log(pixels[vertexIndex]);
-
-          if(pixels[vertexIndex] ===  -1) {
-            complete = false;
-            //Triangle is not rendered completely, so ignore this one for now
-            break;
-          }
 
           //Get the pixel of the vertex
           currentVertex.position = pixels[vertexIndex];
-          //console.log(currentVertex);
 
           //Get the uv coordinates belonging to the vertex
       }
@@ -292,18 +283,19 @@ Render.prototype.renderFlatBottomFace = function(vertices, color, texture) {
       var pos = (textureX * 4)+(texture_width * textureY * 4);
 
 
-        // this.drawPixel(this.imgArray,
-        //               x, y,
-        //               texture.data[pos],
-        //               texture.data[pos + 1],
-        //               texture.data[pos + 2],
-        //               texture.data[pos + 3]);
         this.drawPixel(this.imgArray,
                       x, y,
-                      0,
-                      0,
-                      255,
-                      255);
+                      texture.data[pos],
+                      texture.data[pos + 1],
+                      texture.data[pos + 2],
+                      texture.data[pos + 3]);
+
+        // this.drawPixel(this.imgArray,
+        //               x, y,
+        //               0,
+        //               0,
+        //               255,
+        //               255);
 
 
       tc = tc.addVector(tcScanStep);
@@ -399,18 +391,19 @@ Render.prototype.renderFlatTopFace = function(vertices, color, texture) {
       var pos = (textureX * 4)+(texture_width * textureY * 4);
 
 
-      // this.drawPixel(this.imgArray,
-      //               x, y,
-      //               texture.data[pos],
-      //               texture.data[pos + 1],
-      //               texture.data[pos + 2],
-      //               texture.data[pos + 3]);
       this.drawPixel(this.imgArray,
                     x, y,
-                    255,
-                    0,
-                    0,
-                    255);
+                    texture.data[pos],
+                    texture.data[pos + 1],
+                    texture.data[pos + 2],
+                    texture.data[pos + 3]);
+
+      // this.drawPixel(this.imgArray,
+      //               x, y,
+      //               255,
+      //               0,
+      //               0,
+      //               255);
 
       tc = tc.addVector(tcScanStep);
     }
