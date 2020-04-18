@@ -60,7 +60,6 @@ Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
 
 }
 
-
 /**
 *
 * Main rendering function
@@ -72,16 +71,11 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var screenWidth = this.screenWidth;
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
-
-
   // The virtual image plane
   var canvasWidth = 1;
   var canvasHeight =  1;
 
 
-  //imgArray = this.renderVertices(imgArray, modelGeometry.positions, camera_inverse, object_transform);
-  //var imgArray = this.renderFaces(imgArray, modelGeometry, camera_inverse, object_transform);
-  //var raster_pixels = this.renderVertices(modelGeometry.positions, camera_inverse, object_transform);
   var vertexCount = modelGeometry.positions.length;
   var pixels = []
   for(var i = 0; i < vertexCount; i++) {
@@ -111,21 +105,18 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
           //Get the uv coordinates belonging to the vertex
       }
 
+
       if(!complete || !this.backFaceCull(face, camera_inverse)) {
         continue;
       }
 
-      //console.log("current id: " + face.vertices[0].id);
-      //console.log(face.vertices[0].uv.position[0] + " " + face.vertices[0].uv.position[1])
-
       this.renderFace(imgArray, face, modelGeometry.texture, i);
 
       //Wireframe mode
-      // if(globalState.wireFrame === true) {
-      //   this.renderWireFrame(pixels, modelGeometry.edges);
-      // }
     }
-
+  }
+  if(globalState.wireFrame === true) {
+    this.renderWireFrame(pixels, modelGeometry.edges);
   }
 
 
@@ -301,7 +292,6 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
       var pos = (textureX * 4)+(texture_width * textureY * 4);
 
-
         this.drawPixel(this.imgArray,
                       x, y,
                       texture.data[pos],
@@ -329,7 +319,6 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
       var adjacentList = edges[vId];
 
       //If we want to draw a wireframe, we draw the lines connecting these pixels now
-      //For now, we use html5 canvas methods. In the near future, we'll use Bresenham instead
 
       //Triangle idea is:   start at pixel 0. Move to pixel 1, draw.
       //               go to pixel 1. Move to pixel 2, draw.
@@ -341,14 +330,7 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
         var adjId = adjacentList[k];
         if(pixels[adjId] && pixels[vId]) {
 
-          this.ctx.beginPath();
-
-          this.ctx.moveTo(pixels[vId].position[0], pixels[vId].position[1])
-
-
-          this.ctx.lineTo(pixels[adjId].position[0], pixels[adjId].position[1]);
-          this.ctx.strokeStyle= "black";
-          this.ctx.stroke();
+          this.bresenham(this.imgArray, pixels[vId].position[0] ,pixels[vId].position[1] ,pixels[adjId].position[0], pixels[adjId].position[1], [255, 0, 0, 255]);
         }
       }
   }
@@ -437,7 +419,112 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
   return true;
 }
 
-//Bresenham algorithm to draw lines
-Render.prototype.bresenham = function(x1, y1, x2, y2) {
 
+//Bresenham algorithm to draw lines
+Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {
+  //First check cases
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+
+  if(Math.abs(dy) > Math.abs(dx)) {
+    //Y is the driving axis, because dy is smaller than dx.
+
+    //bresenhamPlotLineHigh
+
+    //Lastly, we need to check the direction of the driving axis: y
+    if(y1 > y2) {
+      //We go downwards, so we should take point 2 as the starting point here.
+      this.bresenhamPlotLineHigh(imgArray, x2, y2, x1, y1, color);
+    }
+
+    else {
+        //We go upwards, so we should take point 1 as the starting point_pd
+        this.bresenhamPlotLineHigh(imgArray, x1, y1, x2, y2, color);
+    }
+
+
+  }
+
+  else {
+    //Here X is the driving axis, because dx is smaller than dy.
+    if(x1 > x2) {
+      //We go from right to left here. So, we should take point 2 as the starting point.
+      this.bresenhamPlotLineLow(imgArray, x2, y2, x1, y1, color);
+    }
+
+    else {
+      //Here we go from left to right, so we should do as normal
+      this.bresenhamPlotLineLow(imgArray, x1, y1, x2, y2, color);
+    }
+  }
+
+}
+
+
+Render.prototype.bresenhamPlotLineHigh = function(imgArray, x1, y1, x2, y2, color) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+
+  var xi = 1;
+  if(dx < 0) {
+    xi = -1;
+    dx = -dx;
+  }
+
+  var P = 2*dx - dy;
+  var x = x1;
+
+  if(x1 < 0) {
+    x1 = 0;
+  }
+
+  for(var y = y1; y <= y2; y++) {
+
+    if(x > 0 && x < this.screenWidth) {
+      this.drawPixel(imgArray, x, y, color[0], color[1], color[2], color[3]);
+    }
+
+    if(P > 0) {
+      x = x + xi;
+      P = P - 2*dy;
+    }
+
+      P = P + 2*dx;
+
+  }
+}
+
+Render.prototype.bresenhamPlotLineLow = function(imgArray, x1, y1, x2, y2, color)  {
+
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+
+  //The value to increment the non-driving axis
+  var yi = 1;
+  if(dy < 0) {
+    //Non driving axis goes from top to bottom. (so point 1 is bigger than point 2)
+    yi = -1;
+    dy = -dy;
+  }
+
+  //Decision variable.  P = 2*dy - dx, for non-driving axis y.    P = 2*dx - dy   for non-driving axis x
+  var P = 2 * dy - dx;
+  var y = y1;
+
+
+  for(var x = x1; x <= x2; x++) {
+    if(x > 0 && x < this.screenWidth) {
+      this.drawPixel(imgArray, x, y, color[0], color[1], color[2], color[3])
+    }
+
+
+    //Decision variable. If P > 0, it means that the distance to the upper pixel was smaller than the distance to the lower pixel
+    //Meaning, we can increment y.
+    if (P > 0) {
+      y = y + yi;
+      P = P - 2*dx
+    }
+
+      P = P + 2*dy;
+  }
 }
