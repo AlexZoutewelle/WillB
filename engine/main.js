@@ -22,7 +22,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 45],
         [0, 1, 0, 40],
-        [0.4, 0, 1, -90],
+        [0, 0, 1, -90],
         [0, 0, 0, 1]
 ]);
 
@@ -48,7 +48,7 @@ model.then(function(result) {
 });
 
 var count = 0;
-
+var movement = 1.55
 
 
 
@@ -61,20 +61,20 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -0.15);
+    camera.fields =  camera.translate(0,0, -movement);
   }
 
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,0.15);
+    camera.fields =  camera.translate(0, 0,movement);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(0.15,0,0);
+    camera.fields = camera.translate(movement,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(-0.15,0,0);
+    camera.fields = camera.translate(-movement,0,0);
   }
 
   if(playerState.input.turnLeft === true) {
@@ -90,11 +90,11 @@ function frame() {
 
   if(playerState.input.jump === true) {
     //console.log("jump");
-    camera.fields = camera.translate(0,-0.5, 0)
+    camera.fields = camera.translate(0,-movement, 0)
   }
   if(playerState.input.crouch === true) {
     //console.log("crouch");
-    camera.fields = camera.translate(0, 0.5, 0);
+    camera.fields = camera.translate(0, movement, 0);
   }
 
   if(playerState.input.tiltForward === true) {
@@ -138,7 +138,7 @@ function frame() {
   //
 
   // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
-  console.log(facepos1 + " " + facepos2 + " " + facepos3);
+  //console.log(facepos1 + " " + facepos2 + " " + facepos3);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);

@@ -92,26 +92,26 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
 
       for(var j = 0; j < 3; j++) {
-          var currentVertex = face.vertices[j];
-          var vertexIndex = currentVertex.id;
 
           //Get the pixel of the vertex
-          currentVertex.position = pixels[vertexIndex];
-
+          face.vertices[j].position = pixels[face.vertices[j].id];
+          //console.log(face.vertices[j].position.position[0] + " " + face.vertices[j].position.position[1] + " " + face.vertices[j].position.position[2] );
       }
 
 
       if(!this.backFaceCull(face, camera)) {
         continue;
       }
-      //console.log(face.vertices[0].position.position[0])
-      face.vertices[0] = this.vertexToRaster(face.vertices[0]);
-      //console.log(face.vertices[0].position.position[0])
 
-      face.vertices[1] = this.vertexToRaster(face.vertices[1]);
-      face.vertices[2] = this.vertexToRaster(face.vertices[2]);
 
-      this.renderFace(imgArray, face, modelGeometry.texture, i);
+      var curr_face = new Face();
+
+      curr_face.vertices[0] = this.vertexToRaster(face.vertices[0]);
+
+      curr_face.vertices[1] = this.vertexToRaster(face.vertices[1]);
+      curr_face.vertices[2] = this.vertexToRaster(face.vertices[2]);
+
+      this.renderFace(imgArray, curr_face, modelGeometry.texture, i);
 
     }
   }
@@ -285,8 +285,8 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
       if(x === xStart + 1) {
         // console.log(-z);
-        // console.log(tc.uv.position[0] + " " + tc.uv.position[1]);
-        // console.log(ptc.uv.position[0] + " " + ptc.uv.position[1]);
+        //console.log(tc.uv.position[0] + " " + tc.uv.position[1]);
+        //console.log(ptc.uv.position[0] + " " + ptc.uv.position[1]);
       }
 
       var textureX = Math.max(Math.min(Math.trunc(ptc.uv.position[0] * texture_width), tex_clamp_x), 0);
@@ -367,10 +367,12 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse, object_tra
 //Perspective_divide, ndc, raster space
 //We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
-Render.prototype.vertexToRaster = function(vertex) {
+Render.prototype.vertexToRaster = function(vertex_orig) {
 
+  var vertex = vertex_orig.copy();
   var zInv = (1/vertex.position.position[2]);
   //console.log(zInv);
+
   vertex = vertex.multiplyScalar(-zInv);
 
   //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
