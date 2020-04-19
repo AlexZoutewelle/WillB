@@ -420,9 +420,9 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
   var normal = line1.cross(line2);
 
   var view_vec = new Vector3(
-    camera_inverse.fields[0][3] - face.vertices[1].position.position[0],
-    camera_inverse.fields[1][3] - face.vertices[1].position.position[1],
-    camera_inverse.fields[2][3] - face.vertices[1].position.position[2]
+    0 - face.vertices[1].position.position[0],
+    0 - face.vertices[1].position.position[1],
+    0 - face.vertices[1].position.position[2]
   )
 
   var dot_result = view_vec.dot(normal);
