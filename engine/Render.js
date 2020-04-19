@@ -75,11 +75,11 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var canvasWidth = 1;
   var canvasHeight =  1;
 
-
   var vertexCount = modelGeometry.positions.length;
+
   var pixels = []
   for(var i = 0; i < vertexCount; i++) {
-    pixels.push(this.vertToRaster(modelGeometry.positions[i], camera_inverse, object_transform));
+    pixels.push(this.vertexTransformer(modelGeometry.positions[i], camera_inverse, object_transform));
   }
 
 
@@ -90,11 +90,7 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 
       var face = modelGeometry.faces[i];
 
-      var vertices = [];
-      var uvs = [];
-      //We take each index specified in the face, and push them to the vertices array.
-      //The vertices in the array are to be drawn to the screen
-      var complete = true;
+
       for(var j = 0; j < 3; j++) {
           var currentVertex = face.vertices[j];
           var vertexIndex = currentVertex.id;
@@ -102,19 +98,25 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
           //Get the pixel of the vertex
           currentVertex.position = pixels[vertexIndex];
 
-          //Get the uv coordinates belonging to the vertex
       }
 
 
-      if(!complete || !this.backFaceCull(face, camera_inverse)) {
+      if(!this.backFaceCull(face, camera)) {
         continue;
       }
+      //console.log(face.vertices[0].position.position[0])
+      face.vertices[0] = this.vertexToRaster(face.vertices[0]);
+      //console.log(face.vertices[0].position.position[0])
+
+      face.vertices[1] = this.vertexToRaster(face.vertices[1]);
+      face.vertices[2] = this.vertexToRaster(face.vertices[2]);
 
       this.renderFace(imgArray, face, modelGeometry.texture, i);
 
-      //Wireframe mode
     }
   }
+
+  //Wireframe mode
   if(globalState.wireFrame === true) {
     this.renderWireFrame(pixels, modelGeometry.edges);
   }
@@ -265,25 +267,34 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       xEnd = this.screenWidth ;
     }
 
+
+    var tc = itEdge0.copy();
+
     //UV only now, we got our x's  and y's already.
-    var tcScanStep = itEdge1.uv.subtractVector(itEdge0.uv).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
+    var tcScanStep = itEdge1.subtract(tc).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
 
 
-    var tc = new Vector2();
-    tc = itEdge0.uv.addVector(tcScanStep.multiplyScalar(xStart - 0.5 - itEdge0.position.position[0]));
-
-
+    tc = itEdge0.add(tcScanStep.multiplyScalar(xStart + 0.5 - itEdge0.position.position[0]));
 
 
 
     for(var x = xStart; x < xEnd; x++) {
-      //console.log(tc.position[0] + " " + tc.position[1]);
-      var textureX = Math.max(Math.min(Math.trunc(tc.position[0] * texture_width), tex_clamp_x), 0);
+
+      var z = 1 / tc.position.position[2];
+      var ptc = tc.copy().multiplyScalar(-z);
+
+      if(x === xStart + 1) {
+        // console.log(-z);
+        // console.log(tc.uv.position[0] + " " + tc.uv.position[1]);
+        // console.log(ptc.uv.position[0] + " " + ptc.uv.position[1]);
+      }
+
+      var textureX = Math.max(Math.min(Math.trunc(ptc.uv.position[0] * texture_width), tex_clamp_x), 0);
       if(textureX < 0) {
         textureX = 0;
         //console.log(textureX);
       }
-      var textureY = Math.max(Math.min(Math.trunc(tc.position[1] * texture_height), tex_clamp_y), 0);
+      var textureY = Math.max(Math.min(Math.trunc(ptc.uv.position[1] * texture_height), tex_clamp_y), 0);
       if(textureY < 0) {
         textureY = 0;
         //console.log(textureY);
@@ -291,7 +302,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       //console.log(textureX + " " + textureY);
 
       var pos = (textureX * 4)+(texture_width * textureY * 4);
-
+      //console.log(pos);
         this.drawPixel(this.imgArray,
                       x, y,
                       texture.data[pos],
@@ -300,7 +311,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
                       texture.data[pos + 3]);
 
 
-      tc = tc.addVector(tcScanStep);
+      tc = tc.add(tcScanStep);
     }
 
       itEdge0 = itEdge0.add(dv0);
@@ -337,9 +348,8 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 }
 
 
-//Renders a set of vertices?   It is right now more just a conversion function.
-//Right now, the vertices used in this function is from a single face
-Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transform) {
+//Transformation matrices
+Render.prototype.vertexTransformer = function(vertex, camera_inverse, object_transform) {
 
 
       //local to world
@@ -348,37 +358,40 @@ Render.prototype.vertToRaster = function(vertex, camera_inverse, object_transfor
       //world to camera
       point = camera_inverse.multMatrixVec3(point);
 
-      var rgba = [255, 0, 0, 255];
-
-      //perspective_divide.
-      var point_pd = new Vector3(0,0,0);
-      point_pd.position[0] = ((point.position[0] )/ (-point.position[2]) ) * Znear;
-      point_pd.position[1] = ((point.position[1] ) / (-point.position[2]) ) * Znear;
-      point_pd.position[2] = point.position[2];
-
-      // console.log(point_pd.position[0] + " " +  point_pd.position[1] + " " + point_pd.position[2]);
-      // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
-      //console.log("new");
-      //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
 
 
 
-
-
-
-      //ndc (range of [0,1])
-      var point_ndc = new Vector3(0,0,0);
-      point_ndc.position[0] = (point_pd.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-      point_ndc.position[1] = (point_pd.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
-
-      //raster coords (pixels)
-      var point_raster = new Vector3(0,0,0);
-      point_raster.position[0] = ((point_ndc.position[0] * this.screenWidth) ) | 0;
-      point_raster.position[1] = (((1 - point_ndc.position[1] ) * this.screenHeight) ) | 0;
-
-  return point_raster;
+  return point;
 }
 
+//Perspective_divide, ndc, raster space
+//We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
+
+Render.prototype.vertexToRaster = function(vertex) {
+
+  var zInv = (1/vertex.position.position[2]);
+  //console.log(zInv);
+  vertex = vertex.multiplyScalar(-zInv);
+
+  //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
+  vertex.position.position[0] = (vertex.position.position[0] )  * Znear;
+  vertex.position.position[1] = (vertex.position.position[1] ) * Znear;
+  vertex.position.position[2] = zInv;
+  // console.log(point_pd.position[0] + " " +  point_pd.position[1] + " " + point_pd.position[2]);
+  // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
+  //console.log("new");
+  //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
+
+  //ndc (range of [0,1])
+  vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+  vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
+
+  //raster coords (pixels)
+  vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
+  vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
+
+  return vertex;
+}
 
 Render.prototype.backFaceCull = function(face, camera_inverse) {
   //Dot product, back culling

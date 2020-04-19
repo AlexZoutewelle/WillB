@@ -20,9 +20,9 @@ var renderer = new Render(screenWidth, screenHeight);
 //trying out some camera stuff
 
 var camera = new Transformation([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -90],
+        [1, 0, 0, 45],
+        [0, 1, 0, 40],
+        [0.4, 0, 1, -90],
         [0, 0, 0, 1]
 ]);
 
@@ -127,15 +127,18 @@ function frame() {
   var position2 = modelGeometry.positions[2].position;
 
   var faceid = modelGeometry.faces[0].vertices;
-  var facepos = modelGeometry.faces[0].vertices[0].position;
+  var facepos1 = modelGeometry.faces[0].vertices[0].position.position[0];
+  var facepos2 = modelGeometry.faces[0].vertices[0].position.position[1];
+  var facepos3 = modelGeometry.faces[0].vertices[0].position.position[2];
+
 
   // console.log(position[0] + " " + position[1] + " " + position[2]);
   // console.log(position1[0] + " " + position1[1] + " " + position1[2]);
   // console.log(position2[0] + " " + position2[1] + " " + position2[2]);
-
+  //
 
   // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
-  // console.log(facepos[0] + " " + facepos[1] + " " + facepos[2]);
+  console.log(facepos1 + " " + facepos2 + " " + facepos3);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
@@ -152,7 +155,6 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-  //console.log(modelGeometry);
     requestAnimationFrame(frame);
 
 

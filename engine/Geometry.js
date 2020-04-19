@@ -6,7 +6,6 @@ function Geometry(positions, faces, edges, uvs) {
 
 function Face(vertices) {
   this.vertices = vertices || [];
-  this.culled = false;
 }
 
 
