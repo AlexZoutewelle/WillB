@@ -30,22 +30,41 @@ var test1 = new Vector3(3, 4, 5);
 var test2 = new Vector3(4,6,5);
 
 
-//Load ad model
-var model_name = "cube";
-var model = mdlLoad.loadObject("models/" + model_name + ".obj");
-console.log(model);
+//Load models
+var model_name1 = "cube";
+var model_name2 = "cube";
 
+var models = [
+  mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
+  mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
+];
 
+Promise.all(models).then(function(results) {
+  models = results;
 
-model.then(function(result) {
-  //All models are loaded. We can start parsing the models
-  modelGeometry = new Geometry();
-  modelGeometry.parseOBJ(result, model_name);
+  //Models are loaded. Place them somewhere in the world
+  var object_transform1 = new Transformation();
+
+  object_transform1.fields = object_transform1.translate(0, 0, 0);
+
+  var object_transform2 = new Transformation();
+  object_transform2.fields = object_transform2.translate(9, 0, 0);
+
+  for(var i = 0; i < models[0].positions.length; i++) {
+    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
+  }
+
+  for(var i = 0; i < models[1].positions.length; i++) {
+    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  }
+
   object_transform = new Transformation();
-  console.log(modelGeometry);
-  //Models are parsed. We can start the main game loop
+
+  //Models are loaded, we can begin the main loop
   frame();
 });
+
+
 
 var count = 0;
 var movement = 1.55
@@ -117,9 +136,9 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
-  // console.log(modelGeometry.faces);
-  // console.log(modelGeometry.positions);
-  renderer.render(modelGeometry, camera_inverse, object_transform, camera);
+
+  renderer.render(models, camera_inverse, object_transform, camera);
+
   //console.log(modelGeometry.faces);
 
   // var position = modelGeometry.positions[0].position;

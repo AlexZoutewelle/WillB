@@ -84,8 +84,6 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     canvas.width = image.width;
     canvas.height = image.height;
     canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-    console.log(canvas);
-
 
     this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
     this.positions = positions;
@@ -169,6 +167,7 @@ Vector3.prototype.translate = function (x,y,z) {
   this.position[0] += x;
   this.position[1] += y;
   this.position[2] += z;
+  return this;
   //return new Vector(this.x + x, this.position[1] + y, this.position[2] + z);
 }
 

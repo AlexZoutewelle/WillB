@@ -144,7 +144,6 @@ Transformation.prototype.multMatrixVec3 = function(vector){
     console.log(error);
     console.log(this);
   }
-
 }
 
 Transformation.prototype.multVec3Matrix = function(vector){

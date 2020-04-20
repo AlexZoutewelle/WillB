@@ -62,11 +62,9 @@ Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
 /**
 *
 * Main rendering function
-* In the future, it should take an array of modelGeometry
 **/
-Render.prototype.render = function(modelGeometry, camera_inverse, object_transform, camera) {
+Render.prototype.render = function(models, camera_inverse, object_transform, camera) {
 
-  //this.ctx.clearRect(0,0, this.screenWidth, this.screenHeight);
   var screenWidth = this.screenWidth;
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
@@ -74,51 +72,56 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
   var canvasWidth = 1;
   var canvasHeight =  1;
 
-  var vertexCount = modelGeometry.positions.length;
+  //Loop over all models currently in the scene
+  for(var m = 0; m < models.length; m++) {
+    var modelGeometry = models[m];
 
-  var pixels = []
-  for(var i = 0; i < vertexCount; i++) {
-    pixels.push(this.vertexTransformer(modelGeometry.positions[i], camera_inverse, object_transform));
-  }
+    var vertexCount = modelGeometry.positions.length;
 
-
-  //Coloring triangles
-  if(globalState.face === true) {
-    var faceCount = modelGeometry.faces.length;
-    for (var i = 0; i < faceCount; i++) {
-
-      var face = modelGeometry.faces[i];
-
-
-      for(var j = 0; j < 3; j++) {
-
-          //Get the pixel of the vertex
-          face.vertices[j].position = pixels[face.vertices[j].id];
-          //console.log(face.vertices[j].position.position[0] + " " + face.vertices[j].position.position[1] + " " + face.vertices[j].position.position[2] );
-      }
-
-
-      if(!this.backFaceCull(face, camera)) {
-        continue;
-      }
-
-
-      var curr_face = new Face();
-
-      curr_face.vertices[0] = this.vertexToRaster(face.vertices[0]);
-
-      curr_face.vertices[1] = this.vertexToRaster(face.vertices[1]);
-      curr_face.vertices[2] = this.vertexToRaster(face.vertices[2]);
-
-      this.renderFace(imgArray, curr_face, modelGeometry.texture);
-
+    var pixels = []
+    for(var i = 0; i < vertexCount; i++) {
+      pixels.push(this.vertexTransformer(modelGeometry.positions[i], camera_inverse, object_transform));
     }
-  }
 
-  //Wireframe mode
-  // if(globalState.wireFrame === true) {
-  //   this.renderWireFrame(pixels, modelGeometry.edges);
-  // }
+
+    //Coloring triangles
+    if(globalState.face === true) {
+      var faceCount = modelGeometry.faces.length;
+      for (var i = 0; i < faceCount; i++) {
+
+        var face = modelGeometry.faces[i];
+
+
+        for(var j = 0; j < 3; j++) {
+
+            //Get the pixel of the vertex
+            face.vertices[j].position = pixels[face.vertices[j].id];
+            //console.log(face.vertices[j].position.position[0] + " " + face.vertices[j].position.position[1] + " " + face.vertices[j].position.position[2] );
+        }
+
+
+        if(!this.backFaceCull(face, camera)) {
+          continue;
+        }
+
+
+        var curr_face = new Face();
+
+        curr_face.vertices[0] = this.vertexToRaster(face.vertices[0]);
+
+        curr_face.vertices[1] = this.vertexToRaster(face.vertices[1]);
+        curr_face.vertices[2] = this.vertexToRaster(face.vertices[2]);
+
+        this.renderFace(imgArray, curr_face, modelGeometry.texture);
+
+      }
+    }
+
+    //Wireframe mode
+    // if(globalState.wireFrame === true) {
+    //   this.renderWireFrame(pixels, modelGeometry.edges);
+    // }
+  }
 
 
   //Actually draw the image array on the canvas

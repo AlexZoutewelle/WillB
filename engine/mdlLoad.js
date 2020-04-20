@@ -6,12 +6,14 @@ function mdlLoad () {
 
 }
 
-mdlLoad.loadObject = function(url){
+mdlLoad.loadObject = function(url, texture){
 //Reserved for requesting multiple objects
   var prom = this.requestObject(url);
-
-  return prom;
-
+  return prom.then( result => {
+    modelGeometry = new Geometry();
+    modelGeometry.parseOBJ(result, texture);
+    return modelGeometry;
+  })
 }
 
 mdlLoad.requestObject = function(url){
