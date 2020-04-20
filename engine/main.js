@@ -8,8 +8,8 @@
 //high-prio: trangle shading
 //high-prio: texture mapping
 
-var screenWidth = 800;
-var screenHeight = 800;
+var screenWidth = 640;
+var screenHeight = 480;
 
 //Get the context
 
@@ -20,8 +20,8 @@ var renderer = new Render(screenWidth, screenHeight);
 //trying out some camera stuff
 
 var camera = new Transformation([
-        [1, 0, 0, 45],
-        [0, 1, 0, 40],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
         [0, 0, 1, -90],
         [0, 0, 0, 1]
 ]);
@@ -122,14 +122,14 @@ function frame() {
   renderer.render(modelGeometry, camera_inverse, object_transform, camera);
   //console.log(modelGeometry.faces);
 
-  var position = modelGeometry.positions[0].position;
-  var position1 = modelGeometry.positions[1].position;
-  var position2 = modelGeometry.positions[2].position;
-
-  var faceid = modelGeometry.faces[0].vertices;
-  var facepos1 = modelGeometry.faces[0].vertices[0].position.position[0];
-  var facepos2 = modelGeometry.faces[0].vertices[0].position.position[1];
-  var facepos3 = modelGeometry.faces[0].vertices[0].position.position[2];
+  // var position = modelGeometry.positions[0].position;
+  // var position1 = modelGeometry.positions[1].position;
+  // var position2 = modelGeometry.positions[2].position;
+  //
+  // var faceid = modelGeometry.faces[0].vertices;
+  // var facepos1 = modelGeometry.faces[0].vertices[0].position.position[0];
+  // var facepos2 = modelGeometry.faces[0].vertices[0].position.position[1];
+  // var facepos3 = modelGeometry.faces[0].vertices[0].position.position[2];
 
 
   // console.log(position[0] + " " + position[1] + " " + position[2]);

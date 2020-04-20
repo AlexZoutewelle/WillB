@@ -11,6 +11,8 @@ function Render(screenWidth, screenHeight) {
   //console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
+  console.log(screenWidth);
+  console.log(screenHeight);
 
 }
 
@@ -49,10 +51,7 @@ console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
 
-  //console.log(pixel);
-  if(pixel > 10000) {
-    //console.log(pixel);
-  }
+
   this.imgArray[pixel] = r;
   this.imgArray[pixel + 1] = g;
   this.imgArray[pixel + 2] = b;
@@ -111,15 +110,15 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
       curr_face.vertices[1] = this.vertexToRaster(face.vertices[1]);
       curr_face.vertices[2] = this.vertexToRaster(face.vertices[2]);
 
-      this.renderFace(imgArray, curr_face, modelGeometry.texture, i);
+      this.renderFace(imgArray, curr_face, modelGeometry.texture);
 
     }
   }
 
   //Wireframe mode
-  if(globalState.wireFrame === true) {
-    this.renderWireFrame(pixels, modelGeometry.edges);
-  }
+  // if(globalState.wireFrame === true) {
+  //   this.renderWireFrame(pixels, modelGeometry.edges);
+  // }
 
 
   //Actually draw the image array on the canvas
@@ -127,13 +126,9 @@ Render.prototype.render = function(modelGeometry, camera_inverse, object_transfo
 }
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, face, texture, c) {
+Render.prototype.renderFace = function(imgArray, face, texture) {
   //We are going to color the Triangle
   var color = "blue";
-  //console.log(c);
-  if(c % 2 == 0) {
-    color = "red";
-  }
 
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
   var set = [0,1,2];
@@ -216,7 +211,7 @@ Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
   var dv1 = v2.subtract(v0).divideScalar(dy);
 
   //Right edge interpolant    //Maybe make a copying function for vertices?
-  var itEdge1 = v0.copy();
+  var itEdge1 = v0;
 
   this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
 }
@@ -228,7 +223,7 @@ Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
   var dv0 = v0.subtract(v2).divideScalar(dy);
   var dv1 = v1.subtract(v2).divideScalar(dy);
 
-  var itEdge1 = v1.copy();
+  var itEdge1 = v1;
 
   this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
 }
@@ -236,11 +231,19 @@ Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
 Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
   //left edge interpolant is always the same, no matter the case.
-  var itEdge0 = v0.copy();
+  var itEdge0 = v0;
 
   var yStart = Math.ceil(v0.position.position[1] - 0.5);
   var yEnd = Math.ceil(v2.position.position[1] - 0.5);
 
+
+  if(yStart < 0) {
+    yStart = 0;
+  }
+
+  if(yEnd > this.screenHeight) {
+    yEnd = this.screenHeight ;
+  }
 
   itEdge0 = itEdge0.add(dv0.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
   itEdge1 = itEdge1.add(dv1.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
@@ -261,14 +264,18 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
     var xEnd = Math.ceil(itEdge1.position.position[0] - 0.5);
 
     if(xStart < 0) {
+      //console.log("xStart: " + xStart + " xEnd: " + xEnd);
+
       xStart = 0;
     }
     if(xEnd > this.screenWidth) {
+      //console.log("xStart: " + xStart + " xEnd: " + xEnd);
+
       xEnd = this.screenWidth ;
     }
 
 
-    var tc = itEdge0.copy();
+    var tc = itEdge0;
 
     //UV only now, we got our x's  and y's already.
     var tcScanStep = itEdge1.subtract(tc).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
@@ -281,27 +288,20 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
     for(var x = xStart; x < xEnd; x++) {
 
       var z = 1 / tc.position.position[2];
-      var ptc = tc.copy().multiplyScalar(-z);
+      var ptc = tc.multiplyScalar(-z);
 
-      if(x === xStart + 1) {
-        // console.log(-z);
-        //console.log(tc.uv.position[0] + " " + tc.uv.position[1]);
-        //console.log(ptc.uv.position[0] + " " + ptc.uv.position[1]);
-      }
 
       var textureX = Math.max(Math.min(Math.trunc(ptc.uv.position[0] * texture_width), tex_clamp_x), 0);
       if(textureX < 0) {
         textureX = 0;
-        //console.log(textureX);
       }
       var textureY = Math.max(Math.min(Math.trunc(ptc.uv.position[1] * texture_height), tex_clamp_y), 0);
       if(textureY < 0) {
         textureY = 0;
-        //console.log(textureY);
       }
       //console.log(textureX + " " + textureY);
 
-      var pos = (textureX * 4)+(texture_width * textureY * 4);
+      var pos = (textureX * 4) + (texture_width * textureY * 4);
       //console.log(pos);
         this.drawPixel(this.imgArray,
                       x, y,
@@ -356,7 +356,7 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse, object_tra
 
       var point = object_transform.multMatrixVec3(vertex)
       //world to camera
-      point = camera_inverse.multMatrixVec3(point);
+      var point = camera_inverse.multMatrixVec3(point);
 
 
 
@@ -369,7 +369,7 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse, object_tra
 
 Render.prototype.vertexToRaster = function(vertex_orig) {
 
-  var vertex = vertex_orig.copy();
+  var vertex = vertex_orig;
   var zInv = (1/vertex.position.position[2]);
   //console.log(zInv);
 
@@ -405,29 +405,29 @@ Render.prototype.backFaceCull = function(face, camera_inverse) {
   //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
   //If the dot product results in 0 or less, it means the normal is pointing away from us.
   var line1 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[1].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[1].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[1].position.position[2]
+      face.vertices[1].position.position[0] - face.vertices[0].position.position[0],
+      face.vertices[1].position.position[1] - face.vertices[0].position.position[1],
+      face.vertices[1].position.position[2] - face.vertices[0].position.position[2]
     );
   var line2 = new Vector3(
-      face.vertices[0].position.position[0] - face.vertices[2].position.position[0],
-      face.vertices[0].position.position[1] - face.vertices[2].position.position[1],
-      face.vertices[0].position.position[2] - face.vertices[2].position.position[2]
+      face.vertices[2].position.position[0] - face.vertices[0].position.position[0],
+      face.vertices[2].position.position[1] - face.vertices[0].position.position[1],
+      face.vertices[2].position.position[2] - face.vertices[0].position.position[2]
   );
 
   // console.log(line1);
   // console.log(line2);
   var normal = line1.cross(line2);
+  //
+  // var view_vec = new Vector3(
+  //   0 - face.vertices[1].position.position[0],
+  //   0 - face.vertices[1].position.position[1],
+  //   0 - face.vertices[1].position.position[2]
+  // )
 
-  var view_vec = new Vector3(
-    0 - face.vertices[1].position.position[0],
-    0 - face.vertices[1].position.position[1],
-    0 - face.vertices[1].position.position[2]
-  )
-
-  var dot_result = view_vec.dot(normal);
-  if(dot_result < 0) {
-    //face.culled = true;
+  var dot_result = face.vertices[0].position.dot(normal);
+  //var dot_result = normal.dot(face.vertices[0].position);
+  if(dot_result >= 0) {
     return false;
   }
 

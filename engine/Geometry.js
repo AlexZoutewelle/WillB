@@ -323,6 +323,5 @@ Vector2.prototype.multiplyVector = function(vector) {
 }
 
 Vector2.prototype.interpolateTo = function(vector, alpha) {
-  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
-  return result;
+  return this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
 }
