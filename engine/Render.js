@@ -14,6 +14,8 @@ function Render(screenWidth, screenHeight) {
   console.log(screenWidth);
   console.log(screenHeight);
 
+  this.ZBuffer = new ZBuffer(screenWidth, screenHeight);
+
 }
 
 
@@ -24,6 +26,8 @@ This array holds 4 elements for each pixel: R G B and A, values are between 0 an
 Render.prototype.draw = function(imageArray) {
 
   //console.log(imgArray);
+  this.ZBuffer.clear();
+  console.log(this.ZBuffer);
   var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
 
   this.ctx.putImageData(imageData, 0, 0);
@@ -118,9 +122,9 @@ Render.prototype.render = function(models, camera_inverse, object_transform, cam
     }
 
     //Wireframe mode
-    // if(globalState.wireFrame === true) {
-    //   this.renderWireFrame(pixels, modelGeometry.edges);
-    // }
+    if(globalState.wireFrame === true) {
+      this.renderWireFrame(pixels, modelGeometry.edges);
+    }
   }
 
 
@@ -290,6 +294,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
     for(var x = xStart; x < xEnd; x++) {
 
+      //Get the original z value. Use it to get the 'real' texture coordinates.
       var z = 1 / tc.position.position[2];
       var ptc = tc.multiplyScalar(-z);
 
@@ -306,13 +311,14 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
       var pos = (textureX * 4) + (texture_width * textureY * 4);
       //console.log(pos);
-        this.drawPixel(this.imgArray,
-                      x, y,
-                      texture.data[pos],
-                      texture.data[pos + 1],
-                      texture.data[pos + 2],
-                      texture.data[pos + 3]);
-
+        if(this.ZBuffer.Ztest(x,y,z)) {
+          this.drawPixel(this.imgArray,
+                        x, y,
+                        texture.data[pos],
+                        texture.data[pos + 1],
+                        texture.data[pos + 2],
+                        texture.data[pos + 3]);
+        }
 
       tc = tc.add(tcScanStep);
     }

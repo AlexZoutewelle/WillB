@@ -45,10 +45,10 @@ Promise.all(models).then(function(results) {
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
 
-  object_transform1.fields = object_transform1.translate(0, 0, 0);
+  object_transform1.fields = object_transform1.translate(-10, 0, 0);
 
   var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(9, 0, 0);
+  object_transform2.fields = object_transform2.translate(10, 0, 0);
 
   for(var i = 0; i < models[0].positions.length; i++) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
@@ -98,12 +98,12 @@ function frame() {
 
   if(playerState.input.turnLeft === true) {
     //console.log("turn left");
-    camera.fields = camera.rotate(0,-0.3);
+    camera.fields = camera.rotate(0,-movement,0);
   }
 
   if(playerState.input.turnRight === true) {
     //console.log("turn right");
-    camera.fields = camera.rotate(0,0.3);
+    camera.fields = camera.rotate(0,movement,0);
 
   }
 
@@ -118,12 +118,12 @@ function frame() {
 
   if(playerState.input.tiltForward === true) {
     //console.log("tilt forward");
-    camera.fields = camera.rotate(-1.1, 0);
+    camera.fields = camera.rotate(-movement, 0);
   }
 
   if(playerState.input.tiltBack === true) {
     //console.log("tilt back");
-    camera.fields = camera.rotate(1.1, 0);
+    camera.fields = camera.rotate(movement, 0);
   }
 
   if(playerState.input.angleX !== 0 || playerState.input.angleY !== 0) {
