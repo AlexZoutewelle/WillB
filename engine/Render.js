@@ -15,7 +15,13 @@ function Render(screenWidth, screenHeight) {
   console.log(screenHeight);
 
   this.ZBuffer = new ZBuffer(screenWidth, screenHeight);
+  //A list of pixel shaders
+  this.pixelShaders = [];
+}
 
+//Change the pixel shader TextureEffect
+Render.prototype.setPixelShader = function(pixelShader) {
+  this.pixelShaders.push( pixelShader );
 }
 
 
@@ -70,6 +76,13 @@ Render.prototype.drawPixel = function(x, y, color) {
   this.imgArray[pixel + 3] = color[3];
 }
 
+Render.prototype.newModel = function(model) {
+  var pixelShader_count = this.pixelShaders.length;
+  for(var i = 0; i < pixelShader_count; i++) {
+    this.pixelShaders[i].newModel(model);
+  }
+}
+
 /**
 *
 * Main rendering function
@@ -86,6 +99,9 @@ Render.prototype.render = function(models, camera_inverse, object_transform, cam
   //Loop over all models currently in the scene
   for(var m = 0; m < models.length; m++) {
     var modelGeometry = models[m];
+
+    //Let our pixel shaders know that we are working with a new model
+    this.newModel(models[m]);
 
     var vertexCount = modelGeometry.positions.length;
 
@@ -291,13 +307,9 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
     var tc = itEdge0;
 
-    //UV only now, we got our x's  and y's already.
     var tcScanStep = itEdge1.subtract(tc).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
 
-
     tc = itEdge0.add(tcScanStep.multiplyScalar(xStart + 0.5 - itEdge0.position.position[0]));
-
-
 
     for(var x = xStart; x < xEnd; x++) {
 
@@ -306,26 +318,10 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       var ptc = tc.multiplyScalar(-z);
 
 
-      var textureX = Math.max(Math.min(Math.trunc(ptc.uv.position[0] * texture_width), tex_clamp_x), 0);
-      if(textureX < 0) {
-        textureX = 0;
-      }
-      var textureY = Math.max(Math.min(Math.trunc(ptc.uv.position[1] * texture_height), tex_clamp_y), 0);
-      if(textureY < 0) {
-        textureY = 0;
-      }
-      //console.log(textureX + " " + textureY);
-
-      var pos = (textureX * 4) + (texture_width * textureY * 4);
-      //console.log(pos);
         if(this.ZBuffer.Ztest(x,y,z)) {
-          //this.drawPixel(x,y, pixelShader.get(ptc))
-          this.drawPixel(x, y,
-                        [texture.data[pos],
-                        texture.data[pos + 1],
-                        texture.data[pos + 2],
-                        texture.data[pos + 3]]);
-        }
+
+        this.drawPixel(x, y, this.invokePixelShaders(ptc));
+      }
 
       tc = tc.add(tcScanStep);
     }
@@ -335,7 +331,17 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
   }
 }
 
+//Invoke all our pixels shaders on a given vertex
+//Each one will return a color.
+//Right now, they will override eachothers output.
+Render.prototype.invokePixelShaders = function(vertex) {
+  var color = [];
+  for(var i = 0; i < this.pixelShaders.length; i++) {
+    color = this.pixelShaders[i].getColor(vertex);
+  }
 
+  return color;
+}
 
 
 

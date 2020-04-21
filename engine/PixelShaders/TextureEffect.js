@@ -3,13 +3,21 @@
 //With this information, it will look up a specific spot on a texture image, and return the color of that spot
 
 //So, it must hold a reference to a texture.
-function TextureEffect(texture) {
+function TextureEffect() {
+
+}
+
+TextureEffect.prototype.setTexture = function(texture) {
   this.texture = texture;
   //uv texture coords clamp
   this.texture_width = texture.width;
   this.texture_height = texture.height;
-  this.tex_clamp_x = texture_width - 1.0;
-  this.tex_clamp_y = texture_height -1.0;
+  this.tex_clamp_x = texture.width - 1.0;
+  this.tex_clamp_y = texture.height -1.0;
+}
+
+TextureEffect.prototype.newModel = function(model) {
+  this.setTexture(model.texture);
 }
 
 //using an (interpolated) vertex, retrieve the color on the position on the texture
@@ -25,7 +33,7 @@ TextureEffect.prototype.getColor = function(vertex) {
   }
   //console.log(textureX + " " + textureY);
 
-  var pos = (textureX * 4) + (texture_width * textureY * 4);
+  var pos = (textureX * 4) + (this.texture_width * textureY * 4);
 
   return [this.texture.data[pos],
           this.texture.data[pos + 1],

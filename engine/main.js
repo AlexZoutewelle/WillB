@@ -16,7 +16,7 @@ var screenHeight = 480;
 var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
-
+renderer.setPixelShader(new TextureEffect());
 //trying out some camera stuff
 
 var camera = new Transformation([
@@ -61,7 +61,9 @@ Promise.all(models).then(function(results) {
 
   object_transform = new Transformation();
 
-  //Models are loaded, we can begin the main loop
+  //Models are placed, ready the render
+
+
   frame();
 });
 
