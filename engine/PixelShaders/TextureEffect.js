@@ -21,7 +21,10 @@ TextureEffect.prototype.newModel = function(model) {
 }
 
 //using an (interpolated) vertex, retrieve the color on the position on the texture
-TextureEffect.prototype.getColor = function(vertex) {
+TextureEffect.prototype.getColor = function(vert_in) {
+
+  var z = 1 / vert_in.position.position[2];
+  var vertex = vert_in.multiplyScalar(-z);
 
   var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);
   if(textureX < 0) {
@@ -31,7 +34,6 @@ TextureEffect.prototype.getColor = function(vertex) {
   if(textureY < 0) {
     textureY = 0;
   }
-  //console.log(textureX + " " + textureY);
 
   var pos = (textureX * 4) + (this.texture_width * textureY * 4);
 

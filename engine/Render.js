@@ -315,12 +315,12 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
       //Get the original z value. Use it to get the 'real' texture coordinates.
       var z = 1 / tc.position.position[2];
-      var ptc = tc.multiplyScalar(-z);
+
 
 
         if(this.ZBuffer.Ztest(x,y,z)) {
 
-        this.drawPixel(x, y, this.invokePixelShaders(ptc));
+        this.drawPixel(x, y, this.invokePixelShaders(tc));
       }
 
       tc = tc.add(tcScanStep);
