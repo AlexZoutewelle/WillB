@@ -50,7 +50,7 @@ var cleft = -cright;
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-Render.prototype.drawPixel = function(x, y, r, g, b, a) {
+Render.prototype.drawPixelAlt = function(x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
 
 
@@ -59,6 +59,15 @@ Render.prototype.drawPixel = function(x, y, r, g, b, a) {
   this.imgArray[pixel + 2] = b;
   this.imgArray[pixel + 3] = a;
 
+}
+
+Render.prototype.drawPixel = function(x, y, color) {
+  var pixel = ((x * 4) + (this.screenWidth * y * 4));
+
+  this.imgArray[pixel] = color[0];
+  this.imgArray[pixel + 1] = color[1];
+  this.imgArray[pixel + 2] = color[2];
+  this.imgArray[pixel + 3] = color[3];
 }
 
 /**
@@ -130,9 +139,9 @@ Render.prototype.postProcessFace = function(face, texture) {
   this.renderFace(face, texture);
 }
 
-//Draw a face
+
+//Triangle rasterizer
 Render.prototype.renderFace = function(face, texture) {
-  //We are going to color the Triangle
   var color = "blue";
 
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
@@ -310,11 +319,12 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       var pos = (textureX * 4) + (texture_width * textureY * 4);
       //console.log(pos);
         if(this.ZBuffer.Ztest(x,y,z)) {
+          //this.drawPixel(x,y, pixelShader.get(ptc))
           this.drawPixel(x, y,
-                        texture.data[pos],
+                        [texture.data[pos],
                         texture.data[pos + 1],
                         texture.data[pos + 2],
-                        texture.data[pos + 3]);
+                        texture.data[pos + 3]]);
         }
 
       tc = tc.add(tcScanStep);
