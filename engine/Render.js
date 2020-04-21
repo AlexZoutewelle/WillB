@@ -23,11 +23,9 @@ function Render(screenWidth, screenHeight) {
 Draws a Uint8ClampedArray to the canvas
 This array holds 4 elements for each pixel: R G B and A, values are between 0 and 255
 **/
-Render.prototype.draw = function(imageArray) {
+Render.prototype.draw = function() {
 
   //console.log(imgArray);
-  this.ZBuffer.clear();
-  console.log(this.ZBuffer);
   var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
 
   this.ctx.putImageData(imageData, 0, 0);
@@ -52,7 +50,7 @@ var cleft = -cright;
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
+Render.prototype.drawPixel = function(x, y, r, g, b, a) {
   var pixel = ((x * 4) + (this.screenWidth * y * 4));
 
 
@@ -68,7 +66,7 @@ Render.prototype.drawPixel = function(imgArray, x, y, r, g, b, a) {
 * Main rendering function
 **/
 Render.prototype.render = function(models, camera_inverse, object_transform, camera) {
-
+  this.ZBuffer.clear();
   var screenWidth = this.screenWidth;
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
@@ -82,58 +80,58 @@ Render.prototype.render = function(models, camera_inverse, object_transform, cam
 
     var vertexCount = modelGeometry.positions.length;
 
+    //Vertex Transformation
     var pixels = []
     for(var i = 0; i < vertexCount; i++) {
       pixels.push(this.vertexTransformer(modelGeometry.positions[i], camera_inverse, object_transform));
     }
 
 
-    //Coloring triangles
-    if(globalState.face === true) {
+
+    //Trangle assembly
       var faceCount = modelGeometry.faces.length;
       for (var i = 0; i < faceCount; i++) {
 
         var face = modelGeometry.faces[i];
 
-
-        for(var j = 0; j < 3; j++) {
-
-            //Get the pixel of the vertex
-            face.vertices[j].position = pixels[face.vertices[j].id];
-            //console.log(face.vertices[j].position.position[0] + " " + face.vertices[j].position.position[1] + " " + face.vertices[j].position.position[2] );
-        }
-
+        face.vertices[0].position = pixels[face.vertices[0].id];
+        face.vertices[1].position = pixels[face.vertices[1].id];
+        face.vertices[2].position = pixels[face.vertices[2].id];
 
         if(!this.backFaceCull(face, camera)) {
           continue;
         }
 
-
-        var curr_face = new Face();
-
-        curr_face.vertices[0] = this.vertexToRaster(face.vertices[0]);
-
-        curr_face.vertices[1] = this.vertexToRaster(face.vertices[1]);
-        curr_face.vertices[2] = this.vertexToRaster(face.vertices[2]);
-
-        this.renderFace(imgArray, curr_face, modelGeometry.texture);
-
+        this.processFace(face, modelGeometry.texture);
       }
-    }
 
     //Wireframe mode
-    if(globalState.wireFrame === true) {
-      this.renderWireFrame(pixels, modelGeometry.edges);
-    }
+    // if(globalState.wireFrame === true) {
+    //   this.renderWireFrame(pixels, modelGeometry.edges);
+    // }
   }
 
 
   //Actually draw the image array on the canvas
-  this.draw(imgArray);
+  this.draw();
+}
+
+Render.prototype.processFace = function(face, texture) {
+  v0 = this.vertexToRaster(face.vertices[0]);
+  v1 = this.vertexToRaster(face.vertices[1]);
+  v2 = this.vertexToRaster(face.vertices[2]);
+
+  var face2 = new Face([v0,v1,v2]);
+  this.postProcessFace(face2, texture);
+}
+
+Render.prototype.postProcessFace = function(face, texture) {
+
+  this.renderFace(face, texture);
 }
 
 //Draw a face
-Render.prototype.renderFace = function(imgArray, face, texture) {
+Render.prototype.renderFace = function(face, texture) {
   //We are going to color the Triangle
   var color = "blue";
 
@@ -210,7 +208,6 @@ Render.prototype.renderFace = function(imgArray, face, texture) {
 }
 
 Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
-
   var dy = (v0.position.position[1] - v2.position.position[1]);
 
   //dv0 and dv1 are the edge steps
@@ -224,6 +221,7 @@ Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
 }
 
 Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
+
   var dy = (v2.position.position[1] - v0.position.position[1]);
 
   //dv0 and dv1 are the edge raster_pixels
@@ -312,8 +310,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       var pos = (textureX * 4) + (texture_width * textureY * 4);
       //console.log(pos);
         if(this.ZBuffer.Ztest(x,y,z)) {
-          this.drawPixel(this.imgArray,
-                        x, y,
+          this.drawPixel(x, y,
                         texture.data[pos],
                         texture.data[pos + 1],
                         texture.data[pos + 2],

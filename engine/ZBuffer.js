@@ -11,7 +11,6 @@ ZBuffer.prototype.clear = function() {
 
     this.buffer[i] = 99999;
   }
-  console.log(this.buffer);
 }
 
 ZBuffer.prototype.getZ = function(x, y) {

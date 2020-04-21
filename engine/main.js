@@ -41,7 +41,8 @@ var models = [
 
 Promise.all(models).then(function(results) {
   models = results;
-
+  console.log(models[0]);
+  console.log(models[1]);
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
 

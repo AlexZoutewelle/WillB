@@ -17,7 +17,7 @@ mdlLoad.loadObject = function(url, texture){
 }
 
 mdlLoad.requestObject = function(url){
-  console.log("loading model...");
+  console.log("loading model " + url);
 
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest(url);
