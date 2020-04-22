@@ -91,7 +91,7 @@ Render.prototype.newModel = function(model) {
 *
 * Main rendering function
 **/
-Render.prototype.render = function(models, camera_inverse, object_transform, camera) {
+Render.prototype.render = function(models, camera_inverse, camera) {
   this.ZBuffer.clear();
   var screenWidth = this.screenWidth;
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
@@ -107,32 +107,32 @@ Render.prototype.render = function(models, camera_inverse, object_transform, cam
     //Let our pixel shaders know that we are working with a new model
     this.newModel(models[m]);
 
-    var vertexCount = modelGeometry.positions.length;
+    var vertexCount = modelGeometry.vertices.length;
 
     //Vertex Transformation
-    var pixels = []
+    var verticesOut = []
     for(var i = 0; i < vertexCount; i++) {
-      pixels.push(this.vertexTransformer(modelGeometry.positions[i], camera_inverse, object_transform));
+      verticesOut.push(this.vertexTransformer(modelGeometry.vertices[i].copy(), camera_inverse, object_transform));
     }
 
 
 
     //Trangle assembly
-      var faceCount = modelGeometry.faces.length;
-      for (var i = 0; i < faceCount; i++) {
+    var faceCount = modelGeometry.faces.length;
+    for (var i = 0; i < faceCount; i++) {
 
-        var face = modelGeometry.faces[i];
+      var face = modelGeometry.faces[i];
 
-        face.vertices[0].position = pixels[face.vertices[0].id];
-        face.vertices[1].position = pixels[face.vertices[1].id];
-        face.vertices[2].position = pixels[face.vertices[2].id];
+      var v0 = verticesOut[face.vertices[0]];
+      var v1 = verticesOut[face.vertices[1]];
+      var v2 = verticesOut[face.vertices[2]];
 
-        if(!this.backFaceCull(face, camera)) {
-          continue;
-        }
-
-        this.processFace(face, modelGeometry.texture);
+      if(!this.backFaceCull(v0, v1, v2, camera)) {
+        continue;
       }
+
+      this.processFace(v0, v1, v2, modelGeometry.texture);
+    }
 
     //Wireframe mode
     // if(globalState.wireFrame === true) {
@@ -144,93 +144,148 @@ Render.prototype.render = function(models, camera_inverse, object_transform, cam
   //Actually draw the image array on the canvas
   this.draw();
 }
+//Transformation matrices
+Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
-Render.prototype.processFace = function(face, texture) {
-  v0 = this.vertexToRaster(face.vertices[0]);
-  v1 = this.vertexToRaster(face.vertices[1]);
-  v2 = this.vertexToRaster(face.vertices[2]);
 
-  var face2 = new Face([v0,v1,v2]);
-  this.postProcessFace(face2, texture);
+  //world to camera
+  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
+  vertex = this.invokeVertexShaders(vertex)
+
+  return vertex;
 }
 
-Render.prototype.postProcessFace = function(face, texture) {
+Render.prototype.invokeVertexShaders = function(vertex_in) {
+  return vertex_in;
+}
 
-  this.renderFace(face, texture);
+
+Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
+  //console.log(v0);
+  //Dot product, back culling
+  //renderVertices will do all the transformations and conversion to raster_coordinates
+  //It returns the indices of the imgArray it should be drawn on
+
+  //To do backface culling: We need the face's normal.
+  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
+  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
+  //If the dot product results in 0 or less, it means the normal is pointing away from us.
+  var line1 = new Vector3(
+      v1.position.position[0] - v0.position.position[0],
+      v1.position.position[1] - v0.position.position[1],
+      v1.position.position[2] - v0.position.position[2]
+    );
+  var line2 = new Vector3(
+      v2.position.position[0] - v0.position.position[0],
+      v2.position.position[1] - v0.position.position[1],
+      v2.position.position[2] - v0.position.position[2]
+  );
+
+  // console.log(line1);
+  // console.log(line2);
+  var normal = line1.cross(line2);
+  //
+  // var view_vec = new Vector3(
+  //   0 - face.vertices[1].position.position[0],
+  //   0 - face.vertices[1].position.position[1],
+  //   0 - face.vertices[1].position.position[2]
+  // )
+
+  var dot_result = v0.position.dot(normal);
+  //var dot_result = normal.dot(face.vertices[0].position);
+  if(dot_result >= 0) {
+    return false;
+  }
+
+  return true;
+}
+
+
+Render.prototype.processFace = function(v0, v1, v2, texture) {
+  v0 = this.vertexToRaster(v0);
+  v1 = this.vertexToRaster(v1);
+  v2 = this.vertexToRaster(v2);
+
+  this.postProcessFace(v0, v1, v2, texture);
+}
+
+Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
+
+  this.renderFace(v0, v1, v2, texture);
 }
 
 
 //Triangle rasterizer
-Render.prototype.renderFace = function(face, texture) {
+Render.prototype.renderFace = function(v0, v1, v2, texture) {
   var color = "blue";
 
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
-  var set = [0,1,2];
-
-  for(var i = 0; i < 3; i++) {
-    var current = i;
-    var next = i + 1;
-    if(current === 2) {
-      current = 0;
-      next = 1;
-    }
-
-    if(face.vertices[set[current]].position.position[1] < face.vertices[set[next]].position.position[1]) {
-        var temp = set[current];
-        set[current] = set[next];
-        set[next] = temp;
-    }
+  if(v0.position.position[1] <  v1.position.position[1]) {
+    var temp = v0;
+    v0 = v1;
+    v1 = temp;
   }
 
+  if(v0.position.position[1] < v2.position.position[1]) {
+    var temp = v0;
+    v0 = v2;
+    v2 = temp;
+  }
+
+  if(v1.position.position[1] < v2.position.position[1]) {
+    var temp = v1;
+    v1 = v2;
+    v2 = temp;
+  }
 
   //Flat top
-  if(face.vertices[set[0]].position.position[1] === face.vertices[set[1]].position.position[1]) {
+  if(v0.position.position[1] === v1.position.position[1]) {
     //Now, we should sort the top vertices by their x values ASC
-    if(face.vertices[set[0]].position.position[0] > face.vertices[set[1]].position.position[0]) {
-      var temp = set[0];
-      set[0] = set[1];
-      set[1] = temp;
+    if(v0.position.position[0] > v1.position.position[0]) {
+      var temp = v0;
+      v0 = v1;
+      v1 = temp;
     }
-    this.renderFlatTopFace( face.vertices[set[0]],
-                            face.vertices[set[1]],
-                            face.vertices[set[2]],
+    this.renderFlatTopFace( v0,
+                            v1,
+                            v2,
                             color, texture);
   }
 
   //Flat bottom
-  else if(face.vertices[set[1]].position.position[1] === face.vertices[set[2]].position.position[1]) {
+  else if(v1.position.position[1] === v2.position.position[1]) {
     //Now, we should sort the bottom vertices by their x values  ASC
-    if(face.vertices[set[1]].position.position[0] > face.vertices[set[2]].position.position[0]) {
-      var temp = set[1];
-      set[1] = set[2];
-      set[2] = temp;
+    if(v1.position.position[0] > v2.position.position[0]) {
+      var temp = v1;
+      v1 = v2;
+      v2 = temp;
     }
 
-    this.renderFlatBottomFace( face.vertices[set[0]],
-                               face.vertices[set[1]],
-                               face.vertices[set[2]],
+    this.renderFlatBottomFace( v0,
+                               v1,
+                               v2,
                                [0,0,255], texture);
   }
 
   //General
   else {
     //Interpolate vertices
-    var alpha = (face.vertices[set[1]].position.position[1] - face.vertices[set[0]].position.position[1]) /
-                (face.vertices[set[2]].position.position[1] - face.vertices[set[0]].position.position[1]);
-    var vi =  face.vertices[set[0]].interpolateTo(face.vertices[set[2]], alpha);
+    var alpha = (v1.position.position[1] - v0.position.position[1]) /
+                (v2.position.position[1] - v0.position.position[1]);
+    var vi =  v0.interpolateTo(v2, alpha);
 
 
     //major right
-    if(vi.position.position[0] > face.vertices[set[1]].position.position[0]) {
+    if(vi.position.position[0] > v1.position.position[0]) {
 
-      this.renderFlatBottomFace(face.vertices[set[0]], face.vertices[set[1]], vi , color, texture);
-      this.renderFlatTopFace(face.vertices[set[1]], vi, face.vertices[set[2]], color, texture);
+      this.renderFlatBottomFace(v0, v1, vi , color, texture);
+      this.renderFlatTopFace(v1, vi, v2, color, texture);
     }
     //major left
-    if(vi.position.position[0] < face.vertices[set[1]].position.position[0]) {
+    if(vi.position.position[0] < v1.position.position[0]) {
 
-      this.renderFlatBottomFace(face.vertices[set[0]], vi, face.vertices[set[1]], color, texture);
-      this.renderFlatTopFace(vi, face.vertices[set[1]], face.vertices[set[2]], color, texture);
+      this.renderFlatBottomFace(v0, vi, v1, color, texture);
+      this.renderFlatTopFace(vi, v1, v2, color, texture);
     }
   }
 
@@ -372,23 +427,6 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
   }
 }
 
-
-//Transformation matrices
-Render.prototype.vertexTransformer = function(vertex, camera_inverse, object_transform) {
-
-
-      //local to world
-
-      var point = object_transform.multMatrixVec3(vertex)
-      //world to camera
-      var point = camera_inverse.multMatrixVec3(point);
-
-
-
-
-  return point;
-}
-
 //Perspective_divide, ndc, raster space
 //We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
@@ -404,7 +442,6 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   vertex.position.position[0] = (vertex.position.position[0] )  * Znear;
   vertex.position.position[1] = (vertex.position.position[1] ) * Znear;
   vertex.position.position[2] = zInv;
-  // console.log(point_pd.position[0] + " " +  point_pd.position[1] + " " + point_pd.position[2]);
   // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
   //console.log("new");
   //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
@@ -419,46 +456,6 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
 
   return vertex;
 }
-
-Render.prototype.backFaceCull = function(face, camera_inverse) {
-  //Dot product, back culling
-  //renderVertices will do all the transformations and conversion to raster_coordinates
-  //It returns the indices of the imgArray it should be drawn on
-
-  //To do backface culling: We need the face's normal.
-  //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
-  //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
-  //If the dot product results in 0 or less, it means the normal is pointing away from us.
-  var line1 = new Vector3(
-      face.vertices[1].position.position[0] - face.vertices[0].position.position[0],
-      face.vertices[1].position.position[1] - face.vertices[0].position.position[1],
-      face.vertices[1].position.position[2] - face.vertices[0].position.position[2]
-    );
-  var line2 = new Vector3(
-      face.vertices[2].position.position[0] - face.vertices[0].position.position[0],
-      face.vertices[2].position.position[1] - face.vertices[0].position.position[1],
-      face.vertices[2].position.position[2] - face.vertices[0].position.position[2]
-  );
-
-  // console.log(line1);
-  // console.log(line2);
-  var normal = line1.cross(line2);
-  //
-  // var view_vec = new Vector3(
-  //   0 - face.vertices[1].position.position[0],
-  //   0 - face.vertices[1].position.position[1],
-  //   0 - face.vertices[1].position.position[2]
-  // )
-
-  var dot_result = face.vertices[0].position.dot(normal);
-  //var dot_result = normal.dot(face.vertices[0].position);
-  if(dot_result >= 0) {
-    return false;
-  }
-
-  return true;
-}
-
 
 //Bresenham algorithm to draw lines
 Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {

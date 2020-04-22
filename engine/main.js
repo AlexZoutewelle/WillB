@@ -49,6 +49,8 @@ Promise.all(models).then(function(results) {
   models = results;
   console.log(models[0]);
   console.log(models[1]);
+
+
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
 
@@ -57,12 +59,12 @@ Promise.all(models).then(function(results) {
   var object_transform2 = new Transformation();
   object_transform2.fields = object_transform2.translate(10, 0, 0);
 
-  for(var i = 0; i < models[0].positions.length; i++) {
-    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
+  for(var i = 0; i < models[0].vertices.length; i++) {
+    models[0].vertices[i].position = object_transform1.multMatrixVec3(models[0].vertices[i].position);
   }
 
-  for(var i = 0; i < models[1].positions.length; i++) {
-    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  for(var i = 0; i < models[1].vertices.length; i++) {
+    models[1].vertices[i].position = object_transform2.multMatrixVec3(models[1].vertices[i].position);
   }
 
   object_transform = new Transformation();
@@ -143,6 +145,7 @@ function frame() {
     playerState.input.angleY = 0;
   }
 
+//Cycle through pixel shaders
   if(globalState.nextPixelShader === true) {
 
     var amountOfShaders  = renderer.pixelShaders.length;
@@ -158,28 +161,8 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
+  renderer.render(models, camera_inverse, camera);
 
-  renderer.render(models, camera_inverse, object_transform, camera);
-
-  //console.log(modelGeometry.faces);
-
-  // var position = modelGeometry.positions[0].position;
-  // var position1 = modelGeometry.positions[1].position;
-  // var position2 = modelGeometry.positions[2].position;
-  //
-  // var faceid = modelGeometry.faces[0].vertices;
-  // var facepos1 = modelGeometry.faces[0].vertices[0].position.position[0];
-  // var facepos2 = modelGeometry.faces[0].vertices[0].position.position[1];
-  // var facepos3 = modelGeometry.faces[0].vertices[0].position.position[2];
-
-
-  // console.log(position[0] + " " + position[1] + " " + position[2]);
-  // console.log(position1[0] + " " + position1[1] + " " + position1[2]);
-  // console.log(position2[0] + " " + position2[1] + " " + position2[2]);
-  //
-
-  // console.log(faceid[0].id + " " + faceid[1].id + " " + faceid[2].id);
-  //console.log(facepos1 + " " + facepos2 + " " + facepos3);
 
   // console.log("CAMERA -----------");
   // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
