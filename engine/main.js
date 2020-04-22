@@ -17,8 +17,11 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 
-renderer.setPixelShader(new TextureEffect());
-renderer.setPixelShader(new DynColorEffect());
+//Initialize pixel pixelShaders
+pixelShaders = [new TextureEffect(), new DynColorEffect()];
+
+renderer.setPixelShader(pixelShaders[0]);
+renderer.setPixelShader(pixelShaders[1]);
 
 //trying out some camera stuff
 
@@ -138,6 +141,19 @@ function frame() {
         playerState.input.angleX);
     playerState.input.angleX = 0;
     playerState.input.angleY = 0;
+  }
+
+  if(globalState.nextPixelShader === true) {
+
+    var amountOfShaders  = renderer.pixelShaders.length;
+    var nextShader = renderer.activePixelShader + 1;
+
+    if(nextShader === amountOfShaders) {
+      nextShader = 0;
+    }
+
+    renderer.activePixelShader = nextShader;
+
   }
 
   camera_inverse = camera.inverse();

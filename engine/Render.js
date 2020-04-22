@@ -15,12 +15,16 @@ function Render(screenWidth, screenHeight) {
   console.log(screenHeight);
 
   this.ZBuffer = new ZBuffer(screenWidth, screenHeight);
+
   //A list of pixel shaders
   this.pixelShaders = [];
+  this.activePixelShader = 0;
 }
 
-//Change the pixel shader TextureEffect
+//Set a new pixelShader in the array of pixelshaders
 Render.prototype.setPixelShader = function(pixelShader) {
+
+  //For now we remove one and add one, so that we always have 1 pixel shader.
   this.pixelShaders.push( pixelShader );
 }
 
@@ -336,9 +340,8 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 //Right now, they will override eachothers output.
 Render.prototype.invokePixelShaders = function(vertex) {
   var color = [];
-  for(var i = 0; i < this.pixelShaders.length; i++) {
-    color = this.pixelShaders[i].getColor(vertex);
-  }
+  color = this.pixelShaders[this.activePixelShader].getColor(vertex);
+
 
   return color;
 }

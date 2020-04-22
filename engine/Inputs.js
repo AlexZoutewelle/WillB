@@ -31,7 +31,7 @@ var playerState = {
 }
 
 var globalState = {
-  wireFrame: true, face: true
+  nextPixelShader: false, prevPixelShader: false
 }
 
 //Pointer lock for mouse movement
@@ -125,13 +125,14 @@ function onkeydown(e, key, pressed) {
       break;
     case KEY.Q:
 
-      globalState.wireFrame = !globalState.wireFrame;
+      globalState.prevPixelShader = !globalState.prevPixelShader;
       e.preventDefault();
       break;
     case KEY.E:
-      globalState.face = !globalState.face;
+      globalState.nextPixelShader = !globalState.nextPixelShader;
       e.preventDefault();
       break;
+
   }
 }
 
@@ -182,5 +183,14 @@ function onkeyup(e, key, pressed) {
       playerState.input.tiltBack = pressed;
       e.preventDefault();
       break;
-    }
+
+    case KEY.Q:
+      globalState.prevPixelShader = !globalState.prevPixelShader;
+      e.preventDefault();
+      break;
+    case KEY.E:
+      globalState.nextPixelShader = !globalState.nextPixelShader;
+      e.preventDefault();
+      break;
+    } 
 }
