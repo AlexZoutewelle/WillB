@@ -22,7 +22,7 @@ Vertex.prototype.add = function(vertex) {
 }
 
 Vertex.prototype.divide = function(vertex) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.divideVector(vertex.position);
   result.uv = this.uv.divideVector(vertex.uv);
@@ -55,7 +55,7 @@ Vertex.prototype.divideScalar = function(scalar) {
 }
 
 Vertex.prototype.multiplyScalar = function(scalar) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.multiplyScalar(scalar);
   result.uv = this.uv.multiplyScalar(scalar);

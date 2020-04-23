@@ -19,6 +19,10 @@ function Render(screenWidth, screenHeight) {
   //A list of pixel shaders
   this.pixelShaders = [];
   this.activePixelShader = 0;
+
+  //A list of vertex shaders
+  this.vertexShaders = [];
+  this.activeVertexShader = 0;
 }
 
 //Set a new pixelShader in the array of pixelshaders
@@ -28,16 +32,28 @@ Render.prototype.setPixelShader = function(pixelShader) {
   this.pixelShaders.push( pixelShader );
 }
 
+Render.prototype.setVertexShader = function(vertexShader) {
+  this.vertexShaders.push(vertexShader);
+}
 
+Render.prototype.clear = function() {
+  this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
+
+  var pixelLength = this.imgArray.length;
+
+  for(var i = 0; i < pixelLength; i += 4) {
+    this.imgArray[i + 3] = 255;
+
+
+  }
+}
 /**
 Draws a Uint8ClampedArray to the canvas
 This array holds 4 elements for each pixel: R G B and A, values are between 0 and 255
 **/
 Render.prototype.draw = function() {
 
-  //console.log(imgArray);
   var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
-
   this.ctx.putImageData(imageData, 0, 0);
 }
 
@@ -93,8 +109,9 @@ Render.prototype.newModel = function(model) {
 **/
 Render.prototype.render = function(models, camera_inverse, camera) {
   this.ZBuffer.clear();
+
   var screenWidth = this.screenWidth;
-  this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
+  this.clear();
 
   // The virtual image plane
   var canvasWidth = 1;
@@ -122,11 +139,9 @@ Render.prototype.render = function(models, camera_inverse, camera) {
     for (var i = 0; i < faceCount; i++) {
 
       var face = modelGeometry.faces[i];
-
       var v0 = verticesOut[face.vertices[0]];
       var v1 = verticesOut[face.vertices[1]];
       var v2 = verticesOut[face.vertices[2]];
-
       if(!this.backFaceCull(v0, v1, v2, camera)) {
         continue;
       }
@@ -156,7 +171,9 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 }
 
 Render.prototype.invokeVertexShaders = function(vertex_in) {
-  return vertex_in;
+  var vertex_out = this.vertexShaders[this.activeVertexShader].getVertex(vertex_in);
+  //console.log(vertex_out);
+  return vertex_out;
 }
 
 
@@ -184,6 +201,7 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   // console.log(line1);
   // console.log(line2);
   var normal = line1.cross(line2);
+
   //
   // var view_vec = new Vector3(
   //   0 - face.vertices[1].position.position[0],
@@ -202,10 +220,11 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
+  console.log(v0);
+
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
-
   this.postProcessFace(v0, v1, v2, texture);
 }
 
@@ -431,7 +450,7 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 //We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
 Render.prototype.vertexToRaster = function(vertex_orig) {
-
+  console.log(vertex_orig);
   var vertex = vertex_orig;
   var zInv = (1/vertex.position.position[2]);
   //console.log(zInv);
@@ -453,7 +472,7 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //raster coords (pixels)
   vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
   vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
-
+  console.log(vertex);
   return vertex;
 }
 

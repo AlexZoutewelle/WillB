@@ -17,11 +17,12 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 
-//Initialize pixel pixelShaders
-pixelShaders = [new TextureEffect(), new DynColorEffect()];
+//Initialize pixel and vertex shaders
 
-renderer.setPixelShader(pixelShaders[0]);
-renderer.setPixelShader(pixelShaders[1]);
+// renderer.setPixelShader(new TextureEffect());
+// renderer.setPixelShader(new DynColorEffect());
+renderer.setPixelShader(new FlatColorEffect());
+renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
 
@@ -32,8 +33,6 @@ var camera = new Transformation([
         [0, 0, 0, 1]
 ]);
 
-var test1 = new Vector3(3, 4, 5);
-var test2 = new Vector3(4,6,5);
 
 
 //Load models
