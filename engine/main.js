@@ -2,9 +2,6 @@
 //low prio: Mouse view is not perfect.
 
 
-//PROBLEM: VERTEX PROCESSING
-//Continuously creating copies/new vertices in our math operations results in loss of data.
-//We must start off the pipeline by CREATING (or copying) a vertex, then we can do what we want with it
 
 var screenWidth = 640;
 var screenHeight = 480;
@@ -18,7 +15,7 @@ var renderer = new Render(screenWidth, screenHeight);
 //Initialize pixel and vertex shaders
 
 //renderer.setPixelShader(new TextureEffect());
-// renderer.setPixelShader(new DynColorEffect());
+//renderer.setPixelShader(new DynColorEffect());
 renderer.setPixelShader(new FlatColorEffect());
 renderer.setVertexShader(new FlatShadeVS());
 
@@ -38,15 +35,14 @@ var model_name1 = "cube";
 var model_name2 = "sphere";
 
 var models = [
-  mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
+  mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
 Promise.all(models).then(function(results) {
   models = results;
   console.log(models[0]);
   console.log(models[1]);
-
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();

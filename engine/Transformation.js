@@ -68,15 +68,64 @@ Transformation.prototype.scale = function (scale) {
   return this.multiply(mat).fields;
 }
 
-Transformation.prototype.rotate = function(pitch = 0, yaw = 0) {
-  pitch = pitch * Math.PI / 180;
-  yaw = yaw * Math.PI / 180;
+Transformation.prototype.rotate = function(pitch = 0, yaw = 0, roll = 0) {
 
-  var cp = Math.cos(pitch);
-  var sp = Math.sin(pitch);
+  var xAxis = new Transformation();
+  if(pitch !== 0) {
 
-  var cy = Math.cos(yaw);
-  var sy = Math.sin(yaw);
+    pitch = pitch * Math.PI / 180;
+
+    var cp = Math.cos(pitch);
+    var sp = Math.sin(pitch);
+
+    xAxis.fields = [
+      [1, 0,   0,  0],
+      [0, cp, sp, 0],
+      [0, -sp, cp,  0],
+      [0, 0,  0,   1]
+    ]
+  }
+
+  var yAxis = new Transformation();
+  if(yaw !== 0) {
+
+    yaw = yaw * Math.PI / 180;
+
+    var cy = Math.cos(yaw);
+    var sy = Math.sin(yaw);
+
+    yAxis.fields = [
+      [cy, 0, -sy, 0],
+      [0,  1, 0,  0],
+      [sy, 0, cy,0],
+      [0, 0, 0,   1]
+    ]
+
+  }
+
+  var zAxis = new Transformation();
+  if(roll !== 0) {
+
+    roll = roll * Math.PI / 180;
+
+    var cr = Math.cos(roll);
+    var sr = Math.sin(roll);
+
+    zAxis.fields = [
+      [cr, sr, 0, 0],
+      [-sr, cr,  0, 0],
+      [0,  0,   1, 0],
+      [0,  0,   0, 1]
+    ]
+
+  }
+
+
+
+  var finalrot = zAxis.multiply(yAxis.multiply(xAxis));
+
+  return this.multiply(finalrot).fields;
+
 
   var mat = new Transformation([
     [cy, 0, -sy, 0],
@@ -84,6 +133,11 @@ Transformation.prototype.rotate = function(pitch = 0, yaw = 0) {
     [sy * cp, -sp, cp * cy, 0],
     [0, 0, 0, 1]
   ]);
+
+
+
+
+
   return this.multiply(mat).fields;
 }
 

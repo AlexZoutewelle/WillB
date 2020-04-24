@@ -43,8 +43,6 @@ Render.prototype.clear = function() {
 
   for(var i = 0; i < pixelLength; i += 4) {
     this.imgArray[i + 3] = 255;
-
-
   }
 }
 /**
@@ -56,6 +54,7 @@ Render.prototype.draw = function() {
   var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
   this.ctx.putImageData(imageData, 0, 0);
 }
+
 
 //milimeters
 var focalLength = 15;
@@ -109,6 +108,7 @@ Render.prototype.newModel = function(model) {
 **/
 Render.prototype.render = function(models, camera_inverse, camera) {
   this.ZBuffer.clear();
+  //console.log(this.vertexShaders[0].lightDirection.position[0].toFixed(3) + " " + this.vertexShaders[0].lightDirection.position[1].toFixed(3) + " " + this.vertexShaders[0].lightDirection.position[2].toFixed(3))
 
   var screenWidth = this.screenWidth;
   this.clear();

@@ -49,11 +49,14 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     }
 
     else if((result = normalRegx.exec(line)) != null) {
-      normals.push(new Vector3(
-        parseFloat(result[0]),
+      var got = new Vector3(
         parseFloat(result[1]),
-        parseFloat(result[2])
-      ));
+        parseFloat(result[2]),
+        parseFloat(result[3]));
+
+      normals.push(
+        got
+      );
     }
 
     else if((result = faceRegx.exec(line)) != null) {
@@ -204,6 +207,7 @@ Vector3.prototype.normalize = function() {
   this.position[0] /= length;
   this.position[1] /= length;
   this.position[2] /= length;
+  return this;
 }
 
 Vector3.prototype.multiplyVector = function(vector) {
