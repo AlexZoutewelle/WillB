@@ -129,7 +129,8 @@ Render.prototype.render = function(models, camera_inverse, camera) {
     //Vertex Transformation
     var verticesOut = []
     for(var i = 0; i < vertexCount; i++) {
-      verticesOut.push(this.vertexTransformer(modelGeometry.vertices[i].copy(), camera_inverse, object_transform));
+      verticesOut.push(this.vertexTransformer(modelGeometry.vertices[i], camera_inverse, object_transform));
+
     }
 
 
@@ -145,7 +146,6 @@ Render.prototype.render = function(models, camera_inverse, camera) {
       if(!this.backFaceCull(v0, v1, v2, camera)) {
         continue;
       }
-
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
 
@@ -164,15 +164,17 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
 
   //world to camera
-  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
-  vertex = this.invokeVertexShaders(vertex)
+  var vertex_out = vertex.copy();
+  vertex_out.position = camera_inverse.multMatrixVec3(vertex_out.position);
 
-  return vertex;
+  //Vertex shaders
+  vertex_out = this.invokeVertexShaders(vertex_out)
+
+  return vertex_out;
 }
 
 Render.prototype.invokeVertexShaders = function(vertex_in) {
   var vertex_out = this.vertexShaders[this.activeVertexShader].getVertex(vertex_in);
-  //console.log(vertex_out);
   return vertex_out;
 }
 
@@ -220,7 +222,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
-  console.log(v0);
 
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
@@ -288,10 +289,12 @@ Render.prototype.renderFace = function(v0, v1, v2, texture) {
 
   //General
   else {
+
     //Interpolate vertices
     var alpha = (v1.position.position[1] - v0.position.position[1]) /
                 (v2.position.position[1] - v0.position.position[1]);
     var vi =  v0.interpolateTo(v2, alpha);
+    // console.log(v0);
 
 
     //major right
@@ -450,7 +453,6 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 //We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
 Render.prototype.vertexToRaster = function(vertex_orig) {
-  console.log(vertex_orig);
   var vertex = vertex_orig;
   var zInv = (1/vertex.position.position[2]);
   //console.log(zInv);
@@ -472,7 +474,6 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //raster coords (pixels)
   vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
   vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
-  console.log(vertex);
   return vertex;
 }
 

@@ -1,12 +1,10 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
-//high prio: wireframe rendering
-//    -Wireframe drawing is implemented, with a few caveats:
-//        Algorithm is unoptimized  -> We're reprocessing vertices and redrawing edges a lot: O(3N^2)
-//        Not sure how to prevent this.
-//        We now have wireframe with no duplicated edges, but without back-culling
-//high-prio: trangle shading
-//high-prio: texture mapping
+
+
+//PROBLEM: VERTEX PROCESSING
+//Continuously creating copies/new vertices in our math operations results in loss of data.
+//We must start off the pipeline by CREATING (or copying) a vertex, then we can do what we want with it
 
 var screenWidth = 640;
 var screenHeight = 480;
@@ -19,7 +17,7 @@ var renderer = new Render(screenWidth, screenHeight);
 
 //Initialize pixel and vertex shaders
 
-// renderer.setPixelShader(new TextureEffect());
+//renderer.setPixelShader(new TextureEffect());
 // renderer.setPixelShader(new DynColorEffect());
 renderer.setPixelShader(new FlatColorEffect());
 renderer.setVertexShader(new FlatShadeVS());
@@ -37,7 +35,7 @@ var camera = new Transformation([
 
 //Load models
 var model_name1 = "cube";
-var model_name2 = "cube";
+var model_name2 = "sphere";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
