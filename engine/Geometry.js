@@ -1,9 +1,10 @@
-function Geometry(positions, faces, edges, uvs) {
-  this.positions = positions || [];
+function Geometry(faces, edges, uvs) {
   this.faces = faces || [];
   this.edges = edges || [];
 }
 
+//Face holds indices to the vertices array.
+//A is made up of 3 vertices (it is a triangle)
 function Face(vertices) {
   this.vertices = vertices || [];
 }
@@ -22,7 +23,7 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
 
   var uvRegx = /^vt\s+(\d+\.*\d*)\s+(\d+\.*\d*)/;
 
-
+  var vertices = [];
   var positions = [];
   var faces = []
   var uvs = [];
@@ -48,35 +49,46 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     }
 
     else if((result = normalRegx.exec(line)) != null) {
-      normals.push(new Vector3(
-        parseFloat(result[0]),
+      var got = new Vector3(
         parseFloat(result[1]),
-        parseFloat(result[2])
-      ));
+        parseFloat(result[2]),
+        parseFloat(result[3]));
+
+      normals.push(
+        got
+      );
     }
 
     else if((result = faceRegx.exec(line)) != null) {
       //Creating the face
 
-      var faceVertices = [];
+      var indices = [];
 
       var step = Math.ceil(result.length / 4);
-      for(var i = 1; i < result.length; i += step ) {
-        //We only save the vertex indices here, since we go 3x slower without them
-        var id = parseInt(result[i] - 1);
+      for(var i = 1, id = 0; i < result.length; i += step, id += 1 ) {
+
+        //Create the vertex
+        var position = positions[parseInt(result[i] - 1)];
         var uv = uvs[parseInt(result[i + 1] - 1)];
         var normal = normals[parseInt(result[i + 2] - 1)];
 
-        faceVertices.push(new Vertex(id, normal, uv));
+        vertices.push(new Vertex(position, normal, uv));
 
+        //Create the indices
+        indices.push(vertices.length - 1);
+        if(3 % id == 1) {
+          //We have the 3 indices for a face. We need to save this to a Face
+          faces.push(new Face(indices));
+          //Reset the indices array
+          indices = [];
+        }
       }
-      faces.push(new Face(faceVertices));
     }
 
   });
 
     //Now that we have parsed all the lines in the .obj file, we must make a list of edges
-    var edges = this.createEdgeList(positions, faces);
+    //var edges = this.createEdgeList(positions, faces);
 
     //Finally, get its texture image, and create a context for it
     var image = document.getElementById(object_name);
@@ -86,12 +98,13 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
 
     this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
-    this.positions = positions;
+    this.vertices = vertices;
     this.faces = faces;
-    this.edges = edges;
+    //this.edges = this.createEdgeList(vertices, faces);
 }
 
 //Create edges, no duplicates allowed
+//REWORK NEEDED: DIFFERENT DATA STRUCTURE FOR MODEL
 Geometry.prototype.createEdgeList = function(vertices, faces){
   var edgeList = {}
 
@@ -194,6 +207,7 @@ Vector3.prototype.normalize = function() {
   this.position[0] /= length;
   this.position[1] /= length;
   this.position[2] /= length;
+  return this;
 }
 
 Vector3.prototype.multiplyVector = function(vector) {

@@ -26,7 +26,8 @@ var playerState = {
     strafeLeft: false, strafeRight: false, backward: false, forward: false,
     escape: false, jump: false, crouch: false, turnLeft: false, turnRight: false, scaleUp: false, scaleBack: false,
     angleX: 0, angleY: 0,
-    mouseX: 0, mouseY: 0, pointerLocked: false
+    mouseX: 0, mouseY: 0, pointerLocked: false,
+    i: false, j: false, k: false, l: false, u: false, o: false
   }
 }
 
@@ -124,7 +125,6 @@ function onkeydown(e, key, pressed) {
       e.preventDefault();
       break;
     case KEY.Q:
-
       globalState.prevPixelShader = !globalState.prevPixelShader;
       e.preventDefault();
       break;
@@ -132,6 +132,33 @@ function onkeydown(e, key, pressed) {
       globalState.nextPixelShader = !globalState.nextPixelShader;
       e.preventDefault();
       break;
+
+    case KEY.I:
+      playerState.input.i = pressed;
+      e.preventDefault();
+      break;
+    case KEY.K:
+      playerState.input.k = pressed;
+      e.preventDefault();
+      break;
+    case KEY.J:
+      playerState.input.j = pressed;
+      e.preventDefault();
+      break;
+    case KEY.L:
+      playerState.input.l = pressed;
+      e.preventDefault();
+      break;
+    case KEY.U:
+      playerState.input.u = pressed;
+      e.preventDefault();
+      break;
+    case KEY.O:
+      playerState.input.o = pressed;
+      e.preventDefault();
+      break;
+
+
 
   }
 }
@@ -192,5 +219,32 @@ function onkeyup(e, key, pressed) {
       globalState.nextPixelShader = !globalState.nextPixelShader;
       e.preventDefault();
       break;
-    } 
+
+    case KEY.I:
+      playerState.input.i = pressed;
+      e.preventDefault();
+      break;
+    case KEY.K:
+      playerState.input.k = pressed;
+      e.preventDefault();
+      break;
+    case KEY.J:
+      playerState.input.j = pressed;
+      e.preventDefault();
+      break;
+    case KEY.L:
+      playerState.input.l = pressed;
+      e.preventDefault();
+      break;
+    case KEY.U:
+      playerState.input.u = pressed;
+      e.preventDefault();
+      break;
+    case KEY.O:
+      playerState.input.o = pressed;
+      e.preventDefault();
+      break;
+
+    }
+
 }

@@ -1,20 +1,19 @@
-function Vertex(id, normal, uv) {
-  this.id = id || 0;
-  this.position = new Vector3();
+function Vertex(position, normal, uv) {
+  this.position = position || new Vector3();
   this.normal = normal || new Vector3();
   this.uv = uv || new Vector2();
 }
 
 //Operations between vertices
 Vertex.prototype.subtract = function(vertex) {
-  var result = new Vertex();
+  var result = this.copy();
   result.position = this.position.subtractVector(vertex.position);
   result.uv = this.uv.subtractVector(vertex.uv);
   return result;
 }
 
 Vertex.prototype.add = function(vertex) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.addVector(vertex.position);
   result.uv = this.uv.addVector(vertex.uv);
@@ -23,7 +22,7 @@ Vertex.prototype.add = function(vertex) {
 }
 
 Vertex.prototype.divide = function(vertex) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.divideVector(vertex.position);
   result.uv = this.uv.divideVector(vertex.uv);
@@ -32,7 +31,7 @@ Vertex.prototype.divide = function(vertex) {
 }
 
 Vertex.prototype.multiply = function(vertex) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.multiplyVector(vertex.position);
   result.uv = this.uv.multiplyVector(vertex.uv);
@@ -41,14 +40,14 @@ Vertex.prototype.multiply = function(vertex) {
 }
 
 Vertex.prototype.interpolateTo = function(vertex, alpha) {
-  var result = new Vertex();
+  var result = this.copy();
   result.position = this.position.interpolateTo(vertex.position, alpha);
   result.uv = this.uv.interpolateTo(vertex.uv, alpha);
   return result;
 }
 
 Vertex.prototype.divideScalar = function(scalar) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.divideScalar(scalar);
   result.uv = this.uv.divideScalar(scalar);
@@ -56,7 +55,7 @@ Vertex.prototype.divideScalar = function(scalar) {
 }
 
 Vertex.prototype.multiplyScalar = function(scalar) {
-  var result = new Vertex();
+  var result = this.copy();
 
   result.position = this.position.multiplyScalar(scalar);
   result.uv = this.uv.multiplyScalar(scalar);
@@ -65,7 +64,11 @@ Vertex.prototype.multiplyScalar = function(scalar) {
 
 Vertex.prototype.copy = function() {
   var newV = new Vertex();
-  newV.position = this.position;
-  newV.uv = this.uv;
+  var orig = this;
+  Object.keys(orig).forEach(function (key, index) {
+    Reflect.defineProperty(newV, key, Reflect.getOwnPropertyDescriptor(orig, key));
+    // console.log (key + " " + index);
+  });
+
   return newV;
 }
