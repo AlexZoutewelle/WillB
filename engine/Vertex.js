@@ -5,41 +5,90 @@ function Vertex(position, normal, uv) {
 }
 
 //Operations between vertices
-Vertex.prototype.subtract = function(vertex) {
-  var result = this.copy();
-  result.position = this.position.subtractVector(vertex.position);
-  result.uv = this.uv.subtractVector(vertex.uv);
-  return result;
+Vertex.prototype.subtract = function(v2) {
+
+  var newV = this.copy();
+  var v1 = this;
+
+  Object.keys(v1).forEach(function (key, index) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.subtractVector(Reflect.getOwnPropertyDescriptor(v2, key).value);
+
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
 }
 
-Vertex.prototype.add = function(vertex) {
-  var result = this.copy();
+Vertex.prototype.add = function(v2) {
+  var newV = this.copy();
+  var v1 = this;
 
-  result.position = this.position.addVector(vertex.position);
-  result.uv = this.uv.addVector(vertex.uv);
-  return result;
+  Object.keys(v1).forEach(function (key, index) {
 
-}
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.addVector(Reflect.getOwnPropertyDescriptor(v2, key).value);
 
-Vertex.prototype.divide = function(vertex) {
-  var result = this.copy();
+    Reflect.set(newV, key, result)
 
-  result.position = this.position.divideVector(vertex.position);
-  result.uv = this.uv.divideVector(vertex.uv);
-  return result;
+  });
 
-}
 
-Vertex.prototype.multiply = function(vertex) {
-  var result = this.copy();
-
-  result.position = this.position.multiplyVector(vertex.position);
-  result.uv = this.uv.multiplyVector(vertex.uv);
-  return result;
+  return newV;
 
 }
 
-Vertex.prototype.interpolateTo = function(vertex, alpha) {
+Vertex.prototype.divide = function(v2) {
+  var newV = this.copy();
+  var v1 = this;
+
+  Object.keys(v1).forEach(function (key, index) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.divideVector(Reflect.getOwnPropertyDescriptor(v2, key).value);
+
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
+
+}
+
+Vertex.prototype.multiply = function(v2) {
+  var newV = this.copy();
+  var v1 = this;
+
+  Object.keys(v1).forEach(function (key, index) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.multiplyVector(Reflect.getOwnPropertyDescriptor(v2, key).value);
+
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
+
+}
+
+Vertex.prototype.interpolateTo = function(v2, alpha) {
+  var newV = this.copy();
+  var v1 = this;
+
+  Object.keys(v1).forEach(function (key, index) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.interpolateTo(Reflect.getOwnPropertyDescriptor(v2, key).value, alpha);
+
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
+
+
   var result = this.copy();
   result.position = this.position.interpolateTo(vertex.position, alpha);
   result.uv = this.uv.interpolateTo(vertex.uv, alpha);
@@ -47,19 +96,39 @@ Vertex.prototype.interpolateTo = function(vertex, alpha) {
 }
 
 Vertex.prototype.divideScalar = function(scalar) {
-  var result = this.copy();
+  var newV = this.copy();
+  var v1 = this;
 
-  result.position = this.position.divideScalar(scalar);
-  result.uv = this.uv.divideScalar(scalar);
-  return result;
+  Object.keys(v1).forEach(function (key, index) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.divideScalar(scalar);
+
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
 }
 
 Vertex.prototype.multiplyScalar = function(scalar) {
-  var result = this.copy();
+  var newV = this.copy();
+  var v1 = this;
 
-  result.position = this.position.multiplyScalar(scalar);
-  result.uv = this.uv.multiplyScalar(scalar);
-  return result;
+  Object.keys(v1).forEach(function (key, index) {
+    if(key === 'normal' || key === 'color') {
+    }
+    else {
+      var result = Reflect.getOwnPropertyDescriptor(v1, key).value.multiplyScalar(scalar);
+
+      Reflect.set(newV, key, result)
+    }
+
+
+  });
+
+
+  return newV;
 }
 
 Vertex.prototype.copy = function() {

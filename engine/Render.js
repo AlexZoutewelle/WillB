@@ -39,11 +39,11 @@ Render.prototype.setVertexShader = function(vertexShader) {
 Render.prototype.clear = function() {
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
-  var pixelLength = this.imgArray.length;
-
-  for(var i = 0; i < pixelLength; i += 4) {
-    this.imgArray[i + 3] = 255;
-  }
+  // var pixelLength = this.imgArray.length;
+  //
+  // for(var i = 0; i < pixelLength; i += 4) {
+  //   this.imgArray[i + 3] = 255;
+  // }
 }
 /**
 Draws a Uint8ClampedArray to the canvas
