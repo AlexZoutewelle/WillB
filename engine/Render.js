@@ -122,12 +122,21 @@ Render.prototype.render = function(models, camera_inverse, camera) {
     //Let our pixel shaders know that we are working with a new model
     this.newModel(models[m]);
 
-    var vertexCount = modelGeometry.vertices.length;
+    var vertexCount = modelGeometry.vertexIds.length;
 
     //Vertex Transformation
     var verticesOut = []
     for(var i = 0; i < vertexCount; i++) {
-      verticesOut.push(this.vertexTransformer(modelGeometry.vertices[i], camera_inverse, object_transform));
+
+      //Assemble vertex
+      var vertexIds = modelGeometry.vertexIds[i];
+      var vertex_in = new Vertex();
+
+      vertex_in.position = modelGeometry.positions[vertexIds.pos];
+      vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
+      vertex_in.normal = modelGeometry.normals[vertexIds.norm];
+
+      verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse, object_transform));
 
     }
 
@@ -160,13 +169,11 @@ Render.prototype.render = function(models, camera_inverse, camera) {
 //Transformation matrices
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
-
-  //world to camera
-  var vertex_out = vertex.copy();
-  vertex_out.position = camera_inverse.multMatrixVec3(vertex_out.position);
+  //console.log(vertex);
+  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
 
   //Vertex shaders
-  vertex_out = this.invokeVertexShaders(vertex_out)
+  vertex_out = this.invokeVertexShaders(vertex)
 
   return vertex_out;
 }
@@ -221,6 +228,7 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
+  console.log(v0);
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);

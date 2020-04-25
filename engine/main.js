@@ -48,18 +48,20 @@ Promise.all(models).then(function(results) {
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
 
-  object_transform1.fields = object_transform1.translate(-10, 0, 0);
+  object_transform1.fields = object_transform1.translate(-5, 0, 0);
 
   var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(10, 0, 0);
+  object_transform2.fields = object_transform2.translate(5, 0, 0);
 
-  for(var i = 0; i < models[0].vertices.length; i++) {
-    models[0].vertices[i].position = object_transform1.multMatrixVec3(models[0].vertices[i].position);
+  for(var i = 0; i < models[0].positions.length; i++) {
+    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  for(var i = 0; i < models[1].vertices.length; i++) {
-    models[1].vertices[i].position = object_transform2.multMatrixVec3(models[1].vertices[i].position);
+  for(var i = 0; i < models[1].positions.length; i++) {
+    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
   }
+
+
 
   object_transform = new Transformation();
 

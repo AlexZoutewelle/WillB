@@ -36,12 +36,16 @@ FlatShadeVS.prototype.rotateLightDirection = function() {
 
 FlatShadeVS.prototype.getVertex = function(vertex_in) {
 
+  var vertex_out = new Vertex();
+  vertex_out.position = vertex_in.position;
+  vertex_out.normal = vertex_in.normal;
+
   this.rotateLightDirection();
 
-  var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_in.normal)));
+  var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_out.normal)));
 
   var color = this.color.multiplyVector(d.addVector(this.ambient)).multiplyScalar(255);
 
-  vertex_in.color = color;
-  return vertex_in;
+  vertex_out.color = color;
+  return vertex_out;
 }

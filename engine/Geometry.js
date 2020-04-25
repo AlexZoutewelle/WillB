@@ -23,7 +23,7 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
 
   var uvRegx = /^vt\s+(\d+\.*\d*)\s+(\d+\.*\d*)/;
 
-  var vertices = [];
+  var vertexIds = [];
   var positions = [];
   var faces = []
   var uvs = [];
@@ -68,14 +68,15 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
       for(var i = 1, id = 0; i < result.length; i += step, id += 1 ) {
 
         //Create the vertex
-        var position = positions[parseInt(result[i] - 1)];
-        var uv = uvs[parseInt(result[i + 1] - 1)];
-        var normal = normals[parseInt(result[i + 2] - 1)];
+        var posId = parseInt(result[i] - 1);
+        var uvId = parseInt(result[i + 1] - 1);
+        var normalId = parseInt(result[i + 2] - 1);
 
-        vertices.push(new Vertex(position, normal, uv));
+
+        vertexIds.push({pos : posId, uv: uvId, norm: normalId});
 
         //Create the indices
-        indices.push(vertices.length - 1);
+        indices.push(vertexIds.length - 1);
         if(3 % id == 1) {
           //We have the 3 indices for a face. We need to save this to a Face
           faces.push(new Face(indices));
@@ -98,8 +99,11 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
 
     this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
-    this.vertices = vertices;
+    this.vertexIds = vertexIds;
     this.faces = faces;
+    this.positions = positions;
+    this.uvs = uvs;
+    this.normals = normals;
     //this.edges = this.createEdgeList(vertices, faces);
 }
 
