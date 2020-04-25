@@ -70,10 +70,14 @@ Promise.all(models).then(function(results) {
 
 
 
-var count = 0;
 var movement = 1.55
 
 
+//FPS measurement
+var filterStrength = 20;
+var g_frameTime = 0;
+var lastLoop = new Date();
+var thisloop;
 
 function frame() {
 
@@ -172,14 +176,25 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-    requestAnimationFrame(frame);
 
+
+    thisLoop = new Date();
+    var thisFrameTime = thisLoop - lastLoop;
+    g_frameTime += (thisFrameTime - g_frameTime) / 1;
+    lastLoop = thisLoop;
+
+    requestAnimationFrame(frame);
 
 }
 
 function update() {
 }
 
-function render() {
 
-}
+
+//FPS measurement output
+
+var fpsOutput = document.getElementById('fps');
+setInterval(function(){
+  fpsOutput.innerHTML = (1000/g_frameTime).toFixed(1) + " fps";
+}, 1000);
