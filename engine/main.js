@@ -15,8 +15,9 @@ var renderer = new Render(screenWidth, screenHeight);
 //Initialize pixel and vertex shaders
 
 //renderer.setPixelShader(new TextureEffect());
-//renderer.setPixelShader(new DynColorEffect());
-renderer.setPixelShader(new FlatColorEffect());
+renderer.setPixelShader(new DynColorEffect());
+//renderer.setPixelShader(new FlatColorEffect());
+//renderer.setVertexShader(new DefaultVS());
 renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
@@ -42,7 +43,7 @@ var models = [
 Promise.all(models).then(function(results) {
   models = results;
   console.log(models[0]);
-  console.log(models[1]);
+  //console.log(models[1]);
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();

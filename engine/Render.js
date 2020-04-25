@@ -39,11 +39,11 @@ Render.prototype.setVertexShader = function(vertexShader) {
 Render.prototype.clear = function() {
   this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
-  // var pixelLength = this.imgArray.length;
-  //
-  // for(var i = 0; i < pixelLength; i += 4) {
-  //   this.imgArray[i + 3] = 255;
-  // }
+  var pixelLength = this.imgArray.length;
+
+  for(var i = 0; i < pixelLength; i += 4) {
+    this.imgArray[i + 3] = 255;
+  }
 }
 /**
 Draws a Uint8ClampedArray to the canvas
@@ -108,9 +108,7 @@ Render.prototype.newModel = function(model) {
 **/
 Render.prototype.render = function(models, camera_inverse, camera) {
   this.ZBuffer.clear();
-  //console.log(this.vertexShaders[0].lightDirection.position[0].toFixed(3) + " " + this.vertexShaders[0].lightDirection.position[1].toFixed(3) + " " + this.vertexShaders[0].lightDirection.position[2].toFixed(3))
 
-  var screenWidth = this.screenWidth;
   this.clear();
 
   // The virtual image plane
@@ -375,13 +373,9 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
     var xEnd = Math.ceil(itEdge1.position.position[0] - 0.5);
 
     if(xStart < 0) {
-      //console.log("xStart: " + xStart + " xEnd: " + xEnd);
-
       xStart = 0;
     }
     if(xEnd > this.screenWidth) {
-      //console.log("xStart: " + xStart + " xEnd: " + xEnd);
-
       xEnd = this.screenWidth ;
     }
 
@@ -396,8 +390,6 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
       //Get the original z value. Use it to get the 'real' texture coordinates.
       var z = 1 / tc.position.position[2];
-
-
 
         if(this.ZBuffer.Ztest(x,y,z)) {
 
