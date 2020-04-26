@@ -1,3 +1,5 @@
+var rotationSpeed = 0.0025;
+
 function FlatShadeVS() {
   this.lightDirection = new Vector3(0,0,1);
   this.diffuse = new Vector3(1,1,1);
@@ -12,22 +14,22 @@ FlatShadeVS.prototype.newModel = function(newModel) {
 
 FlatShadeVS.prototype.rotateLightDirection = function() {
   if(playerState.input.i === true) {
-    this.rot.fields = this.rot.rotate(0, 0, 0.025);
+    this.rot.fields = this.rot.rotate(0, 0, rotationSpeed);
   }
   if(playerState.input.j === true) {
-    this.rot.fields = this.rot.rotate(-0.025, 0 , 0);
+    this.rot.fields = this.rot.rotate(-rotationSpeed, 0 , 0);
   }
   if(playerState.input.k === true) {
-    this.rot.fields = this.rot.rotate(0, 0, -0.025);
+    this.rot.fields = this.rot.rotate(0, 0, -rotationSpeed);
   }
   if(playerState.input.l === true) {
-    this.rot.fields = this.rot.rotate(0.025, 0, 0 );
+    this.rot.fields = this.rot.rotate(rotationSpeed, 0, 0 );
   }
   if(playerState.input.u === true) {
-    this.rot.fields = this.rot.rotate(0, 0.025, 0 );
+    this.rot.fields = this.rot.rotate(0, rotationSpeed, 0 );
   }
   if(playerState.input.o === true) {
-    this.rot.fields = this.rot.rotate(0, -0.025, 0 );
+    this.rot.fields = this.rot.rotate(0, -rotationSpeed, 0 );
   }
 
   this.lightDirection = this.rot.multMatrixVec3(this.lightDirection);

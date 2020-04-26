@@ -182,10 +182,7 @@ function onkeyup(e, key, pressed) {
       playerState.input.strafeRight = pressed;
       e.preventDefault();
       break;
-    case KEY.ESC:
-      playerState.input.escape = pressed;
-      e.preventDefault();
-      break;
+
     case KEY.SPACE:
       playerState.input.jump = pressed;
       e.preventDefault();

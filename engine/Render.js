@@ -241,7 +241,8 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
 Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
 
-  this.renderFace(v0, v1, v2, texture);
+  //this.renderFace(v0, v1, v2, texture);
+  this.drawFace(v0, v1, v2 )
 }
 
 
@@ -324,96 +325,109 @@ Render.prototype.renderFace = function(v0, v1, v2, texture) {
 }
 
 Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
-  var dy = (v0.position.position[1] - v2.position.position[1]);
+  // var dy = (v0.position.position[1] - v2.position.position[1]);
+  //
+  // //dv0 and dv1 are the edge steps
+  // var dv0 = v1.subtract(v0).divideScalar(dy);
+  // var dv1 = v2.subtract(v0).divideScalar(dy);
+  //
+  // //Right edge interpolant    //Maybe make a copying function for vertices?
+  // var itEdge1 = v0;
 
-  //dv0 and dv1 are the edge steps
-  var dv0 = v1.subtract(v0).divideScalar(dy);
-  var dv1 = v2.subtract(v0).divideScalar(dy);
+  // this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
+  this.drawFace(v0, v1, v2 )
 
-  //Right edge interpolant    //Maybe make a copying function for vertices?
-  var itEdge1 = v0;
-
-  this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
 }
 
 Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
 
-  var dy = (v2.position.position[1] - v0.position.position[1]);
+  // var dy = (v2.position.position[1] - v0.position.position[1]);
+  //
+  // //dv0 and dv1 are the edge raster_pixels
+  // var dv0 = v0.subtract(v2).divideScalar(dy);
+  // var dv1 = v1.subtract(v2).divideScalar(dy);
+  //
+  // var itEdge1 = v1;
 
-  //dv0 and dv1 are the edge raster_pixels
-  var dv0 = v0.subtract(v2).divideScalar(dy);
-  var dv1 = v1.subtract(v2).divideScalar(dy);
+  // this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
+  this.drawFace(v0,v1, v2);
 
-  var itEdge1 = v1;
-
-  this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
 }
 
 Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
 
-  //left edge interpolant is always the same, no matter the case.
-  var itEdge0 = v0;
+  //Bounding box
+  var minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+  var maxX = getMax3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
 
-  var yStart = Math.ceil(v0.position.position[1] - 0.5);
-  var yEnd = Math.ceil(v2.position.position[1] - 0.5);
+  var minY = getMin3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+  var maxY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
 
-
-  if(yStart < 0) {
-    yStart = 0;
-  }
-
-  if(yEnd > this.screenHeight) {
-    yEnd = this.screenHeight ;
-  }
-
-  itEdge0 = itEdge0.add(dv0.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
-  itEdge1 = itEdge1.add(dv1.multiplyScalar(yStart + 0.5 - v0.position.position[1]));
+  //2d clipping
+  minX = Math.max(0, minX);
+  minY = Math.max(0, minY);
+  maxX = Math.min(this.screenWidth - 1, maxX);
+  maxY = Math.min(this.screenHeight - 1, maxY);
 
 
-  //uv texture coords clamp
-  var texture_width = texture.width;
-  var texture_height = texture.height;
-  var tex_clamp_x = texture_width;
-  var tex_clamp_y = texture_height;
+  //Face area
+  var area = EdgeFunction(v0.position,v1.position,v2.position);
+  //loop over bounding box
 
 
+  for(var y = minY;y < maxY; y += 1){
+    for(var x = minX; x < maxX; x += 1) {
 
+      var currentP = new Vector3(x, y, 1);
+      //edge check
+      var w0 = EdgeFunction(v1.position, v2.position, currentP);
+      var w1 = EdgeFunction(v2.position, v0.position, currentP);
+      var w2 = EdgeFunction(v0.position, v1.position, currentP);
+      //console.log(w0 + " " + w1 + " " + w2);
 
-  for(var y = yStart; y > yEnd; y--) {
+      if(w0 >= 0 && w1 >= 0 && w2 >= 0) {
 
-    var xStart = Math.ceil(itEdge0.position.position[0] - 0.5);
-    var xEnd = Math.ceil(itEdge1.position.position[0] - 0.5);
+          //barycentric coordinates
+          w0 /= area;
+          w1 /= area;
+          w2 /= area;
+          //z-buffer test
+          var z = v0.position.position[2] + (w1 * (v1.position.position[2] - v0.position.position[2]) ) + (w2 * (v2.position.position[2] - v0.position.position[2]));
 
-    if(xStart < 0) {
-      xStart = 0;
-    }
-    if(xEnd > this.screenWidth) {
-      xEnd = this.screenWidth ;
-    }
+          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], z)) {
 
+            //Assemble Vertex
+            var p = new Vertex();
+            p.position = new Vector3(x, y, z);
 
-    var tc = itEdge0;
+            //Interpolate the vertex attributes
+            // console.log(v0);
 
-    var tcScanStep = itEdge1.subtract(tc).divideScalar(itEdge1.position.position[0] - itEdge0.position.position[0]);
+            // var color = new Vector3(0,0,0);
+            // color.position[0] = v0.color.position[0] + (w1 * (v1.color.position[0] - v0.color.position[0]) ) + (w2 * (v2.color.position[0] - v0.color.position[0]));
+            // color.position[1] = v0.color.position[1] + (w1 * (v1.color.position[1] - v0.color.position[1]) ) + (w2 * (v2.color.position[1] - v0.color.position[1]));
+            // color.position[2] = v0.color.position[2] + (w1 * (v1.color.position[2] - v0.color.position[2]) ) + (w2 * (v2.color.position[2] - v0.color.position[2]));
+            // p.color = color;
 
-    tc = itEdge0.add(tcScanStep.multiplyScalar(xStart + 0.5 - itEdge0.position.position[0]));
+            var uv = new Vector3(0,0,0);
+            uv.position[0] = v0.uv.position[0] + (w1 * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2 * (v2.uv.position[0] - v0.uv.position[0]));
+            uv.position[1] = v0.uv.position[1] + (w1 * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2 * (v2.uv.position[1] - v0.uv.position[1]));
+            uv.position[2] = v0.uv.position[2] + (w1 * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2 * (v2.uv.position[2] - v0.uv.position[2]));
+            p.uv = uv;
 
-    for(var x = xStart; x < xEnd; x++) {
+            //draw
+            this.drawPixel(x, y, this.invokePixelShaders(p));
+          }
 
-      //Get the original z value. Use it to get the 'real' texture coordinates.
-      var z = 1 / tc.position.position[2];
-
-        if(this.ZBuffer.Ztest(x,y,z)) {
-
-        this.drawPixel(x, y, this.invokePixelShaders(tc));
       }
 
-      tc = tc.add(tcScanStep);
-    }
 
-      itEdge0 = itEdge0.add(dv0);
-      itEdge1 = itEdge1.add(dv1);
+
+
+    }
   }
+
+
 }
 
 //Invoke all our pixels shaders on a given vertex
@@ -461,12 +475,11 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   var zInv = (1/vertex.position.position[2]);
   //console.log(zInv);
 
-  vertex = vertex.multiplyScalar(-zInv);
+  //vertex = vertex.multiplyScalar(-zInv);
 
   //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
-  vertex.position.position[0] = (vertex.position.position[0] )  * Znear;
-  vertex.position.position[1] = (vertex.position.position[1] ) * Znear;
-  vertex.position.position[2] = zInv;
+  vertex.position.position[0] = (vertex.position.position[0] )  * Znear / vertex.position.position[2];
+  vertex.position.position[1] = (vertex.position.position[1] ) * Znear / vertex.position.position[2];
   // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
   //console.log("new");
   //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
@@ -478,6 +491,7 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //raster coords (pixels)
   vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
   vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
+  // vertex.position.position[2] = zInv;
   return vertex;
 }
 
