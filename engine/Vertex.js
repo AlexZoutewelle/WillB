@@ -1,7 +1,5 @@
-function Vertex(position, normal, uv) {
-  this.position = position || new Vector3();
-  this.normal = normal || new Vector3();
-  this.uv = uv || new Vector2();
+function Vertex() {
+
 }
 
 //Operations between vertices

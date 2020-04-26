@@ -17,14 +17,15 @@ var renderer = new Render(screenWidth, screenHeight);
 //renderer.setPixelShader(new TextureEffect());
 //renderer.setPixelShader(new DynColorEffect());
 renderer.setPixelShader(new FlatColorEffect());
-renderer.setVertexShader(new FlatShadeVS());
+renderer.setVertexShader(new DefaultVS());
+//renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
 
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -90],
+        [0, 0, 1, -40],
         [0, 0, 0, 1]
 ]);
 
@@ -35,30 +36,32 @@ var model_name1 = "cube";
 var model_name2 = "sphere";
 
 var models = [
-  mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
+  //mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
   mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
 Promise.all(models).then(function(results) {
   models = results;
   console.log(models[0]);
-  console.log(models[1]);
+  //console.log(models[1]);
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
 
-  object_transform1.fields = object_transform1.translate(-10, 0, 0);
+  object_transform1.fields = object_transform1.translate(-5, 0, 0);
 
   var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(10, 0, 0);
+  object_transform2.fields = object_transform2.translate(5, 0, 0);
 
-  for(var i = 0; i < models[0].vertices.length; i++) {
-    models[0].vertices[i].position = object_transform1.multMatrixVec3(models[0].vertices[i].position);
+  for(var i = 0; i < models[0].positions.length; i++) {
+    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  for(var i = 0; i < models[1].vertices.length; i++) {
-    models[1].vertices[i].position = object_transform2.multMatrixVec3(models[1].vertices[i].position);
-  }
+  // for(var i = 0; i < models[1].positions.length; i++) {
+  //   models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  // }
+
+
 
   object_transform = new Transformation();
 
@@ -70,10 +73,14 @@ Promise.all(models).then(function(results) {
 
 
 
-var count = 0;
 var movement = 1.55
 
 
+//FPS measurement
+var filterStrength = 20;
+var g_frameTime = 0;
+var lastLoop = new Date();
+var thisloop;
 
 function frame() {
 
@@ -172,14 +179,25 @@ function frame() {
   // console.log(object_transform.fields[3][0] + " "  + object_transform.fields[3][1] + " " + object_transform.fields[3][2] + " "  + object_transform.fields[3][3]);
   // console.log("------------------");
 
-    requestAnimationFrame(frame);
 
+
+    thisLoop = new Date();
+    var thisFrameTime = thisLoop - lastLoop;
+    g_frameTime += (thisFrameTime - g_frameTime) / 1;
+    lastLoop = thisLoop;
+
+    requestAnimationFrame(frame);
 
 }
 
 function update() {
 }
 
-function render() {
 
-}
+
+//FPS measurement output
+
+var fpsOutput = document.getElementById('fps');
+setInterval(function(){
+  fpsOutput.innerHTML = (1000/g_frameTime).toFixed(1) + " fps";
+}, 1000);
