@@ -10,6 +10,10 @@ DynColorEffect.prototype.getColor = function(vert_in) {
   var zInv = 1 / vert_in.position.position[2]
 
   var color = vert_in.color;
+  // color.position[0] < 0 ? color.position[0] = 0 : color.position[0] = color.position[0];
+  // color.position[1] < 0 ? color.position[1] = 0 : color.position[1] = color.position[1];
+  // color.position[2] < 0 ? color.position[2] = 0 : color.position[2] = color.position[2];
+
   var position = vert_in.position;
 
   var max = color.position[0];
@@ -37,12 +41,16 @@ DynColorEffect.prototype.getColor = function(vert_in) {
 
   var r_v = -(1/this.screenWidth) * posX + 1;
   var r = Math.trunc(r_v * max);
+  if(r < 0) {r = -r;}
 
   var g_v = -(1/this.screenHeight) * posY + 1;
   var g = Math.trunc(g_v * max);
+  if(g < 0) {g = -g;}
 
   var b_v = -(1/this.screenHeight) * posZ + 1;
   var b = Math.trunc(max - posZ);
+  if(b < 0) {b = -b;}
+
   return [r ,
           g,
           b,

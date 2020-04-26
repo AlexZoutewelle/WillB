@@ -45,7 +45,10 @@ FlatShadeVS.prototype.getVertex = function(vertex_in) {
   var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_out.normal)));
 
   var color = this.color.multiplyVector(d.addVector(this.ambient)).multiplyScalar(255);
-
+  // color.position[0] = Math.trunc(color.position[0]);
+  // color.position[1] = Math.trunc(color.position[1]);
+  // color.position[2] = Math.trunc(color.position[2]);
   vertex_out.color = color;
+
   return vertex_out;
 }

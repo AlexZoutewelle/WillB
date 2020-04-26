@@ -15,17 +15,17 @@ var renderer = new Render(screenWidth, screenHeight);
 //Initialize pixel and vertex shaders
 
 //renderer.setPixelShader(new TextureEffect());
-renderer.setPixelShader(new DynColorEffect());
-//renderer.setPixelShader(new FlatColorEffect());
-//renderer.setVertexShader(new DefaultVS());
-renderer.setVertexShader(new FlatShadeVS());
+//renderer.setPixelShader(new DynColorEffect());
+renderer.setPixelShader(new FlatColorEffect());
+renderer.setVertexShader(new DefaultVS());
+//renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
 
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -90],
+        [0, 0, 1, -40],
         [0, 0, 0, 1]
 ]);
 
@@ -36,7 +36,7 @@ var model_name1 = "cube";
 var model_name2 = "sphere";
 
 var models = [
-  mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
+  //mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
   mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
@@ -57,9 +57,9 @@ Promise.all(models).then(function(results) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  for(var i = 0; i < models[1].positions.length; i++) {
-    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
-  }
+  // for(var i = 0; i < models[1].positions.length; i++) {
+  //   models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  // }
 
 
 

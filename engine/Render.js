@@ -11,8 +11,11 @@ function Render(screenWidth, screenHeight) {
   //console.log(this.ctx);
   this.screenWidth = screenWidth;
   this.screenHeight = screenHeight;
-  console.log(screenWidth);
-  console.log(screenHeight);
+  this.imageData = this.ctx.getImageData(0,0, screenWidth, screenHeight);
+  this.buf = new ArrayBuffer(this.imageData.data.length);
+  this.buf8 = new Uint8ClampedArray(this.buf);
+  this.buf32 = new Uint32Array(this.buf);
+
 
   this.ZBuffer = new ZBuffer(screenWidth, screenHeight);
 
@@ -37,12 +40,15 @@ Render.prototype.setVertexShader = function(vertexShader) {
 }
 
 Render.prototype.clear = function() {
-  this.imgArray = new Uint8ClampedArray(4 * this.screenWidth * this.screenHeight);
 
-  var pixelLength = this.imgArray.length;
-
-  for(var i = 0; i < pixelLength; i += 4) {
-    this.imgArray[i + 3] = 255;
+  for(var y = 0; y < this.screenHeight; ++y) {
+    for(var x = 0; x < this.screenWidth; ++x) {
+      this.buf32[y * this.screenWidth + x] =
+        (255 << 24) |
+        (0   << 16) |
+        (0   <<  8) |
+        0;
+    }
   }
 }
 /**
@@ -50,9 +56,8 @@ Draws a Uint8ClampedArray to the canvas
 This array holds 4 elements for each pixel: R G B and A, values are between 0 and 255
 **/
 Render.prototype.draw = function() {
-
-  var imageData = new ImageData(this.imgArray, this.screenWidth, this.screenHeight);
-  this.ctx.putImageData(imageData, 0, 0);
+  this.imageData.data.set(this.buf8);
+  this.ctx.putImageData(this.imageData, 0, 0);
 }
 
 
@@ -87,12 +92,12 @@ Render.prototype.drawPixelAlt = function(x, y, r, g, b, a) {
 }
 
 Render.prototype.drawPixel = function(x, y, color) {
-  var pixel = ((x * 4) + (this.screenWidth * y * 4));
-
-  this.imgArray[pixel] = color[0];
-  this.imgArray[pixel + 1] = color[1];
-  this.imgArray[pixel + 2] = color[2];
-  this.imgArray[pixel + 3] = color[3];
+  var pixel = (y * this.screenWidth + x);
+  this.buf32[pixel] =
+    (color[3] << 24)  |   //A
+    (color[0] << 16)  |   //R
+    (color[1] << 8)   |   //G
+    (color[2]);           //B
 }
 
 Render.prototype.newModel = function(model) {
@@ -142,7 +147,7 @@ Render.prototype.render = function(models, camera_inverse, camera) {
 
 
 
-    //Trangle assembly
+    //Triangle assembly
     var faceCount = modelGeometry.faces.length;
     for (var i = 0; i < faceCount; i++) {
 
@@ -228,7 +233,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
-  console.log(v0);
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
