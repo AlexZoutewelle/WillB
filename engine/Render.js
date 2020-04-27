@@ -80,17 +80,6 @@ var cleft = -cright;
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-Render.prototype.drawPixelAlt = function(x, y, r, g, b, a) {
-  var pixel = ((x * 4) + (this.screenWidth * y * 4));
-
-
-  this.imgArray[pixel] = r;
-  this.imgArray[pixel + 1] = g;
-  this.imgArray[pixel + 2] = b;
-  this.imgArray[pixel + 3] = a;
-
-}
-
 Render.prototype.drawPixel = function(x, y, color) {
   var pixel = (y * this.screenWidth + x);
   this.buf32[pixel] =
@@ -99,6 +88,7 @@ Render.prototype.drawPixel = function(x, y, color) {
     (color[1] << 8)   |   //G
     (color[2]);           //B
 }
+
 
 Render.prototype.newModel = function(model) {
   var pixelShader_count = this.pixelShaders.length;
@@ -367,41 +357,58 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
   maxX = Math.min(this.screenWidth - 1, maxX);
   maxY = Math.min(this.screenHeight - 1, maxY);
 
+  //Setting up constants for the edge function. A is the unit step on the x-axis. B is the unit step on the y-axis
+  //v1, v2, p
+  var A12 = v1.position.position[1] - v2.position.position[1];
+  var B12 = v2.position.position[0] - v1.position.position[0];
+
+  //v2, v0, p
+  var A20 = v2.position.position[1] - v0.position.position[1];
+  var B20 = v0.position.position[0] - v2.position.position[0];
+
+  //v0, v1, p
+  var A01 = v0.position.position[1] - v1.position.position[1];
+  var B01 = v1.position.position[0] - v0.position.position[0];
 
   //Face area
   var area = EdgeFunction(v0.position,v1.position,v2.position);
+
+  var currentP = new Vector3(minX, minY, 1);
+  //Set up barycentric coordinates at minX and minY
+
+
+  var w0_in = EdgeFunction(v1.position, v2.position, currentP);
+  var w1_in = EdgeFunction(v2.position, v0.position, currentP);
+  var w2_in = EdgeFunction(v0.position, v1.position, currentP);
+
   //loop over bounding box
+  for(currentP.position[1] = minY; currentP.position[1] < maxY; currentP.position[1] += 1){
 
+    //Barycentric coordinates at the start of the current row
+    var w0 = w0_in;
+    var w1 = w1_in;
+    var w2 = w2_in;
 
-  for(var y = minY;y < maxY; y += 1){
-    for(var x = minX; x < maxX; x += 1) {
-
-      var currentP = new Vector3(x, y, 1);
-      //edge check
-      var w0 = EdgeFunction(v1.position, v2.position, currentP);
-      var w1 = EdgeFunction(v2.position, v0.position, currentP);
-      var w2 = EdgeFunction(v0.position, v1.position, currentP);
-
+    for(currentP.position[0] = minX; currentP.position[0] < maxX; currentP.position[0] += 1) {
       if(w0 >= 0 && w1 >= 0 && w2 >= 0) {
 
           //barycentric coordinates
-          w0 /= area;
-          w1 /= area;
-          w2 /= area;
+          var w0_current =  w0 / area;
+          var w1_current =  w1 / area;
+          var w2_current =  w2 / area;
 
           //z-buffer test
 
           //The vertices' Z is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
-          var z = 1 / (v0.position.position[2] + (w1 * (v1.position.position[2] - v0.position.position[2]) ) + (w2 * (v2.position.position[2] - v0.position.position[2])));
+          currentP.position[2] = 1 / (v0.position.position[2] + (w1_current * (v1.position.position[2] - v0.position.position[2]) ) + (w2_current * (v2.position.position[2] - v0.position.position[2])));
 
-          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], z)) {
+          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
 
             //Assemble Vertex
             var p = new Vertex();
-            p.position = new Vector3(x, y, z);
+            p.position = currentP;
 
             //Interpolate the vertex attributes
-            // console.log(v0);
 
             // var color = new Vector3(0,0,0);
             // color.position[0] = v0.color.position[0] + (w1 * (v1.color.position[0] - v0.color.position[0]) ) + (w2 * (v2.color.position[0] - v0.color.position[0]));
@@ -410,21 +417,26 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             // p.color = color;
 
             var uv = new Vector3(0,0,0);
-            uv.position[0] = v0.uv.position[0] + (w1 * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2 * (v2.uv.position[0] - v0.uv.position[0]));
-            uv.position[1] = v0.uv.position[1] + (w1 * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2 * (v2.uv.position[1] - v0.uv.position[1]));
-            uv.position[2] = v0.uv.position[2] + (w1 * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2 * (v2.uv.position[2] - v0.uv.position[2]));
+            uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
+            uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
+            uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
             p.uv = uv;
 
             //draw
-            this.drawPixel(x, y, this.invokePixelShaders(p));
+            this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p));
           }
-
       }
-
-
-
+      //One unit step on the x-axis
+      w0 += A12;
+      w1 += A20;
+      w2 += A01;
 
     }
+    //One unit step on the y-axis
+    w0_in += B12;
+    w1_in += B20;
+    w2_in += B01;
+
   }
 
 
