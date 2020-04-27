@@ -23,14 +23,16 @@ TextureEffect.prototype.newModel = function(model) {
 //using an (interpolated) vertex, retrieve the color on the position on the texture
 TextureEffect.prototype.getColor = function(vertex) {
 
-  // var z = 1 / vert_in.position.position[2];
-  // var vertex = vert_in.multiplyScalar(z);
-  //console.log(vertex.uv);
-  var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);
+
+  //Perspective correction: multiply all the uv coordinates by the vertex' Z position
+  var cUV = vertex.uv.multiplyScalar(vertex.position.position[2]);
+
+
+  var textureX = Math.max(Math.min(Math.trunc(cUV.position[0] * this.texture_width), this.tex_clamp_x), 0);
   if(textureX < 0) {
     textureX = 0;
   }
-  var textureY = Math.max(Math.min(Math.trunc(vertex.uv.position[1] * this.texture_height), this.tex_clamp_y), 0);
+  var textureY = Math.max(Math.min(Math.trunc(cUV.position[1] * this.texture_height), this.tex_clamp_y), 0);
   if(textureY < 0) {
     textureY = 0;
   }

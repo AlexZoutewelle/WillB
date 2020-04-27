@@ -145,8 +145,6 @@ Render.prototype.render = function(models, camera_inverse, camera) {
 
     }
 
-
-
     //Triangle assembly
     var faceCount = modelGeometry.faces.length;
     for (var i = 0; i < faceCount; i++) {
@@ -354,7 +352,7 @@ Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
 
 }
 
-Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
+Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
   //Bounding box
   var minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
@@ -383,7 +381,6 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
       var w0 = EdgeFunction(v1.position, v2.position, currentP);
       var w1 = EdgeFunction(v2.position, v0.position, currentP);
       var w2 = EdgeFunction(v0.position, v1.position, currentP);
-      //console.log(w0 + " " + w1 + " " + w2);
 
       if(w0 >= 0 && w1 >= 0 && w2 >= 0) {
 
@@ -391,8 +388,11 @@ Render.prototype.drawFace = function(v0, v1, v2, texture, dv0, dv1, itEdge1) {
           w0 /= area;
           w1 /= area;
           w2 /= area;
+
           //z-buffer test
-          var z = v0.position.position[2] + (w1 * (v1.position.position[2] - v0.position.position[2]) ) + (w2 * (v2.position.position[2] - v0.position.position[2]));
+
+          //The vertices' Z is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
+          var z = 1 / (v0.position.position[2] + (w1 * (v1.position.position[2] - v0.position.position[2]) ) + (w2 * (v2.position.position[2] - v0.position.position[2])));
 
           if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], z)) {
 
@@ -491,7 +491,7 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //raster coords (pixels)
   vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
   vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
-  // vertex.position.position[2] = zInv;
+  vertex.position.position[2] = zInv;
   return vertex;
 }
 

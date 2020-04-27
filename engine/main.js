@@ -17,7 +17,9 @@ var renderer = new Render(screenWidth, screenHeight);
 renderer.setPixelShader(new TextureEffect());
 //renderer.setPixelShader(new DynColorEffect());
 //renderer.setPixelShader(new FlatColorEffect());
-renderer.setVertexShader(new DefaultVS());
+//renderer.setVertexShader(new DefaultVS());
+renderer.setVertexShader(new TextureVS());
+
 //renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
