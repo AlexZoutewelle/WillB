@@ -14,6 +14,7 @@ TextureEffect.prototype.setTexture = function(texture) {
   this.texture_height = texture.height;
   this.tex_clamp_x = texture.width - 1.0;
   this.tex_clamp_y = texture.height -1.0;
+  this.array_width = texture.width * 4;
 }
 
 TextureEffect.prototype.newModel = function(model) {
@@ -21,24 +22,25 @@ TextureEffect.prototype.newModel = function(model) {
 }
 
 //using an (interpolated) vertex, retrieve the color on the position on the texture
-TextureEffect.prototype.getColor = function(vert_in) {
+TextureEffect.prototype.getColor = function(vertex) {
 
-  var z = 1 / vert_in.position.position[2];
-  var vertex = vert_in.multiplyScalar(-z);
 
-  var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);
+  //Perspective correction: multiply all the uv coordinates by the vertex' Z position
+  var cUV = vertex.uv.multiplyScalar(vertex.position.position[2]);
+
+
+  var textureX = Math.max(Math.min(Math.trunc(cUV.position[0] * this.texture_width), this.tex_clamp_x), 0);
   if(textureX < 0) {
     textureX = 0;
   }
-  var textureY = Math.max(Math.min(Math.trunc(vertex.uv.position[1] * this.texture_height), this.tex_clamp_y), 0);
+  var textureY = Math.max(Math.min(Math.trunc(cUV.position[1] * this.texture_height), this.tex_clamp_y), 0);
   if(textureY < 0) {
     textureY = 0;
   }
 
-  var pos = (textureX * 4) + (this.texture_width * textureY * 4);
-
+  var pos = (textureX * 4) + (this.array_width * textureY);
   return [this.texture.data[pos],
           this.texture.data[pos + 1],
           this.texture.data[pos + 2],
-          this.texture.data[pos + 3]];
+          255];
 }
