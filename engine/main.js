@@ -1,7 +1,16 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 
+var w_v1 = new workerVec(2, 2, 2);
+var v1 = new Vector3(2,2,2);
 
+var v2 = new Vector3(3,3,3);
+
+var w_r = w_v1.multiply(v2);
+var v_r =v2.multiplyVector(v2);
+
+console.log(v_r.position[0] + "  " + v_r.position[1] + " " + v_r.position[2]);
+console.log(w_r.x + "  " + w_r.y + "  " + w_r.z);
 
 var screenWidth = 640;
 var screenHeight = 480;
