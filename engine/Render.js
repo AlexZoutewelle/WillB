@@ -390,7 +390,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
     var w2 = w2_in;
 
     for(currentP.position[0] = minX; currentP.position[0] < maxX; currentP.position[0] += 1) {
-      if(w0 >= 0 && w1 >= 0 && w2 >= 0) {
+      if((w0 | w1 | w2) >= 0) {
 
           //barycentric coordinates
           var w0_current =  w0 / area;
@@ -410,17 +410,17 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
             //Interpolate the vertex attributes
 
-            // var color = new Vector3(0,0,0);
-            // color.position[0] = v0.color.position[0] + (w1 * (v1.color.position[0] - v0.color.position[0]) ) + (w2 * (v2.color.position[0] - v0.color.position[0]));
-            // color.position[1] = v0.color.position[1] + (w1 * (v1.color.position[1] - v0.color.position[1]) ) + (w2 * (v2.color.position[1] - v0.color.position[1]));
-            // color.position[2] = v0.color.position[2] + (w1 * (v1.color.position[2] - v0.color.position[2]) ) + (w2 * (v2.color.position[2] - v0.color.position[2]));
-            // p.color = color;
+            var color = new Vector3(0,0,0);
+            color.position[0] = v0.color.position[0] + (w1_current * (v1.color.position[0] - v0.color.position[0]) ) + (w2_current * (v2.color.position[0] - v0.color.position[0]));
+            color.position[1] = v0.color.position[1] + (w1_current * (v1.color.position[1] - v0.color.position[1]) ) + (w2_current * (v2.color.position[1] - v0.color.position[1]));
+            color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
+            p.color = color;
 
-            var uv = new Vector3(0,0,0);
-            uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
-            uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
-            uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
-            p.uv = uv;
+            // var uv = new Vector3(0,0,0);
+            // uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
+            // uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
+            // uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
+            // p.uv = uv;
 
             //draw
             this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p));

@@ -14,6 +14,7 @@ TextureEffect.prototype.setTexture = function(texture) {
   this.texture_height = texture.height;
   this.tex_clamp_x = texture.width - 1.0;
   this.tex_clamp_y = texture.height -1.0;
+  this.array_width = texture.width * 4;
 }
 
 TextureEffect.prototype.newModel = function(model) {
@@ -37,9 +38,9 @@ TextureEffect.prototype.getColor = function(vertex) {
     textureY = 0;
   }
 
-  var pos = (textureX * 4) + (this.texture_width * textureY * 4);
+  var pos = (textureX * 4) + (this.array_width * textureY);
   return [this.texture.data[pos],
           this.texture.data[pos + 1],
           this.texture.data[pos + 2],
-          this.texture.data[pos + 3]];
+          255];
 }

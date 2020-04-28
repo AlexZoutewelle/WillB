@@ -14,13 +14,13 @@ var renderer = new Render(screenWidth, screenHeight);
 
 //Initialize pixel and vertex shaders
 
-renderer.setPixelShader(new TextureEffect());
-//renderer.setPixelShader(new DynColorEffect());
+//renderer.setPixelShader(new TextureEffect());
+renderer.setPixelShader(new DynColorEffect());
 //renderer.setPixelShader(new FlatColorEffect());
-//renderer.setVertexShader(new DefaultVS());
-renderer.setVertexShader(new TextureVS());
 
-//renderer.setVertexShader(new FlatShadeVS());
+//renderer.setVertexShader(new DefaultVS());
+//renderer.setVertexShader(new TextureVS());
+renderer.setVertexShader(new FlatShadeVS());
 
 //trying out some camera stuff
 
@@ -70,7 +70,7 @@ Promise.all(models).then(function(results) {
   //Models are placed, ready the render
 
 
-  frame();
+  //frame();
 });
 
 

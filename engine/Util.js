@@ -30,5 +30,8 @@ function getMax3(var1, var2, var3) {
 
 function EdgeFunction(v0,v1,v2) {
 
-  return ( ((v1.position[0] - v0.position[0]) * (v2.position[1] - v0.position[1])) - ((v1.position[1] - v0.position[1]) * (v2.position[0] - v0.position[0]))   );
+  return ( v2.position[0] * (v0.position[1] - v1.position[1]) +
+           v2.position[1] * (v1.position[0] - v0.position[0]) +
+           ((v1.position[1] * v0.position[0]) - (v1.position[0] * v0.position[1]))
+        );
 }
