@@ -15,18 +15,22 @@ var renderer = new Render(screenWidth, screenHeight);
 //Initialize pixel and vertex shaders
 
 //var texturePS = new TextureEffect(renderer);
-var dynColorPS = new DynColorEffect(renderer);
+//var dynColorPS = new DynColorEffect(renderer);
 //var flatColorPS = new FlatColorEffect(renderer);
+var ppLightingPS = new PPLightingPS(renderer);
+
 
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
-var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var pointShader = new PointShadeVS(renderer);
+
+var ppLightingVS = new PPLightingVS(renderer);
 
 
 
         //Renderer setup: Point lights
 
-//var pointShader = new PointShadeVS(renderer);
 
         //Renderer setup end
 
@@ -71,8 +75,6 @@ Promise.all(models).then(function(results) {
     models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
   }
 
-  console.log(models[0]);
-  // console.log(models[1]);
 
   object_transform = new Transformation();
 
@@ -174,7 +176,6 @@ function frame() {
     }
 
     renderer.activePixelShader = nextShader;
-
   }
 
   camera_inverse = camera.inverse();

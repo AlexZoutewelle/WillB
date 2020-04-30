@@ -185,6 +185,13 @@ function Vector3(x,y,z) {
   this.position = [x || 0, y || 0, z || 0, 1];
 }
 
+Vector3.prototype.copy = function() {
+  var result = new Vector3();
+  result.position[0] = this.position[0];
+  result.position[1] = this.position[1];
+  result.position[2] = this.position[2];
+  return result;
+}
 Vector3.prototype.translate = function (x,y,z) {
   this.position[0] += x;
   this.position[1] += y;
