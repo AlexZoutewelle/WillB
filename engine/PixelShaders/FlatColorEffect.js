@@ -1,5 +1,5 @@
-function FlatColorEffect() {
-
+function FlatColorEffect(renderer) {
+  renderer.setPixelShader(this);
 }
 
 FlatColorEffect.prototype.newModel = function(model) {

@@ -1,6 +1,8 @@
-function DynColorEffect() {
+function DynColorEffect(renderer) {
   this.screenWidth = 640;
   this.screenHeight = 480;
+
+  renderer.setPixelShader(this);
 }
 
 DynColorEffect.prototype.newModel = function(model) {

@@ -14,19 +14,19 @@ var renderer = new Render(screenWidth, screenHeight);
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//renderer.setPixelShader(new TextureEffect());
-//renderer.setPixelShader(new DynColorEffect());
-renderer.setPixelShader(new FlatColorEffect());
+//var texturePS = new TextureEffect(renderer);
+var dynColorPS = new DynColorEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
 
-//renderer.setVertexShader(new DefaultVS());
-//renderer.setVertexShader(new TextureVS());
-//renderer.setVertexShader(new FlatShadeVS());
+//var defaultVertexShader = new DefaultVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 
         //Renderer setup: Point lights
 
-var pointShader = new PointShadeVS(renderer);
+//var pointShader = new PointShadeVS(renderer);
 
         //Renderer setup end
 
@@ -47,7 +47,7 @@ var model_name2 = "sphere";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
-  //mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
+  mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
 Promise.all(models).then(function(results) {
@@ -56,10 +56,10 @@ Promise.all(models).then(function(results) {
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.translate(-5, 0, 0);
+  object_transform1.fields = object_transform1.translate(-10, 0, 0);
 
   var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(5, 0, 0);
+  object_transform2.fields = object_transform2.translate(10, 0, 0);
 
 
 
@@ -67,9 +67,9 @@ Promise.all(models).then(function(results) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  // for(var i = 0; i < models[1].positions.length; i++) {
-  //   models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
-  // }
+  for(var i = 0; i < models[1].positions.length; i++) {
+    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  }
 
   console.log(models[0]);
   // console.log(models[1]);
@@ -79,11 +79,11 @@ Promise.all(models).then(function(results) {
 
   //model ids
   models[0].id = "n1";
-  // models[1].id = "n2";
+  models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
-  // renderer.models.push(models[1]);
+  renderer.models.push(models[1]);
 
   frame();
 });

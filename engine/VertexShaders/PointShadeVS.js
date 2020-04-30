@@ -1,6 +1,6 @@
 var moveSpeed = 0.0025;
 
-function PointShadeVS() {
+function PointShadeVS(renderer) {
   this.lightPosition = new Vector3(0,1,0);
   this.pos = new Transformation();
   this.color = new Vector3(0.4, 0.8, 0.7);

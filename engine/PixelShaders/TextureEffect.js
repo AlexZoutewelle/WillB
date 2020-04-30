@@ -3,8 +3,8 @@
 //With this information, it will look up a specific spot on a texture image, and return the color of that spot
 
 //So, it must hold a reference to a texture.
-function TextureEffect() {
-
+function TextureEffect(renderer) {
+  renderer.setPixelShader(this);
 }
 
 TextureEffect.prototype.setTexture = function(texture) {

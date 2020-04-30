@@ -1,11 +1,13 @@
 var rotationSpeed = 0.0025;
 
-function FlatShadeVS() {
+function FlatShadeVS(renderer) {
   this.lightDirection = new Vector3(0,0,1);
   this.diffuse = new Vector3(1,1,1);
   this.ambient = new Vector3(0.1, 0.0, 0.1);
   this.color = new Vector3(0.7, 0.7, 0.5);
   this.rot = new Transformation();
+
+  renderer.setVertexShader(this);
 }
 
 FlatShadeVS.prototype.newModel = function(newModel) {
@@ -36,7 +38,7 @@ FlatShadeVS.prototype.rotateLightDirection = function() {
   this.rot = new Transformation();
 }
 
-FlatShadeVS.prototype.getVertex = function(vertex_in) {
+FlatShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
   // var vertex_out = new Vertex();
   // vertex_out.position = vertex_in.position;
@@ -51,6 +53,7 @@ FlatShadeVS.prototype.getVertex = function(vertex_in) {
   // color.position[1] = Math.trunc(color.position[1]);
   // color.position[2] = Math.trunc(color.position[2]);
   vertex_in.color = color;
+  vertex_in.position = camera_inverse.multMatrixVec3(vertex_in.position);
 
   return vertex_in;
 }
