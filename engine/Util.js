@@ -35,3 +35,8 @@ function EdgeFunction(v0,v1,v2) {
            ((v1.position[1] * v0.position[0]) - (v1.position[0] * v0.position[1]))
         );
 }
+
+
+function log(v) {
+  console.log(v.position[0] + " " + v.position[1] + " " + v.position[2]);
+}

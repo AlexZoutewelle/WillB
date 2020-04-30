@@ -1,17 +1,6 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 
-var w_v1 = new workerVec(2, 2, 2);
-var v1 = new Vector3(2,2,2);
-
-var v2 = new Vector3(3,3,3);
-
-var w_r = w_v1.multiply(v2);
-var v_r =v2.multiplyVector(v2);
-
-console.log(v_r.position[0] + "  " + v_r.position[1] + " " + v_r.position[2]);
-console.log(w_r.x + "  " + w_r.y + "  " + w_r.z);
-
 var screenWidth = 640;
 var screenHeight = 480;
 
@@ -21,15 +10,25 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 
+
+          //Renderer setup start
 //Initialize pixel and vertex shaders
 
 //renderer.setPixelShader(new TextureEffect());
-renderer.setPixelShader(new DynColorEffect());
-//renderer.setPixelShader(new FlatColorEffect());
+//renderer.setPixelShader(new DynColorEffect());
+renderer.setPixelShader(new FlatColorEffect());
 
 //renderer.setVertexShader(new DefaultVS());
 //renderer.setVertexShader(new TextureVS());
-renderer.setVertexShader(new FlatShadeVS());
+//renderer.setVertexShader(new FlatShadeVS());
+
+
+
+        //Renderer setup: Point lights
+
+var pointShader = new PointShadeVS(renderer);
+
+        //Renderer setup end
 
 //trying out some camera stuff
 
@@ -48,38 +47,45 @@ var model_name2 = "sphere";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
-  mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
+  //mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
 Promise.all(models).then(function(results) {
   models = results;
-  console.log(models[0]);
-  //console.log(models[1]);
+
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
-
   object_transform1.fields = object_transform1.translate(-5, 0, 0);
 
   var object_transform2 = new Transformation();
   object_transform2.fields = object_transform2.translate(5, 0, 0);
 
+
+
   for(var i = 0; i < models[0].positions.length; i++) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  for(var i = 0; i < models[1].positions.length; i++) {
-    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
-  }
+  // for(var i = 0; i < models[1].positions.length; i++) {
+  //   models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+  // }
 
-
+  console.log(models[0]);
+  // console.log(models[1]);
 
   object_transform = new Transformation();
 
-  //Models are placed, ready the render
 
+  //model ids
+  models[0].id = "n1";
+  // models[1].id = "n2";
 
-  //frame();
+  //Models are placed, hand them over to the renderer
+  renderer.models.push(models[0]);
+  // renderer.models.push(models[1]);
+
+  frame();
 });
 
 
@@ -173,7 +179,7 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
-  renderer.render(models, camera_inverse, camera);
+  renderer.render(camera_inverse, camera);
 
 
   // console.log("CAMERA -----------");

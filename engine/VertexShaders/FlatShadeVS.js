@@ -38,19 +38,19 @@ FlatShadeVS.prototype.rotateLightDirection = function() {
 
 FlatShadeVS.prototype.getVertex = function(vertex_in) {
 
-  var vertex_out = new Vertex();
-  vertex_out.position = vertex_in.position;
-  vertex_out.normal = vertex_in.normal;
+  // var vertex_out = new Vertex();
+  // vertex_out.position = vertex_in.position;
+  // vertex_out.normal = vertex_in.normal;
 
   this.rotateLightDirection();
 
-  var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_out.normal)));
+  var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_in.normal)));
 
   var color = this.color.multiplyVector(d.addVector(this.ambient)).multiplyScalar(255);
   // color.position[0] = Math.trunc(color.position[0]);
   // color.position[1] = Math.trunc(color.position[1]);
   // color.position[2] = Math.trunc(color.position[2]);
-  vertex_out.color = color;
+  vertex_in.color = color;
 
-  return vertex_out;
+  return vertex_in;
 }

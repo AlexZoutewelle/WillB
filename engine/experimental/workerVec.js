@@ -4,47 +4,67 @@ function workerVec(x, y, z) {
   this.z = z;
   this.q = 1;
 
-  this.workerx = new Worker('/engine/experimental/math.js');
-  this.workery = new Worker('/engine/experimental/math.js');
-  this.workerz = new Worker('/engine/experimental/math.js');
-  this.workerq = new Worker('/engine/experimental/math.js');
-
-
 }
+
+workerx = new Worker('/engine/experimental/math.js');
+workery = new Worker('/engine/experimental/math.js');
+workerz = new Worker('/engine/experimental/math.js');
 
 
 //Parallel Hadamard product
-workerVec.prototype.multiply = function(vector) {
+ workerVec.prototype.multiply = async function(vector) {
+
+
 
   var result = new workerVec();
+  var promises = [];
 
-  var thisx = this.x; var vx = vector.position[0];
-  var messagex = {multiply: {thisx, vx}}
+  promises.push(
+    new Promise(function(resolve,reject) {
 
-  var thisy = this.y; var vy = vector.position[1];
-  var messagey = {multiply: {thisy, vy}}
+    var var1 = 2; var var2 = vector.position[0];
+    var messagex = {multiply: {var1, var2}}
 
-  var thisz = this.z; var vz = vector.position[2];
-  var messagez = {multiply: {thisz,vz}}
+    workerx.postMessage(messagex);
+
+    workerx.addEventListener('message', e => {
+      console.log(e.data.result);
+      resolve( e.data.result);
+    });
+
+  }));
+
+  promises.push(
+    new Promise(function(resolve,reject) {
+
+    var var1 = 2; var var2 = vector.position[1];
+    var messagey = {multiply: {var1, var2}}
+
+    workery.postMessage(messagey);
 
 
+    workery.addEventListener('message', e => {
+      console.log(e.data.result);
+      resolve(e.data.result);
+    });
 
-  this.workerx.postMessage(messagex);
-  this.workery.postMessage(messagey);
-  this.workerz.postMessage(messagez);
+  }));
 
-  this.workerx.onMessage = function(e) {
-    result.x = e.data.result;
-  }
+  promises.push(new Promise(function(resolve,reject) {
+    var var1 = 2; var var2 = vector.position[2];
+    var messagez = {multiply: {var1, var2}}
+    workerz.postMessage(messagez);
 
-  this.workery.onMessage = function(e) {
-    result.y = e.data.result;
-  }
+    workerz.addEventListener('message', e => {
+      resolve( e.data.result);
+    });
 
-  this.workerz.onMessage = function(e) {
-    result.z = e.data.result;
-  }
+  }));
 
-  return result;
+  await Promise.all(promises).then(function(data) {
+    console.log(data);
+      return data;
+  });
+
 
 }

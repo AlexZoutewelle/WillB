@@ -19,6 +19,9 @@ function Render(screenWidth, screenHeight) {
 
   this.ZBuffer = new ZBuffer(screenWidth, screenHeight);
 
+  //List of Models
+  this.models = [];
+
   //A list of pixel shaders
   this.pixelShaders = [];
   this.activePixelShader = 0;
@@ -95,23 +98,32 @@ Render.prototype.newModel = function(model) {
   for(var i = 0; i < pixelShader_count; i++) {
     this.pixelShaders[i].newModel(model);
   }
+
+  var vertexShader_count = this.vertexShaders.length;
+  for(var i = 0; i < vertexShader_count; i++) {
+    this.vertexShaders[i].newModel(model);
+  }
 }
+
 
 /**
 *
 * Main rendering function
 **/
-Render.prototype.render = function(models, camera_inverse, camera) {
+Render.prototype.render = function(camera_inverse, camera) {
+  //console.log(this.vertexShaders[0].lightPosition.position[0] + "  " + this.vertexShaders[0].lightPosition.position[1] + "  " + this.vertexShaders[0].lightPosition.position[2]);
   this.ZBuffer.clear();
 
   this.clear();
+
 
   // The virtual image plane
   var canvasWidth = 1;
   var canvasHeight =  1;
 
   //Loop over all models currently in the scene
-  for(var m = 0; m < models.length; m++) {
+  for(var m = 0; m < this.models.length; m++) {
+    var models = this.models;
     var modelGeometry = models[m];
 
     //Let our pixel shaders know that we are working with a new model
@@ -157,22 +169,29 @@ Render.prototype.render = function(models, camera_inverse, camera) {
 
 
   //Actually draw the image array on the canvas
+
+
+
   this.draw();
 }
 //Transformation matrices
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
   //console.log(vertex);
-  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
+
+
+
+  //We must transform the positions of the vertex inside the shader!
+  //Otherwise, if we want to do point lights, we can not do comparins between positions: they will be in a differernt coordinate system!
 
   //Vertex shaders
-  vertex_out = this.invokeVertexShaders(vertex)
+  vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
   return vertex_out;
 }
 
-Render.prototype.invokeVertexShaders = function(vertex_in) {
-  var vertex_out = this.vertexShaders[this.activeVertexShader].getVertex(vertex_in);
+Render.prototype.invokeVertexShaders = function(vertex_in, camera_inverse) {
+  var vertex_out = this.vertexShaders[this.activeVertexShader].getVertex(vertex_in, camera_inverse);
   return vertex_out;
 }
 

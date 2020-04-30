@@ -91,14 +91,19 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     //Now that we have parsed all the lines in the .obj file, we must make a list of edges
     //var edges = this.createEdgeList(positions, faces);
 
-    //Finally, get its texture image, and create a context for it
-    var image = document.getElementById(object_name);
-    var canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+    if(object_name !== undefined) {
+      //Finally, get its texture image, and create a context for it
+      var image = document.getElementById(object_name);
+      var canvas = document.createElement('canvas');
 
-    this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
+      canvas.width = image.width;
+      canvas.height = image.height;
+      canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+
+      this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
+    }
+
+
     this.vertexIds = vertexIds;
     this.faces = faces;
     this.positions = positions;
@@ -214,6 +219,10 @@ Vector3.prototype.normalize = function() {
   return this;
 }
 
+Vector3.prototype.length = function() {
+  return Math.sqrt( (this.position[0] **2) + (this.position[1] ** 2) + (this.position[2] **2) );
+}
+
 Vector3.prototype.multiplyVector = function(vector) {
   var result = new Vector3();
   result.position[0] = this.position[0] * vector.position[0];
@@ -227,6 +236,7 @@ Vector3.prototype.divideVector = function(vector) {
   result.position[0] = this.position[0] / vector.position[0];
   result.position[1] = this.position[1] / vector.position[1];
   result.position[2] = this.position[2] / vector.position[2];
+  return result;
 }
 Vector3.prototype.subtractVector = function(vector) {
   var result = new Vector3();
