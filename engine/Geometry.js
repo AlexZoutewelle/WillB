@@ -18,7 +18,9 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
   //original
   //var faceRegx = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/;
   var faceRegx = /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)/;
-  //var faceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
+
+  //Regex for models whose faces only consist of positions.
+  var simpleFaceRegx = /^f\s+(-?\d+)\/?\s?(-?\d+)\/?\s?(-?\d+)/;
   var normalRegx = /^vn\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)\s+([\d\.\+\-eE]+)/;
 
   var uvRegx = /^vt\s+(\d+\.*\d*)\s+(\d+\.*\d*)/;
@@ -81,6 +83,44 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
           //We have the 3 indices for a face. We need to save this to a Face
           faces.push(new Face(indices));
           //Reset the indices array
+          indices = [];
+        }
+      }
+    }
+
+    else if((result = simpleFaceRegx.exec(line)) != null) {
+      var indices = [];
+      //console.log(result);
+      for(var i = 1, id= 0; i < result.length; i++, id++) {
+        var posId = parseInt(result[i] - 1);
+
+        vertexIds.push({pos: posId});
+        indices.push(vertexIds.length - 1);
+
+        if(indices.length === 3) {
+          //console.log(indices);
+          faces.push(new Face(indices));
+
+          //Compute normal
+          //Get the positions
+          var latestVertexId = vertexIds.length - 1;
+
+          var p1 = positions[vertexIds[latestVertexId].pos];
+          var p2 = positions[vertexIds[latestVertexId - 1].pos]
+          var p3 = positions[vertexIds[latestVertexId - 2].pos]
+
+          var edge1 = p1.subtractVector(p2)
+          var edge2 = p3.subtractVector(p2);
+
+          var normal = edge1.cross(edge2).normalize();
+          //push the normal to the normals array
+          normals.push(normal);
+
+          //push the id of this normal to the vertexIds
+          vertexIds[latestVertexId]['norm'] = normals.length - 1;
+          vertexIds[latestVertexId - 1]['norm'] = normals.length - 1;
+          vertexIds[latestVertexId - 2]['norm'] = normals.length - 1;
+
           indices = [];
         }
       }

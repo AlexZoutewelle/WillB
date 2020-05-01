@@ -1,5 +1,5 @@
 function FlatShadeVS(renderer) {
-  this.lightDirection = new Vector3(0,0,1);
+  this.lightDirection = new Vector3(1,0,0);
   this.diffuse = new Vector3(1,1,1);
   this.ambient = new Vector3(0.1, 0.0, 0.1);
   this.color = new Vector3(0.7, 0.7, 0.5);
@@ -23,10 +23,11 @@ FlatShadeVS.prototype.move = function(x,y,z) {
 FlatShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
 
-
-  var d =  this.diffuse.multiplyScalar(Math.max(0, -this.lightDirection.dot(vertex_in.normal)));
+  var d =  this.diffuse.multiplyScalar(Math.max(0, this.lightDirection.dot(vertex_in.normal)));
 
   var color = this.color.multiplyVector(d.addVector(this.ambient)).multiplyScalar(255);
+  //console.log(d.addVector(this.ambient));
+
   // color.position[0] = Math.trunc(color.position[0]);
   // color.position[1] = Math.trunc(color.position[1]);
   // color.position[2] = Math.trunc(color.position[2]);

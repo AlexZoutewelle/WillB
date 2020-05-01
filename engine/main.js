@@ -22,15 +22,15 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var texturePS = new TextureEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
-//var flatColorPS = new FlatColorEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
 //var ppLightingPS = new PPLightingPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
 //var pointShader = new PointShadeVS(renderer);
 
 //var ppLightingVS = new PPLightingVS(renderer);
@@ -38,7 +38,7 @@ var textureVertexShader = new TextureVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-//var movementTarget = flatShadeVertexShader;
+var movementTarget = flatShadeVertexShader;
 
 
 
@@ -51,8 +51,8 @@ var textureVertexShader = new TextureVS(renderer);
 
 
 //Load models
-var model_name1 = "cube";
-var model_name2 = "sphere";
+var model_name1 = "sphere";
+var model_name2 = "bear";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -62,13 +62,14 @@ var models = [
 Promise.all(models).then(function(results) {
   models = results;
 
+  console.log(models[0]);
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.translate(-10, 0, 0);
+  object_transform1.fields = object_transform1.translate(-11, 0, 0);
 
   var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(10, 0, 0);
+  object_transform2.fields = object_transform2.translate(11, 0, 0);
 
 
 
@@ -90,6 +91,7 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
+  console.log(models[1]);
   renderer.models.push(models[1]);
 
 

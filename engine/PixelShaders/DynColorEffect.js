@@ -43,15 +43,15 @@ DynColorEffect.prototype.getColor = function(vert_in) {
 
   var r_v = -(1/this.screenWidth) * posX + 1;
   var r = Math.trunc(r_v * max);
-  if(r < 0) {r = -r;}
+  if(r < 0) {r = 0;}
 
   var g_v = -(1/this.screenHeight) * posY + 1;
   var g = Math.trunc(g_v * max);
-  if(g < 0) {g = -g;}
+  if(g < 0) {g =0;}
 
   var b_v = -(1/this.screenHeight) * posZ + 1;
   var b = Math.trunc(max - posZ);
-  if(b < 0) {b = -b;}
+  if(b < 0) {b = 0;}
 
   return [r ,
           g,
