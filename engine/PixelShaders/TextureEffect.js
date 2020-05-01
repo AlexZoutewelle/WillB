@@ -12,8 +12,8 @@ TextureEffect.prototype.setTexture = function(texture) {
   //uv texture coords clamp
   this.texture_width = texture.width;
   this.texture_height = texture.height;
-  this.tex_clamp_x = texture.width - 1.0;
-  this.tex_clamp_y = texture.height -1.0;
+  this.tex_clamp_x = texture.width;
+  this.tex_clamp_y = texture.height ;
   this.array_width = texture.width * 4;
 }
 

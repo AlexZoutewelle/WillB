@@ -439,26 +439,26 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             // color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
             // p.color = color;
 
-            // var uv = new Vector3(0,0,0);
-            // uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
-            // uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
-            // uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
-            // p.uv = uv;
+            var uv = new Vector3(0,0,0);
+            uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
+            uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
+            uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
+            p.uv = uv;
 
 
-            var normal = new Vector3(0,0,0);
-            normal.position[0] = v0.normal.position[0] + (w1_current * (v1.normal.position[0] - v0.normal.position[0]) ) + (w2_current * (v2.normal.position[0] - v0.normal.position[0]));
-            normal.position[1] = v0.normal.position[1] + (w1_current * (v1.normal.position[1] - v0.normal.position[1]) ) + (w2_current * (v2.normal.position[1] - v0.normal.position[1]));
-            normal.position[2] = v0.normal.position[2] + (w1_current * (v1.normal.position[2] - v0.normal.position[2]) ) + (w2_current * (v2.normal.position[2] - v0.normal.position[2]));
-            //p.normal = normal.multiplyScalar(p.position.position[2]).normalize();
-            p.normal = normal.normalize();
-
-
-            var worldPos = new Vector3(0,0,0);
-            worldPos.position[0] = v0.worldPos.position[0] + (w1_current * (v1.worldPos.position[0] - v0.worldPos.position[0]) ) + (w2_current * (v2.worldPos.position[0] - v0.worldPos.position[0]));
-            worldPos.position[1] = v0.worldPos.position[1] + (w1_current * (v1.worldPos.position[1] - v0.worldPos.position[1]) ) + (w2_current * (v2.worldPos.position[1] - v0.worldPos.position[1]));
-            worldPos.position[2] = v0.worldPos.position[2] + (w1_current * (v1.worldPos.position[2] - v0.worldPos.position[2]) ) + (w2_current * (v2.worldPos.position[2] - v0.worldPos.position[2]));
-            p.worldPos = worldPos.multiplyScalar(p.position.position[2]);
+            // var normal = new Vector3(0,0,0);
+            // normal.position[0] = v0.normal.position[0] + (w1_current * (v1.normal.position[0] - v0.normal.position[0]) ) + (w2_current * (v2.normal.position[0] - v0.normal.position[0]));
+            // normal.position[1] = v0.normal.position[1] + (w1_current * (v1.normal.position[1] - v0.normal.position[1]) ) + (w2_current * (v2.normal.position[1] - v0.normal.position[1]));
+            // normal.position[2] = v0.normal.position[2] + (w1_current * (v1.normal.position[2] - v0.normal.position[2]) ) + (w2_current * (v2.normal.position[2] - v0.normal.position[2]));
+            // //p.normal = normal.multiplyScalar(p.position.position[2]).normalize();
+            // p.normal = normal.normalize();
+            //
+            //
+            // var worldPos = new Vector3(0,0,0);
+            // worldPos.position[0] = v0.worldPos.position[0] + (w1_current * (v1.worldPos.position[0] - v0.worldPos.position[0]) ) + (w2_current * (v2.worldPos.position[0] - v0.worldPos.position[0]));
+            // worldPos.position[1] = v0.worldPos.position[1] + (w1_current * (v1.worldPos.position[1] - v0.worldPos.position[1]) ) + (w2_current * (v2.worldPos.position[1] - v0.worldPos.position[1]));
+            // worldPos.position[2] = v0.worldPos.position[2] + (w1_current * (v1.worldPos.position[2] - v0.worldPos.position[2]) ) + (w2_current * (v2.worldPos.position[2] - v0.worldPos.position[2]));
+            // p.worldPos = worldPos.multiplyScalar(p.position.position[2]);
 
             //draw
             this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p));

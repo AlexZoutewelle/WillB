@@ -1,4 +1,3 @@
-var moveSpeed = 0.0025;
 
 function PointShadeVS(renderer) {
   this.lightPosition = new Vector3(0,1,0);
@@ -51,60 +50,13 @@ PointShadeVS.prototype.newModel = function(newModel) {
 
 }
 
-PointShadeVS.prototype.movePointLight = function() {
-  if(playerState.input.i === true) {
-    this.pos.fields = this.pos.translate(0, 0, moveSpeed);
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
+PointShadeVS.prototype.move = function(x,y,z) {
+  this.pos.fields = this.pos.translate(x,y,z);
 
-    }
+  this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
 
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.j === true) {
-    this.pos.fields = this.pos.translate(-moveSpeed, 0 , 0);
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
-
-    }
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.k === true) {
-    this.pos.fields = this.pos.translate(0, 0, -moveSpeed);
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
-
-    }
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.l === true) {
-    this.pos.fields = this.pos.translate(moveSpeed, 0, 0 );
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
-
-    }
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.u === true) {
-    this.pos.fields = this.pos.translate(0, moveSpeed, 0 );
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
-
-    }
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.o === true) {
-    this.pos.fields = this.pos.translate(0, -moveSpeed, 0 );
-    for(var i = 0; i < this.indicator.positions.length; i++) {
-      this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
-
-    }
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
+  for(var i = 0; i < this.indicator.positions.length; i++) {
+    this.indicator.positions[i] = this.pos.multMatrixVec3(this.indicator.positions[i]);
   }
 
   this.pos = new Transformation();
@@ -113,7 +65,6 @@ PointShadeVS.prototype.movePointLight = function() {
 
 PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
-  this.movePointLight();
 
   if(this.pl_flag === false) {
     // var lightPosition = camera_inverse.multMatrixVec3(this.lightPosition);
@@ -133,6 +84,11 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
     var d = this.diffuse.multiplyScalar( attenuation  *  Math.max(0, vertex_in.normal.dot(direction)) );
     var c = this.color.multiplyVector( d.addVector(this.ambient) ).multiplyScalar(255);
+
+    c.position[0] = Math.min(255, c.position[0]);
+    c.position[1] = Math.min(255, c.position[1]);
+    c.position[2] = Math.min(255, c.position[2]);
+
 
     vertex_in.color = c;
 

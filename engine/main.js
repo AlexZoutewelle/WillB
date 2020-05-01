@@ -22,23 +22,23 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//var texturePS = new TextureEffect(renderer);
+var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 //var flatColorPS = new FlatColorEffect(renderer);
-var ppLightingPS = new PPLightingPS(renderer);
+//var ppLightingPS = new PPLightingPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
 //var flatShadeVertexShader = new FlatShadeVS(renderer);
 //var pointShader = new PointShadeVS(renderer);
 
-var ppLightingVS = new PPLightingVS(renderer);
+//var ppLightingVS = new PPLightingVS(renderer);
 
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = ppLightingPS;
+//var movementTarget = flatShadeVertexShader;
 
 
 
