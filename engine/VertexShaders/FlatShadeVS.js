@@ -26,11 +26,12 @@ FlatShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
   var d =  this.diffuse.multiplyScalar(Math.max(0, this.lightDirection.dot(vertex_in.normal)));
 
   var color = this.color.multiplyVector(d.addVector(this.ambient)).multiplyScalar(255);
-  //console.log(d.addVector(this.ambient));
 
   // color.position[0] = Math.trunc(color.position[0]);
   // color.position[1] = Math.trunc(color.position[1]);
   // color.position[2] = Math.trunc(color.position[2]);
+
+
   vertex_in.color = color;
   vertex_in.position = camera_inverse.multMatrixVec3(vertex_in.position);
 

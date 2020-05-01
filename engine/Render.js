@@ -433,11 +433,12 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
             //Interpolate the vertex attributes
 
-            var color = new Vector3(0,0,0);
-            color.position[0] = v0.color.position[0] + (w1_current * (v1.color.position[0] - v0.color.position[0]) ) + (w2_current * (v2.color.position[0] - v0.color.position[0]));
-            color.position[1] = v0.color.position[1] + (w1_current * (v1.color.position[1] - v0.color.position[1]) ) + (w2_current * (v2.color.position[1] - v0.color.position[1]));
-            color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
-            p.color = color
+            // var color = new Vector3(0,0,0);
+            // color.position[0] = v0.color.position[0] + (w1_current * (v1.color.position[0] - v0.color.position[0]) ) + (w2_current * (v2.color.position[0] - v0.color.position[0]));
+            // color.position[1] = v0.color.position[1] + (w1_current * (v1.color.position[1] - v0.color.position[1]) ) + (w2_current * (v2.color.position[1] - v0.color.position[1]));
+            // color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
+            // p.color = color;
+
             // var uv = new Vector3(0,0,0);
             // uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
             // uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
@@ -460,7 +461,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             // p.worldPos = worldPos.multiplyScalar(p.position.position[2]);
 
             //draw
-            this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p));
+            this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2));
           }
       }
       //One unit step on the x-axis
@@ -482,9 +483,9 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 //Invoke all our pixels shaders on a given vertex
 //Each one will return a color.
 //Right now, they will override eachothers output.
-Render.prototype.invokePixelShaders = function(vertex) {
+Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
   var color = [];
-  color = this.pixelShaders[this.activePixelShader].getColor(vertex);
+  color = this.pixelShaders[this.activePixelShader].getColor(vertex, w0, w1, w2, v0, v1, v2);
 
 
   return color;
