@@ -29,7 +29,10 @@ var ppLightingVS = new PPLightingVS(renderer);
 
 
 
-        //Renderer setup: Point lights
+//Set a thing you want to control using IJKLOU
+var movementTarget = ppLightingPS;
+
+
 
 
         //Renderer setup end
@@ -86,6 +89,11 @@ Promise.all(models).then(function(results) {
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
   renderer.models.push(models[1]);
+
+
+
+
+
 
   frame();
 });
@@ -177,6 +185,37 @@ function frame() {
 
     renderer.activePixelShader = nextShader;
   }
+
+
+  //Only for PP lighting shader (?)
+  var moveSpeed = 0.2;
+  if(playerState.input.i === true) {
+    movementTarget.move(0,0, moveSpeed);
+  }
+  if(playerState.input.j === true) {
+    movementTarget.move(-moveSpeed,0,0);
+
+  }
+  if(playerState.input.k === true) {
+    movementTarget.move(0,0, -moveSpeed);
+  }
+  if(playerState.input.l === true) {
+    movementTarget.move(moveSpeed,0, 0);
+
+  }
+  if(playerState.input.u === true) {
+    movementTarget.move(0,moveSpeed, 0);
+
+  }
+  if(playerState.input.o === true) {
+    movementTarget.move(0,-moveSpeed, 0);
+
+  }
+
+
+
+
+
 
   camera_inverse = camera.inverse();
 

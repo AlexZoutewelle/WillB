@@ -84,6 +84,7 @@ var cleft = -cright;
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
 Render.prototype.drawPixel = function(x, y, color) {
+  //console.log(color);
   var pixel = (y * this.screenWidth + x);
   this.buf32[pixel] =
     (color[3] << 24)  |   //A
@@ -461,7 +462,8 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             normal.position[0] = v0.normal.position[0] + (w1_current * (v1.normal.position[0] - v0.normal.position[0]) ) + (w2_current * (v2.normal.position[0] - v0.normal.position[0]));
             normal.position[1] = v0.normal.position[1] + (w1_current * (v1.normal.position[1] - v0.normal.position[1]) ) + (w2_current * (v2.normal.position[1] - v0.normal.position[1]));
             normal.position[2] = v0.normal.position[2] + (w1_current * (v1.normal.position[2] - v0.normal.position[2]) ) + (w2_current * (v2.normal.position[2] - v0.normal.position[2]));
-            p.normal = normal.multiplyScalar(p.position.position[2]).normalize();
+            //p.normal = normal.multiplyScalar(p.position.position[2]).normalize();
+            p.normal = normal.normalize();
 
 
             var worldPos = new Vector3(0,0,0);

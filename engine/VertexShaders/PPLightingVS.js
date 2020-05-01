@@ -8,45 +8,6 @@ PPLightingVS.prototype.newModel = function(model) {
 
 }
 
-PPLightingPS.prototype.movePointLight = function() {
-  var moveSpeed = 0.000005;
-  if(playerState.input.i === true) {
-    this.pos.fields = this.pos.translate(0, 0, moveSpeed);
-
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.j === true) {
-    this.pos.fields = this.pos.translate(-moveSpeed, 0 , 0);
-
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.k === true) {
-    this.pos.fields = this.pos.translate(0, 0, -moveSpeed);
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.l === true) {
-    this.pos.fields = this.pos.translate(moveSpeed, 0, 0 );
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.u === true) {
-    this.pos.fields = this.pos.translate(0, moveSpeed, 0 );
-
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-  if(playerState.input.o === true) {
-    this.pos.fields = this.pos.translate(0, -moveSpeed, 0 );
-
-
-    this.lightPosition = this.pos.multMatrixVec3(this.lightPosition);
-  }
-
-  this.pos = new Transformation();
-}
 
 PPLightingVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
