@@ -65,7 +65,23 @@ PPLightingPS.prototype.move = function(x, y, z) {
 }
 
 
-PPLightingPS.prototype.getColor = function(vertex_in) {
+PPLightingPS.prototype.getColor = function(vertex_in, w0, w1, w2, v0, v1, v2) {
+  //Interpolation
+  var normal = new Vector3(0,0,0);
+  normal.position[0] = v0.normal.position[0] + (w1 * (v1.normal.position[0] - v0.normal.position[0]) ) + (w2 * (v2.normal.position[0] - v0.normal.position[0]));
+  normal.position[1] = v0.normal.position[1] + (w1 * (v1.normal.position[1] - v0.normal.position[1]) ) + (w2 * (v2.normal.position[1] - v0.normal.position[1]));
+  normal.position[2] = v0.normal.position[2] + (w1 * (v1.normal.position[2] - v0.normal.position[2]) ) + (w2 * (v2.normal.position[2] - v0.normal.position[2]));
+  vertex_in.normal = normal.multiplyScalar(vertex_in.position.position[2]).normalize();
+  //p.normal = normal.normalize();
+
+
+  var worldPos = new Vector3(0,0,0);
+  worldPos.position[0] = v0.worldPos.position[0] + (w1 * (v1.worldPos.position[0] - v0.worldPos.position[0]) ) + (w2 * (v2.worldPos.position[0] - v0.worldPos.position[0]));
+  worldPos.position[1] = v0.worldPos.position[1] + (w1 * (v1.worldPos.position[1] - v0.worldPos.position[1]) ) + (w2 * (v2.worldPos.position[1] - v0.worldPos.position[1]));
+  worldPos.position[2] = v0.worldPos.position[2] + (w1 * (v1.worldPos.position[2] - v0.worldPos.position[2]) ) + (w2 * (v2.worldPos.position[2] - v0.worldPos.position[2]));
+  vertex_in.worldPos = worldPos.multiplyScalar(vertex_in.position.position[2]);
+
+
   var worldPos = vertex_in.worldPos;
   if(this.pl_flag === true) {
 

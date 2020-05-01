@@ -19,12 +19,24 @@ var camera = new Transformation([
 renderer.camera = camera;
 
 
+var testt = new Transformation([
+  [1,2,3,4],
+  [5,6,7,8],
+  [9,10,11,12],
+  [13,14,15,16]
+]);
+
+var transp = testt.transpose();
+console.log(transp);
+
+
+
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
 //var texturePS = new TextureEffect(renderer);
-//var dynColorPS = new DynColorEffect(renderer);
-var flatColorPS = new FlatColorEffect(renderer);
+var dynColorPS = new DynColorEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
 //var ppLightingPS = new PPLightingPS(renderer);
 
 
@@ -52,7 +64,7 @@ var movementTarget = flatShadeVertexShader;
 
 //Load models
 var model_name1 = "sphere";
-var model_name2 = "bear";
+var model_name2 = "cow";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -66,10 +78,16 @@ Promise.all(models).then(function(results) {
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.translate(-11, 0, 0);
+  object_transform1.fields = object_transform1.translate(-12, 0, 0);
 
-  var object_transform2 = new Transformation();
-  object_transform2.fields = object_transform2.translate(11, 0, 0);
+  var object2_srt = new Transformation();
+  object2_srt.fields = object2_srt.translate(5, 0, 0);
+
+  object2_srt.fields = object2_srt.scale(3,3,3);
+  object2_srt.fields = object2_srt.rotate(0, 270, 0)
+
+  var object2_rotate = new Transformation()
+  object2_rotate.fields = object2_rotate.rotate(0, 270, 0)
 
 
 
@@ -78,7 +96,11 @@ Promise.all(models).then(function(results) {
   }
 
   for(var i = 0; i < models[1].positions.length; i++) {
-    models[1].positions[i] = object_transform2.multMatrixVec3(models[1].positions[i]);
+
+    models[1].positions[i] = object2_srt.multMatrixVec3(models[1].positions[i]);
+
+    models[1].normals[i] = object2_rotate.inverse().transpose().multMatrixVec3(models[1].normals[i]).normalize();
+
   }
 
 

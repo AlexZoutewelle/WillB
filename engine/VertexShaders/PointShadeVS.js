@@ -1,14 +1,14 @@
 
 function PointShadeVS(renderer) {
-  this.lightPosition = new Vector3(0,5,20);
+  this.lightPosition = new Vector3(0,5,-20);
   this.pos = new Transformation();
-  this.color = new Vector3(0.4, 0.8, 0.7);
+  this.color = new Vector3(1, 1, 1);
   this.diffuse = new Vector3(1,1,1);
   this.ambient = new Vector3(0.10,0.12,0.1);
 
-  this.attenuationA = 0.1
-  this.attenuationB = 0.519;
-  this.attenuationC = 1;
+  this.attenuationA = 0.00619
+  this.attenuationB = 0.21382;
+  this.attenuationC = 0.5;
 
   //Load a sphere model for the point light
   var sphereReq = mdlLoad.loadObject("models/smallcube.obj");
@@ -79,7 +79,7 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
     var direction = vertex_to_light.divideScalar(distance);
 
     //Distance attenuation,  1 / Ad^2 + Bd + c,   simplified: 1/ d(Ad + B +C)
-    var attenuation = 1 / ( (this.attenuationA * (distance/100)**2) + (this.attenuationB * (distance/10)) + this.attenuationC);
+    var attenuation = 1 / ( (this.attenuationA * (distance)**2) + (this.attenuationB * (distance)) + this.attenuationC);
 
 
     var d = this.diffuse.multiplyScalar( attenuation  *  Math.max(0, vertex_in.normal.dot(direction)) );

@@ -8,16 +8,14 @@ function DynColorEffect(renderer) {
 DynColorEffect.prototype.newModel = function(model) {
 }
 
-DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2) {
+DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2, v0, v1, v2) {
   var zInv = 1 / vert_in.position.position[2]
-  
+
   var color = new Vector3(0,0,0);
-  color.position[0] = v0.color.position[0] + (w1_current * (v1.color.position[0] - v0.color.position[0]) ) + (w2_current * (v2.color.position[0] - v0.color.position[0]));
-  color.position[1] = v0.color.position[1] + (w1_current * (v1.color.position[1] - v0.color.position[1]) ) + (w2_current * (v2.color.position[1] - v0.color.position[1]));
-  color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
+  color.position[0] = v0.color.position[0] + (w1 * (v1.color.position[0] - v0.color.position[0]) ) + (w2 * (v2.color.position[0] - v0.color.position[0]));
+  color.position[1] = v0.color.position[1] + (w1 * (v1.color.position[1] - v0.color.position[1]) ) + (w2 * (v2.color.position[1] - v0.color.position[1]));
+  color.position[2] = v0.color.position[2] + (w1 * (v1.color.position[2] - v0.color.position[2]) ) + (w2 * (v2.color.position[2] - v0.color.position[2]));
   vert_in.color = color
-
-
 
 
 

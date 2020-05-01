@@ -22,18 +22,23 @@ TextureEffect.prototype.newModel = function(model) {
 }
 
 //using an (interpolated) vertex, retrieve the color on the position on the texture
-TextureEffect.prototype.getColor = function(vertex) {
+TextureEffect.prototype.getColor = function(vertex, w0, w1, w2, v0, v1, v2) {
 
+  var uv = new Vector3(0,0,0);
+  uv.position[0] = v0.uv.position[0] + (w1 * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2 * (v2.uv.position[0] - v0.uv.position[0]));
+  uv.position[1] = v0.uv.position[1] + (w1 * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2 * (v2.uv.position[1] - v0.uv.position[1]));
+  uv.position[2] = v0.uv.position[2] + (w1 * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2 * (v2.uv.position[2] - v0.uv.position[2]));
+  vertex.uv = uv;
 
   //Perspective correction: multiply all the uv coordinates by the vertex' Z position
-  var cUV = vertex.uv.multiplyScalar(vertex.position.position[2]);
+  vertex.uv = vertex.uv.multiplyScalar(vertex.position.position[2]);
 
 
-  var textureX = Math.max(Math.min(Math.trunc(cUV.position[0] * this.texture_width), this.tex_clamp_x), 0);
+  var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);
   if(textureX < 0) {
     textureX = 0;
   }
-  var textureY = Math.max(Math.min(Math.trunc(cUV.position[1] * this.texture_height), this.tex_clamp_y), 0);
+  var textureY = Math.max(Math.min(Math.trunc(vertex.uv.position[1] * this.texture_height), this.tex_clamp_y), 0);
   if(textureY < 0) {
     textureY = 0;
   }

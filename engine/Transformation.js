@@ -217,7 +217,15 @@ Transformation.prototype.multVec3Matrix = function(vector){
 
 
 
-
+Transformation.prototype.transpose = function() {
+  var result = new Transformation();
+  for(var i = 0; i < 4; i++) {
+    for(var j = 0; j < 4; j++) {
+      result.fields[j][i] = this.fields[i][j];
+    }
+  }
+  return result;
+}
 
 
 
