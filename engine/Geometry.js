@@ -109,10 +109,10 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
           var p1 = positions[vertexIds[latestVertexId - 1].pos]
           var p2 = positions[vertexIds[latestVertexId - 2].pos]
 
-          var edge1 = p0.subtractVector(p1)
-          var edge2 = p2.subtractVector(p1);
+          var edge1 = p0.subtractVector(p2)
+          var edge2 = p1.subtractVector(p2);
 
-          var normal = edge1.cross(edge2).normalize();
+          var normal = edge2.cross(edge1).normalize();
           //push the normal to the normals array
           normals.push(normal);
 

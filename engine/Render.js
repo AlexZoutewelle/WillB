@@ -259,8 +259,6 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
 
 //Triangle rasterizer
 Render.prototype.renderFace = function(v0, v1, v2, texture) {
-  var color = "blue";
-
   //First, we have to sort the triangles based on their Y values DESC, to determine the case
   if(v0.position.position[1] <  v1.position.position[1]) {
     var temp = v0;
@@ -311,13 +309,6 @@ Render.prototype.renderFace = function(v0, v1, v2, texture) {
 
   //General
   else {
-
-    //Interpolate vertices
-    var alpha = (v1.position.position[1] - v0.position.position[1]) /
-                (v2.position.position[1] - v0.position.position[1]);
-    var vi =  v0.interpolateTo(v2, alpha);
-    // console.log(v0);
-
 
     //major right
     if(vi.position.position[0] > v1.position.position[0]) {

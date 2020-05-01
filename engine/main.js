@@ -64,7 +64,7 @@ var movementTarget = flatShadeVertexShader;
 
 //Load models
 var model_name1 = "sphere";
-var model_name2 = "cow";
+var model_name2 = "teapot";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -83,7 +83,7 @@ Promise.all(models).then(function(results) {
   var object2_srt = new Transformation();
   object2_srt.fields = object2_srt.translate(5, 0, 0);
 
-  object2_srt.fields = object2_srt.scale(3,3,3);
+  object2_srt.fields = object2_srt.scale(0.3,0.3,0.3);
   object2_srt.fields = object2_srt.rotate(0, 270, 0)
 
   var object2_rotate = new Transformation()
@@ -98,7 +98,8 @@ Promise.all(models).then(function(results) {
   for(var i = 0; i < models[1].positions.length; i++) {
 
     models[1].positions[i] = object2_srt.multMatrixVec3(models[1].positions[i]);
-
+  }
+  for(var i = 0; i < models[1].normals.length; i++) {
     models[1].normals[i] = object2_rotate.inverse().transpose().multMatrixVec3(models[1].normals[i]).normalize();
 
   }
