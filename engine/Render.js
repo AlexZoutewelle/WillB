@@ -118,6 +118,7 @@ Render.prototype.render = function(camera_inverse, camera) {
 
   this.clear();
 
+  //this.pixelShaders[0].rasterize();
 
 
   // The virtual image plane
@@ -174,19 +175,6 @@ Render.prototype.render = function(camera_inverse, camera) {
   //Actually draw the image array on the canvas
 
 
-  var indicator = this.pixelShaders[0].lightPosition;
-  indicator = camera_inverse.multMatrixVec3(indicator);
-  var indicatorV = new Vertex();
-  indicatorV.position = indicator;
-  indicatorV = this.vertexToRaster(indicatorV);
-  this.drawPixel(indicatorV.position.position[0], indicatorV.position.position[1], [255,255,255,255]);
-  this.drawPixel(indicatorV.position.position[0] + 1, indicatorV.position.position[1], [255,255,255,255]);
-  this.drawPixel(indicatorV.position.position[0] + 1, indicatorV.position.position[1] + 1, [255,255,255,255]);
-  this.drawPixel(indicatorV.position.position[0], indicatorV.position.position[1] + 1, [255,255,255,255]);
-  //
-  // console.log(indicatorV.position.position[0] + "  " + indicatorV.position.position[1] + "  " +indicatorV.position.position[2]);
-  //
-  // console.log(this.pixelShaders[0].lightPosition.position[0] + "  " + this.pixelShaders[0].lightPosition.position[1] + "  " + this.pixelShaders[0].lightPosition.position[2]);
 
   this.draw();
 }

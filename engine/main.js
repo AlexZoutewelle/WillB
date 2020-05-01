@@ -9,6 +9,14 @@ var screenHeight = 480;
 var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
+var camera = new Transformation([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, -40],
+        [0, 0, 0, 1]
+]);
+
+renderer.camera = camera;
 
 
           //Renderer setup start
@@ -39,12 +47,6 @@ var movementTarget = ppLightingPS;
 
 //trying out some camera stuff
 
-var camera = new Transformation([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -40],
-        [0, 0, 0, 1]
-]);
 
 
 
@@ -219,6 +221,8 @@ function frame() {
 
   camera_inverse = camera.inverse();
 
+  renderer.camera = camera;
+  renderer.camera_inverse = camera_inverse;
   renderer.render(camera_inverse, camera);
 
 
