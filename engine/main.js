@@ -120,7 +120,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 0.5
+var movement = 10
 
 
 //FPS measurement
@@ -129,7 +129,17 @@ var g_frameTime = 0;
 var lastLoop = new Date();
 var thisloop;
 
+//Game loop time initialization
+var now = performance.now() / 1000;
+var newNow = performance.now() / 1000;
+var dt = 0;
+console.log(now);
+
+
 function frame() {
+  dt = newNow - now;
+  console.log(dt);
+  now = performance.now() / 1000;
 
   update();
   if(playerState.input.escape === true) {
@@ -138,50 +148,49 @@ function frame() {
   }
   if(playerState.input.backward === true) {
     //console.log("move backward");
-    camera.fields =  camera.translate(0,0, -movement);
+    camera.fields =  camera.translate(0,0, dt * -movement);
   }
-
   if(playerState.input.forward === true ) {
     //console.log("move forward");
-    camera.fields =  camera.translate(0, 0,movement);
+    camera.fields =  camera.translate(0, 0,dt * movement);
   }
   if(playerState.input.strafeLeft === true) {
     //console.log("move left");
-    camera.fields = camera.translate(-movement,0,0);
+    camera.fields = camera.translate(dt * -movement,0,0);
   }
   if(playerState.input.strafeRight === true) {
     //console.log("move right");
-    camera.fields = camera.translate(movement,0,0);
+    camera.fields = camera.translate(dt * movement,0,0);
   }
 
   if(playerState.input.turnLeft === true) {
     //console.log("turn left");
-    camera.fields = camera.rotate(0,movement,0);
+    camera.fields = camera.rotate(0,dt * movement,0);
   }
 
   if(playerState.input.turnRight === true) {
     //console.log("turn right");
-    camera.fields = camera.rotate(0,-movement,0);
+    camera.fields = camera.rotate(0,dt * -movement,0);
 
   }
 
   if(playerState.input.jump === true) {
     //console.log("jump");
-    camera.fields = camera.translate(0,movement, 0)
+    camera.fields = camera.translate(0,dt * movement, 0)
   }
   if(playerState.input.crouch === true) {
     //console.log("crouch");
-    camera.fields = camera.translate(0, -movement, 0);
+    camera.fields = camera.translate(0, dt * -movement, 0);
   }
 
   if(playerState.input.tiltForward === true) {
     //console.log("tilt forward");
-    camera.fields = camera.rotate(movement, 0);
+    camera.fields = camera.rotate(dt * movement, 0);
   }
 
   if(playerState.input.tiltBack === true) {
     //console.log("tilt back");
-    camera.fields = camera.rotate(-movement, 0);
+    camera.fields = camera.rotate(dt * -movement, 0);
   }
 
   if(playerState.input.angleX !== 0 || playerState.input.angleY !== 0) {
@@ -207,28 +216,28 @@ function frame() {
   }
 
 
-  //Only for PP lighting shader (?)
-  var moveSpeed = 0.3;
+  //Secondary movement controls
+  var moveSpeed = 5;
   if(playerState.input.i === true) {
-    movementTarget.move(0,0, moveSpeed);
+    movementTarget.move(0,0, dt * moveSpeed);
   }
   if(playerState.input.j === true) {
-    movementTarget.move(-moveSpeed,0,0);
+    movementTarget.move(dt * -moveSpeed,0,0);
 
   }
   if(playerState.input.k === true) {
-    movementTarget.move(0,0, -moveSpeed);
+    movementTarget.move(0,0, dt * -moveSpeed);
   }
   if(playerState.input.l === true) {
-    movementTarget.move(moveSpeed,0, 0);
+    movementTarget.move(dt * moveSpeed,0, 0);
 
   }
   if(playerState.input.u === true) {
-    movementTarget.move(0,moveSpeed, 0);
+    movementTarget.move(0,dt * moveSpeed, 0);
 
   }
   if(playerState.input.o === true) {
-    movementTarget.move(0,-moveSpeed, 0);
+    movementTarget.move(0,dt * -moveSpeed, 0);
 
   }
 
@@ -266,6 +275,7 @@ function frame() {
     var thisFrameTime = thisLoop - lastLoop;
     g_frameTime += (thisFrameTime - g_frameTime) / 1;
     lastLoop = thisLoop;
+    newNow = performance.now() / 1000;
     requestAnimationFrame(frame);
 
 }
