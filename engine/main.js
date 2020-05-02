@@ -26,14 +26,14 @@ renderer.camera = camera;
 
 var texturePS = new TextureEffect(renderer);
 //var flatColorPS = new FlatColorEffect(renderer);
-var dynColorPS = new DynColorEffect(renderer);
+//var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
 var textureVertexShader = new TextureVS(renderer);
-var flatColorVS = new FlatColorVS(renderer);
+//var flatColorVS = new FlatColorVS(renderer);
 //var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
 
@@ -65,6 +65,7 @@ var models = [
   mdlLoad.loadObject("models/" + model_name2 + ".obj", "cube2"),
 ];
 
+
 Promise.all(models).then(function(results) {
   models = results;
 
@@ -75,10 +76,11 @@ Promise.all(models).then(function(results) {
   object_transform1.fields = object_transform1.translate(-12, 0, 0);
 
   var object2_srt = new Transformation();
-  object2_srt.fields = object2_srt.translate(5, 0, 0);
+
+  object2_srt.fields = object2_srt.rotate(0, 270, 0)
+  object2_srt.fields = object2_srt.translate(12, 0, 0);
 
   object2_srt.fields = object2_srt.scale(1,1,1);
-  object2_srt.fields = object2_srt.rotate(0, 270, 0)
 
   var object2_rotate = new Transformation()
   object2_rotate.fields = object2_rotate.rotate(0, 270, 0)
@@ -120,7 +122,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 10
+var movement = 25
 
 
 //FPS measurement
@@ -138,10 +140,14 @@ console.log(now);
 
 function frame() {
   dt = newNow - now;
-  console.log(dt);
   now = performance.now() / 1000;
 
   update();
+  transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
+  transformModel(models[1], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
+
+  //console.log(models[0]);
+
   if(playerState.input.escape === true) {
     console.log("ending");
     return;
@@ -217,7 +223,7 @@ function frame() {
 
 
   //Secondary movement controls
-  var moveSpeed = 5;
+  var moveSpeed = 30;
   if(playerState.input.i === true) {
     movementTarget.move(0,0, dt * moveSpeed);
   }
@@ -279,6 +285,29 @@ function frame() {
     requestAnimationFrame(frame);
 
 }
+
+function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
+
+  var positions = model.positions.length;
+  var normals = model.normals.length;
+  var transformation = new Transformation();
+
+  // transformation.fields = transformation.scale(dt * s1,dt * s2, dt * s3)
+
+  transformation.fields = transformation.rotate(dt * o0, dt * o1, dt * o2);
+
+  transformation.fields = transformation.translate(dt * x, dt * y, dt * z);
+
+  for(var i = 0; i < positions; i++) {
+    model.positions[i] = transformation.multMatrixVec3(model.positions[i]);
+  }
+  for(var i = 0; i < normals; i++) {
+    model.normals[i] = transformation.inverse().transpose().multMatrixVec3(model.normals[i]).normalize();
+
+  }
+
+}
+
 
 function update() {
 }

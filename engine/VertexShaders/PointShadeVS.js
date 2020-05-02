@@ -1,6 +1,6 @@
 
 function PointShadeVS(renderer) {
-  this.lightPosition = new Vector3(-8,0,-7.5);
+  this.lightPosition = new Vector3(0,0,5 );
   this.pos = new Transformation();
   this.color = new Vector3(1, 1, 1);
   this.diffuse = new Vector3(1,1,1);
