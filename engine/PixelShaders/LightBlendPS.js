@@ -6,6 +6,9 @@ LightBlendPS.prototype.newModel = function(model) {
 
 }
 LightBlendPS.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
+  if(typeof(v0.light) === "undefined") {
+    return vertex;
+  }
   var light = new Vector3(0,0,0);
   light.position[0] = v0.light.position[0] + (w1 * (v1.light.position[0] - v0.light.position[0]) ) + (w2 * (v2.light.position[0] - v0.light.position[0]));
   light.position[1] = v0.light.position[1] + (w1 * (v1.light.position[1] - v0.light.position[1]) ) + (w2 * (v2.light.position[1] - v0.light.position[1]));

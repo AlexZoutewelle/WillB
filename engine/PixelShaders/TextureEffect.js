@@ -8,6 +8,7 @@ function TextureEffect(renderer) {
 }
 
 TextureEffect.prototype.setTexture = function(texture) {
+
   this.texture = texture;
   //uv texture coords clamp
   this.texture_width = texture.width;
@@ -18,11 +19,18 @@ TextureEffect.prototype.setTexture = function(texture) {
 }
 
 TextureEffect.prototype.newModel = function(model) {
-  this.setTexture(model.texture);
+  if(model.id !== 'pl1') {
+    this.setTexture(model.texture);
+
+  }
 }
 
 //using an (interpolated) vertex, retrieve the color on the position on the texture
 TextureEffect.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
+  if(typeof (v0.uv) === "undefined") {
+
+    return vertex;
+  }
   var uv = new Vector3(0,0,0);
   uv.position[0] = v0.uv.position[0] + (w1 * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2 * (v2.uv.position[0] - v0.uv.position[0]));
   uv.position[1] = v0.uv.position[1] + (w1 * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2 * (v2.uv.position[1] - v0.uv.position[1]));

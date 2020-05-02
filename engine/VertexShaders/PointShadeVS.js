@@ -1,21 +1,21 @@
 
 function PointShadeVS(renderer) {
-  this.lightPosition = new Vector3(0,5,-20);
+  this.lightPosition = new Vector3(-8,0,-7.5);
   this.pos = new Transformation();
   this.color = new Vector3(1, 1, 1);
   this.diffuse = new Vector3(1,1,1);
   this.ambient = new Vector3(0.10,0.12,0.1);
 
   this.attenuationA = 0.00619
-  this.attenuationB = 0.21382;
-  this.attenuationC = 0.5;
+  this.attenuationB = 0.01382;
+  this.attenuationC = 0.1;
 
   //Load a sphere model for the point light
   var sphereReq = mdlLoad.loadObject("models/smallcube.obj");
   sphereReq.then(result => {
     result.id = 'pl1';
     this.setIndicator(result)
-
+    delete result.uvs;
     renderer.models.push(result);
     renderer.setVertexShader(this);
 
@@ -73,9 +73,6 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
     var distance = vertex_to_light.length();
 
-    if(distance > 10) {
-      //console.log(true)
-    }
     var direction = vertex_to_light.divideScalar(distance);
 
     //Distance attenuation,  1 / Ad^2 + Bd + c,   simplified: 1/ d(Ad + B +C)
@@ -83,21 +80,23 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
 
     var d = this.diffuse.multiplyScalar( attenuation  *  Math.max(0, vertex_in.normal.dot(direction)) );
-    var c = this.color.multiplyVector( d.addVector(this.ambient) ).multiplyScalar(255);
-
-    c.position[0] = Math.min(255, c.position[0]);
-    c.position[1] = Math.min(255, c.position[1]);
-    c.position[2] = Math.min(255, c.position[2]);
-
-
-    vertex_in.color = c;
+    vertex_in.light = d.addVector(this.ambient);
+    //console.log(vertex_in.light.position[0] + " " + vertex_in.light.position[1] + " " + vertex_in.light.position[2]);
+    // var c = this.color.multiplyVector( d.addVector(this.ambient) ).multiplyScalar(255);
+    //
+    // c.position[0] = Math.min(255, c.position[0]);
+    // c.position[1] = Math.min(255, c.position[1]);
+    // c.position[2] = Math.min(255, c.position[2]);
+    //
+    //
+    // vertex_in.color = c;
+    return vertex_in;
 
   }
   else {
     vertex_in.color = new Vector3(255,255,255,255);
+    //console.log(vertex_in)
+    return vertex_in;
+
   }
-
-
-  return vertex_in;
-
 }

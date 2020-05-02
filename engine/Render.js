@@ -144,7 +144,9 @@ Render.prototype.render = function(camera_inverse, camera) {
       var vertex_in = new Vertex();
 
       vertex_in.position = modelGeometry.positions[vertexIds.pos];
-      vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
+      if(typeof(modelGeometry.uvs) !== "undefined") {
+        vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
+      }
       vertex_in.normal = modelGeometry.normals[vertexIds.norm];
 
       verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse, object_transform));
@@ -486,7 +488,10 @@ Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
     vertex = this.pixelShaders[i].getVertex(vertex, w0, w1, w2, v0, v1, v2);
   }
 
-
+  if(typeof(vertex.color) === "undefined") {
+    vertex.color = new Vector3(255,255,255);
+    vertex.color.position[3] = 255;
+  }
   return vertex.color;
 }
 
