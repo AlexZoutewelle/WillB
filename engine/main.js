@@ -24,18 +24,18 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var texturePS = new TextureEffect(renderer);
-//var flatColorPS = new FlatColorEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-//var flatColorVS = new FlatColorVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
-var pointShader = new PointShadeVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+var flatColorVS = new FlatColorVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -44,7 +44,7 @@ var pointShader = new PointShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = pointShader;
+var movementTarget = flatShadeVertexShader;
 
 
 
@@ -57,8 +57,8 @@ var movementTarget = pointShader;
 
 
 //Load models
-var model_name1 = "cube";
-var model_name2 = "cube";
+var model_name1 = "sphere";
+var model_name2 = "cow";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -111,7 +111,7 @@ Promise.all(models).then(function(results) {
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
   renderer.models.push(models[1]);
-
+  console.log(models[1])
 
 
 
@@ -144,7 +144,7 @@ function frame() {
 
   update();
   transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
-  transformModel(models[1], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
+  transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
   //console.log(models[0]);
 

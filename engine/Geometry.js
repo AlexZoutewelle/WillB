@@ -30,9 +30,9 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
   var faces = []
   var uvs = [];
   var normals = [];
+  var normalArray = {};
 
   var lines = object.split('\n');
-
   lines.forEach(function(line) {
     var result;
     if((result = positionRegx.exec(line)) != null) {
@@ -62,8 +62,8 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
     }
 
     else if((result = faceRegx.exec(line)) != null) {
-      //Creating the face
 
+      //Creating the face
       var indices = [];
 
       var step = Math.ceil(result.length / 4);
@@ -88,17 +88,32 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
       }
     }
 
+
+
+
+
     else if((result = simpleFaceRegx.exec(line)) != null) {
       var indices = [];
+      var currentPosIds = [];
       //console.log(result);
       for(var i = 1, id= 0; i < result.length; i++, id++) {
         var posId = parseInt(result[i] - 1);
 
-        vertexIds.push({pos: posId});
+        vertexIds.push({pos: posId, norm: posId});
         indices.push(vertexIds.length - 1);
 
+
+        //Prepare the normal array
+        if(typeof(normalArray[posId]) === "undefined") {
+          normalArray[posId] = [];
+        }
+        //We want to explicitly save the posIds for the moment
+        currentPosIds.push(posId);
+        //console.log(normalArray[posId])
+
+
+
         if(indices.length === 3) {
-          //console.log(indices);
           faces.push(new Face(indices));
 
           //Compute normal
@@ -120,22 +135,58 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
 
           var normal = edge2.cross(edge1).normalize();
           //push the normal to the normals array
-          normals.push(normal);
+          //normals.push(normal);
 
           //push the id of this normal to the vertexIds
-          vertexIds[latestVertexId]['norm'] = normals.length - 1;
-          vertexIds[latestVertexId - 1]['norm'] = normals.length - 1;
-          vertexIds[latestVertexId - 2]['norm'] = normals.length - 1;
+          // vertexIds[latestVertexId]['norm'] = normals.length - 1;
+          // vertexIds[latestVertexId - 1]['norm'] = normals.length - 1;
+          // vertexIds[latestVertexId - 2]['norm'] = normals.length - 1;
+
+          //Push the computed normal to the involved posIds in the normalArray
+          //console.log((indices[0] + 1) + " " + (indices[1] + 1) + " " + (indices[2] + 1));
+          //console.log(normalArray);
+          normalArray[currentPosIds[0] ].push(normal);
+          normalArray[currentPosIds[1] ].push(normal);
+          normalArray[currentPosIds[2] ].push(normal);
+
+
 
           indices = [];
+          currentPosIds = [];
         }
       }
     }
-
   });
 
-    //Now that we have parsed all the lines in the .obj file, we must make a list of edges
-    //var edges = this.createEdgeList(positions, faces);
+    //If the model did not have normals, we now have a normalArray sorted by the positionIds
+    //We now have to loop through this array, and calculate a singular, interpolated normal
+    var posIds = Object.keys(normalArray);
+    if(posIds.length > 0) {
+      posIds.forEach(function(key) {
+        var normalPerPosId = normalArray[key];
+
+        //Interpolate the normals.
+        var normalLength = normalPerPosId.length;
+        var mainNormal = normalPerPosId[0];
+
+        for(var i = 1; i < normalLength; i++) {
+          currentNormal = normalPerPosId[i];
+
+          var dx = (mainNormal.position[0] - currentNormal.position[0]) / 2;
+          var dy = (mainNormal.position[1] - currentNormal.position[1]) / 2;
+          var dz = (mainNormal.position[2] - currentNormal.position[2]) / 2;
+
+          mainNormal.position[0] -= dx;
+          mainNormal.position[1] -= dy;
+          mainNormal.position[2] -= dz;
+
+        }
+
+        //Push the interpolated normal to the normals array. This is what the model will use
+        normals.push(mainNormal.normalize());
+      });
+    }
+
 
     if(object_name !== undefined) {
       //Finally, get its texture image, and create a context for it
@@ -148,7 +199,6 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
 
       this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
     }
-
 
     this.vertexIds = vertexIds;
     this.faces = faces;
