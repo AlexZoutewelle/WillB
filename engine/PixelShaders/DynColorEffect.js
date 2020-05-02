@@ -1,6 +1,6 @@
 function DynColorEffect(renderer) {
-  this.screenWidth = 640;
-  this.screenHeight = 480;
+  this.screenWidth = renderer.screenWidth;
+  this.screenHeight = renderer.screenHeight;
 
   renderer.setPixelShader(this);
 }

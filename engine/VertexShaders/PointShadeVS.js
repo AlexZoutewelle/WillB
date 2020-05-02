@@ -69,7 +69,7 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
   if(this.pl_flag === false) {
     // var lightPosition = camera_inverse.multMatrixVec3(this.lightPosition);
     var lightPosition = this.lightPosition;
-    var vertex_to_light = lightPosition.subtractVector(vertex_in.position);
+    var vertex_to_light = lightPosition.subtractVector(vertex_in.worldPos);
 
     var distance = vertex_to_light.length();
 
@@ -96,8 +96,6 @@ PointShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
   else {
     vertex_in.color = new Vector3(255,255,255,255);
   }
-
-  vertex_in.position = camera_inverse.multMatrixVec3(vertex_in.position);
 
 
   return vertex_in;

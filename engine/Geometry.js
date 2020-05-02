@@ -102,7 +102,13 @@ Geometry.prototype.parseOBJ = function(object, object_name) {
           faces.push(new Face(indices));
 
           //Compute normal
-          //Get the positions
+
+          //Ideally, each position vector should have 1 normal vector associated with it.
+          //Since a position vector can be part of up to three triangles, we should interpolate between them to get the 'true'  normal
+          //For now, we create separate normals for each triangle.
+
+          //This means that Gouraud shading is impossible at the moment
+
           var latestVertexId = vertexIds.length - 1;
 
           var p0 = positions[vertexIds[latestVertexId].pos];

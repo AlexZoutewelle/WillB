@@ -19,29 +19,20 @@ var camera = new Transformation([
 renderer.camera = camera;
 
 
-var testt = new Transformation([
-  [1,2,3,4],
-  [5,6,7,8],
-  [9,10,11,12],
-  [13,14,15,16]
-]);
-
-var transp = testt.transpose();
-console.log(transp);
-
 
 
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//var texturePS = new TextureEffect(renderer);
-var dynColorPS = new DynColorEffect(renderer);
+var texturePS = new TextureEffect(renderer);
+var lightBlendPS = new LightBlendPS(renderer);
+//var dynColorPS = new DynColorEffect(renderer);
 //var flatColorPS = new FlatColorEffect(renderer);
 //var ppLightingPS = new PPLightingPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
 var flatShadeVertexShader = new FlatShadeVS(renderer);
 //var pointShader = new PointShadeVS(renderer);
 
@@ -63,8 +54,8 @@ var movementTarget = flatShadeVertexShader;
 
 
 //Load models
-var model_name1 = "sphere";
-var model_name2 = "teapot";
+var model_name1 = "cube";
+var model_name2 = "capsule";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -83,7 +74,7 @@ Promise.all(models).then(function(results) {
   var object2_srt = new Transformation();
   object2_srt.fields = object2_srt.translate(5, 0, 0);
 
-  object2_srt.fields = object2_srt.scale(0.3,0.3,0.3);
+  object2_srt.fields = object2_srt.scale(3,3,3);
   object2_srt.fields = object2_srt.rotate(0, 270, 0)
 
   var object2_rotate = new Transformation()
@@ -113,8 +104,7 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  renderer.models.push(models[0]);
-  console.log(models[1]);
+  //renderer.models.push(models[0]);
   renderer.models.push(models[1]);
 
 
@@ -215,7 +205,7 @@ function frame() {
 
 
   //Only for PP lighting shader (?)
-  var moveSpeed = 0.2;
+  var moveSpeed = 0.9;
   if(playerState.input.i === true) {
     movementTarget.move(0,0, moveSpeed);
   }
@@ -243,6 +233,7 @@ function frame() {
 
 
 
+  //console.log(renderer)
 
   camera_inverse = camera.inverse();
 
@@ -272,7 +263,6 @@ function frame() {
     var thisFrameTime = thisLoop - lastLoop;
     g_frameTime += (thisFrameTime - g_frameTime) / 1;
     lastLoop = thisLoop;
-
     requestAnimationFrame(frame);
 
 }

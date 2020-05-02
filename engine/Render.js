@@ -84,13 +84,13 @@ var cleft = -cright;
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
 Render.prototype.drawPixel = function(x, y, color) {
-  //console.log(color);
+  //console.log(color.position[0] + " " + color.position[1] + " " + color.position[2] + " " + color.position[3]);
   var pixel = (y * this.screenWidth + x);
   this.buf32[pixel] =
-    (color[3] << 24)  |   //A
-    (color[0] << 16)  |   //R
-    (color[1] << 8)   |   //G
-    (color[2]);           //B
+    (color.position[3] << 24)  |   //A
+    (color.position[0] << 16)  |   //R
+    (color.position[1] << 8)   |   //G
+    (color.position[2]);           //B
 }
 
 
@@ -189,14 +189,19 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
   //Otherwise, if we want to do point lights, we can not do comparins between positions: they will be in a differernt coordinate system!
 
   //Vertex shaders
+  vertex.worldPos = vertex.position.copy();
+  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
+
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
   return vertex_out;
 }
 
 Render.prototype.invokeVertexShaders = function(vertex_in, camera_inverse) {
-  var vertex_out = this.vertexShaders[this.activeVertexShader].getVertex(vertex_in, camera_inverse);
-  return vertex_out;
+  for(var i = 0; i < this.vertexShaders.length; i++) {
+    vertex_in = this.vertexShaders[i].getVertex(vertex_in);
+  }
+  return vertex_in;
 }
 
 
@@ -452,7 +457,9 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             // p.worldPos = worldPos.multiplyScalar(p.position.position[2]);
 
             //draw
-            this.drawPixel(p.position.position[0], p.position.position[1], this.invokePixelShaders(p, "", w1_current, w2_current, v0, v1, v2));
+            //Get the color that the vertex must output
+            var outputColor = this.invokePixelShaders(p, "", w1_current, w2_current, v0, v1, v2);
+            this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
           }
       }
       //One unit step on the x-axis
@@ -475,11 +482,12 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 //Each one will return a color.
 //Right now, they will override eachothers output.
 Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
-  var color = [];
-  color = this.pixelShaders[this.activePixelShader].getColor(vertex, w0, w1, w2, v0, v1, v2);
+  for(var i = 0; i < this.pixelShaders.length; i++) {
+    vertex = this.pixelShaders[i].getVertex(vertex, w0, w1, w2, v0, v1, v2);
+  }
 
 
-  return color;
+  return vertex.color;
 }
 
 
