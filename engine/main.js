@@ -25,9 +25,10 @@ renderer.camera = camera;
 //Initialize pixel and vertex shaders
 
 //var texturePS = new TextureEffect(renderer);
-var flatColorPS = new FlatColorEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
+var dynColorPS = new DynColorEffect(renderer);
+
 var lightBlendPS = new LightBlendPS(renderer);
-//var dynColorPS = new DynColorEffect(renderer);
 //var ppLightingPS = new PPLightingPS(renderer);
 
 

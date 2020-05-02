@@ -8,7 +8,7 @@ function DynColorEffect(renderer) {
 DynColorEffect.prototype.newModel = function(model) {
 }
 
-DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2, v0, v1, v2) {
+DynColorEffect.prototype.getVertex = function(vert_in, w0, w1, w2, v0, v1, v2) {
   var zInv = 1 / vert_in.position.position[2]
 
   var color = new Vector3(0,0,0);
@@ -36,6 +36,7 @@ DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2, v0, v1, v2) {
   var posY = position.position[1];
   var posZ = zInv;
 
+  //Clamp the positions
   if(posX < 0) {posX = 0}
   if(posX > this.screenWidth) {posX = this.screenWidth}
   if(posY < 0) {posY = 0}
@@ -43,7 +44,7 @@ DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2, v0, v1, v2) {
   if(posZ < 0) {posX = 0}
 
 
-
+  //Multiply colors with the ratios
   var r_v = -(1/this.screenWidth) * posX + 1;
   var r = Math.trunc(r_v * max);
   if(r < 0) {r = 0;}
@@ -56,8 +57,9 @@ DynColorEffect.prototype.getColor = function(vert_in, w0, w1, w2, v0, v1, v2) {
   var b = Math.trunc(max - posZ);
   if(b < 0) {b = 0;}
 
-  return [r ,
-          g,
-          b,
-          255];
+  var color = new Vector3(r, g, b);
+  color.position[3] = 255;
+  vert_in.color = color;
+  return vert_in;
+
 }
