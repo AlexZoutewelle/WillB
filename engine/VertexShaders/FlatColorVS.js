@@ -1,7 +1,7 @@
 function FlatColorVS(renderer) {
   renderer.setVertexShader(this);
 
-  this.color = new Vector3(0, 120, 214);
+  this.color = new Vector3(255, 255, 255);
 }
 
 FlatColorVS.prototype.newModel = function(newModel) {

@@ -24,20 +24,21 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//var texturePS = new TextureEffect(renderer);
+var texturePS = new TextureEffect(renderer);
 //var flatColorPS = new FlatColorEffect(renderer);
 var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
-//var ppLightingPS = new PPLightingPS(renderer);
 
 
 //var defaultVertexShader = new DefaultVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
 
+
+//var ppLightingPS = new PPLightingPS(renderer);
 //var ppLightingVS = new PPLightingVS(renderer);
 
 
