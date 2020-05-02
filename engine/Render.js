@@ -88,9 +88,9 @@ Render.prototype.drawPixel = function(x, y, color) {
   var pixel = (y * this.screenWidth + x);
   this.buf32[pixel] =
     (color.position[3] << 24)  |   //A
-    (color.position[0] << 16)  |   //R
+    (color.position[2] << 16)  |   //R
     (color.position[1] << 8)   |   //G
-    (color.position[2]);           //B
+    (color.position[0]);           //B
 }
 
 
