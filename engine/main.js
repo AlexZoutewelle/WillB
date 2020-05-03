@@ -29,13 +29,14 @@ var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
-
+//var wireFramePS = new WireFramePS(renderer);
+//var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-var flatShadeVertexShader = new FlatShadeVS(renderer);
-//var pointShader = new PointShadeVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
+var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -44,7 +45,7 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = flatShadeVertexShader;
+var movementTarget = pointShader;
 
 
 
@@ -57,7 +58,7 @@ var movementTarget = flatShadeVertexShader;
 
 
 //Load models
-var model_name1 = "sphere";
+var model_name1 = "cube";
 var model_name2 = "cow";
 
 var models = [
@@ -74,6 +75,7 @@ Promise.all(models).then(function(results) {
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
   object_transform1.fields = object_transform1.translate(-12, 0, 0);
+  object_transform1.fields = object_transform1.scale(0.5,0.5,0.5);
 
   var object2_srt = new Transformation();
 
@@ -146,7 +148,6 @@ function frame() {
   transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
   transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
-  //console.log(models[0]);
 
   if(playerState.input.escape === true) {
     console.log("ending");

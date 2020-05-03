@@ -414,7 +414,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
       if((w0 | w1 | w2) >= 0) {
 
           //barycentric coordinates
-          //var w0_current =  w0 / area;
+          var w0_current =  w0 / area;
           var w1_current =  w1 / area;
           var w2_current =  w2 / area;
 
@@ -460,7 +460,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
             //draw
             //Get the color that the vertex must output
-            var outputColor = this.invokePixelShaders(p, "", w1_current, w2_current, v0, v1, v2);
+            var outputColor = this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2);
             this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
           }
       }
