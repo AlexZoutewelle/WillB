@@ -180,6 +180,18 @@ Render.prototype.render = function(camera_inverse, camera) {
 
   this.draw();
 }
+var n = 1;
+var f = 100;
+var w = 1.5;
+//  console.log(vertex.position.position[3]);
+
+var projection = new Transformation([
+  [2 * n / w, 0,      0,              0],
+  [0,         2* n/w, 0,              0],
+  [0,         0,      f / (f - n),    -1],
+  [0,         0,      n * f/(f - n), 0]
+]);
+
 //Transformation matrices
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
@@ -194,15 +206,10 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
   var w = 2;
 //  console.log(vertex.position.position[3]);
 
-  var projection = new Transformation([
-    [2 * n / w, 0,      0,              0],
-    [0,         2* n/w, 0,              0],
-    [0,         0,      f / (f - n),    1],
-    [0,         0,      -n * f/(f - n), 0]
-  ]);
 
-  //vertex.position = projection.multMatrixVec3(vertex.position);
-  //console.log(vertex.position.position[3]);
+
+  vertex.position = projection.multMatrixVec3(vertex.position);
+  //console.log(vertex.position.position[2]);
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
   return vertex_out;
@@ -265,7 +272,49 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
+  console.log(v0.position.position[2] + " " + v0.position.position[3]);
 
+  if(v0.position.position[0] > v0.position.position[3] &&
+     v1.position.position[0] > v1.position.position[3] &&
+     v2.position.position[0] > v2.position.position[3]) {
+       console.log("true1");
+      return;
+    }
+    if(v0.position.position[0] < -v0.position.position[3] &&
+       v1.position.position[0] < -v1.position.position[3] &&
+       v2.position.position[0] < -v2.position.position[3]) {
+         console.log("true2");
+
+        return;
+    }
+    if(v0.position.position[1] > v0.position.position[3] &&
+       v1.position.position[1] > v1.position.position[3] &&
+       v2.position.position[1] > v2.position.position[3]) {
+         console.log("true3");
+
+        return;
+      }
+      if(v0.position.position[1] < -v0.position.position[3] &&
+         v1.position.position[1] < -v1.position.position[3] &&
+         v2.position.position[1] < -v2.position.position[3]) {
+           console.log("true3");
+
+          return;
+        }
+  if(v0.position.position[2] > v0.position.position[3] &&
+     v1.position.position[2] > v1.position.position[3] &&
+     v2.position.position[2] > v2.position.position[3]) {
+       console.log("true4");
+
+      return;
+  }
+  if(v0.position.position[2] < 0 &&
+     v1.position.position[2] < 0 &&
+     v2.position.position[2] < 0) {
+       console.log("true5");
+
+      return;
+  }
   this.postProcessFace(v0, v1, v2, texture);
 }
 

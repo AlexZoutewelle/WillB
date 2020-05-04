@@ -22,7 +22,7 @@ FlatShadeVS.prototype.move = function(x,y,z) {
 
 FlatShadeVS.prototype.getVertex = function(vertex_in, camera_inverse) {
 
-
+  //log(vertex_in.position);
   var d =  this.diffuse.multiplyScalar(Math.max(0, this.lightDirection.dot(vertex_in.normal)));
 
   var light = (d.addVector(this.ambient));
