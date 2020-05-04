@@ -67,7 +67,7 @@ Render.prototype.draw = function() {
 //milimeters
 var focalLength = 15;
 var filmWidth = 21.023;
-var filmHeight = 21.328;
+var filmHeight = 21.023;
 
 var Znear = 1;
 var Zfar = 1000;
@@ -183,17 +183,26 @@ Render.prototype.render = function(camera_inverse, camera) {
 //Transformation matrices
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
-  //console.log(vertex);
-
-
-
-  //We must transform the positions of the vertex inside the shader!
-  //Otherwise, if we want to do point lights, we can not do comparins between positions: they will be in a differernt coordinate system!
-
   //Vertex shaders
+  //Save a copy of the world position
   vertex.worldPos = vertex.position.copy();
-  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
 
+  //Transform to camera coordinate system
+  vertex.position = camera_inverse.multMatrixVec3(vertex.position);
+  var n = 1;
+  var f = 1000;
+  var w = 2;
+//  console.log(vertex.position.position[3]);
+
+  var projection = new Transformation([
+    [2 * n / w, 0,      0,              0],
+    [0,         2* n/w, 0,              0],
+    [0,         0,      f / (f - n),    1],
+    [0,         0,      -n * f/(f - n), 0]
+  ]);
+
+  //vertex.position = projection.multMatrixVec3(vertex.position);
+  //console.log(vertex.position.position[3]);
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
   return vertex_out;
@@ -251,117 +260,25 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
-  v0 = this.vertexToRaster(v0);
-  v1 = this.vertexToRaster(v1);
-  v2 = this.vertexToRaster(v2);
+  //Fustrum Cull test
+  //We need to check if a triangle is completely out of the visible fustrum. If it is, we return immediately: we cull this triangle.
+
+  //Z-plane clipping
+  //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
+
   this.postProcessFace(v0, v1, v2, texture);
 }
 
 Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
 
   //this.renderFace(v0, v1, v2, texture);
+  v0 = this.vertexToRaster(v0);
+  v1 = this.vertexToRaster(v1);
+  v2 = this.vertexToRaster(v2);
   this.drawFace(v0, v1, v2 )
 }
 
 
-//Triangle rasterizer
-Render.prototype.renderFace = function(v0, v1, v2, texture) {
-  //First, we have to sort the triangles based on their Y values DESC, to determine the case
-  if(v0.position.position[1] <  v1.position.position[1]) {
-    var temp = v0;
-    v0 = v1;
-    v1 = temp;
-  }
-
-  if(v0.position.position[1] < v2.position.position[1]) {
-    var temp = v0;
-    v0 = v2;
-    v2 = temp;
-  }
-
-  if(v1.position.position[1] < v2.position.position[1]) {
-    var temp = v1;
-    v1 = v2;
-    v2 = temp;
-  }
-
-  //Flat top
-  if(v0.position.position[1] === v1.position.position[1]) {
-    //Now, we should sort the top vertices by their x values ASC
-    if(v0.position.position[0] > v1.position.position[0]) {
-      var temp = v0;
-      v0 = v1;
-      v1 = temp;
-    }
-    this.renderFlatTopFace( v0,
-                            v1,
-                            v2,
-                            color, texture);
-  }
-
-  //Flat bottom
-  else if(v1.position.position[1] === v2.position.position[1]) {
-    //Now, we should sort the bottom vertices by their x values  ASC
-    if(v1.position.position[0] > v2.position.position[0]) {
-      var temp = v1;
-      v1 = v2;
-      v2 = temp;
-    }
-
-    this.renderFlatBottomFace( v0,
-                               v1,
-                               v2,
-                               [0,0,255], texture);
-  }
-
-  //General
-  else {
-
-    //major right
-    if(vi.position.position[0] > v1.position.position[0]) {
-
-      this.renderFlatBottomFace(v0, v1, vi , color, texture);
-      this.renderFlatTopFace(v1, vi, v2, color, texture);
-    }
-    //major left
-    if(vi.position.position[0] < v1.position.position[0]) {
-
-      this.renderFlatBottomFace(v0, vi, v1, color, texture);
-      this.renderFlatTopFace(vi, v1, v2, color, texture);
-    }
-  }
-
-}
-
-Render.prototype.renderFlatBottomFace = function(v0, v1, v2, color, texture) {
-  // var dy = (v0.position.position[1] - v2.position.position[1]);
-  //
-  // //dv0 and dv1 are the edge steps
-  // var dv0 = v1.subtract(v0).divideScalar(dy);
-  // var dv1 = v2.subtract(v0).divideScalar(dy);
-  //
-  // //Right edge interpolant    //Maybe make a copying function for vertices?
-  // var itEdge1 = v0;
-
-  // this.drawFace(v0, v1, v2, texture, dv0, dv1, itEdge1 )
-  this.drawFace(v0, v1, v2 )
-
-}
-
-Render.prototype.renderFlatTopFace = function(v0, v1, v2, color, texture) {
-
-  // var dy = (v2.position.position[1] - v0.position.position[1]);
-  //
-  // //dv0 and dv1 are the edge raster_pixels
-  // var dv0 = v0.subtract(v2).divideScalar(dy);
-  // var dv1 = v1.subtract(v2).divideScalar(dy);
-  //
-  // var itEdge1 = v1;
-
-  // this.drawFace(v0,v1, v2, texture, dv0, dv1, itEdge1);
-  this.drawFace(v0,v1, v2);
-
-}
 
 Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
@@ -429,34 +346,6 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
             var p = new Vertex();
             p.position = currentP;
 
-            //Interpolate the vertex attributes
-
-            // var color = new Vector3(0,0,0);
-            // color.position[0] = v0.color.position[0] + (w1_current * (v1.color.position[0] - v0.color.position[0]) ) + (w2_current * (v2.color.position[0] - v0.color.position[0]));
-            // color.position[1] = v0.color.position[1] + (w1_current * (v1.color.position[1] - v0.color.position[1]) ) + (w2_current * (v2.color.position[1] - v0.color.position[1]));
-            // color.position[2] = v0.color.position[2] + (w1_current * (v1.color.position[2] - v0.color.position[2]) ) + (w2_current * (v2.color.position[2] - v0.color.position[2]));
-            // p.color = color;
-
-            // var uv = new Vector3(0,0,0);
-            // uv.position[0] = v0.uv.position[0] + (w1_current * (v1.uv.position[0] - v0.uv.position[0]) ) + (w2_current * (v2.uv.position[0] - v0.uv.position[0]));
-            // uv.position[1] = v0.uv.position[1] + (w1_current * (v1.uv.position[1] - v0.uv.position[1]) ) + (w2_current * (v2.uv.position[1] - v0.uv.position[1]));
-            // uv.position[2] = v0.uv.position[2] + (w1_current * (v1.uv.position[2] - v0.uv.position[2]) ) + (w2_current * (v2.uv.position[2] - v0.uv.position[2]));
-            // p.uv = uv;
-
-            //
-            // var normal = new Vector3(0,0,0);
-            // normal.position[0] = v0.normal.position[0] + (w1_current * (v1.normal.position[0] - v0.normal.position[0]) ) + (w2_current * (v2.normal.position[0] - v0.normal.position[0]));
-            // normal.position[1] = v0.normal.position[1] + (w1_current * (v1.normal.position[1] - v0.normal.position[1]) ) + (w2_current * (v2.normal.position[1] - v0.normal.position[1]));
-            // normal.position[2] = v0.normal.position[2] + (w1_current * (v1.normal.position[2] - v0.normal.position[2]) ) + (w2_current * (v2.normal.position[2] - v0.normal.position[2]));
-            // p.normal = normal.multiplyScalar(p.position.position[2]).normalize();
-            // //p.normal = normal.normalize();
-            //
-            //
-            // var worldPos = new Vector3(0,0,0);
-            // worldPos.position[0] = v0.worldPos.position[0] + (w1_current * (v1.worldPos.position[0] - v0.worldPos.position[0]) ) + (w2_current * (v2.worldPos.position[0] - v0.worldPos.position[0]));
-            // worldPos.position[1] = v0.worldPos.position[1] + (w1_current * (v1.worldPos.position[1] - v0.worldPos.position[1]) ) + (w2_current * (v2.worldPos.position[1] - v0.worldPos.position[1]));
-            // worldPos.position[2] = v0.worldPos.position[2] + (w1_current * (v1.worldPos.position[2] - v0.worldPos.position[2]) ) + (w2_current * (v2.worldPos.position[2] - v0.worldPos.position[2]));
-            // p.worldPos = worldPos.multiplyScalar(p.position.position[2]);
 
             //draw
             //Get the color that the vertex must output
@@ -527,7 +416,8 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 Render.prototype.vertexToRaster = function(vertex_orig) {
   var vertex = vertex_orig;
   var zInv = (1/vertex.position.position[2]);
-  //console.log(zInv);
+
+
 
   //vertex = vertex.multiplyScalar(-zInv);
 

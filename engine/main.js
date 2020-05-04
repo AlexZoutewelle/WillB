@@ -35,8 +35,8 @@ var lightBlendPS = new LightBlendPS(renderer);
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
-var pointShader = new PointShadeVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
+// var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -45,7 +45,7 @@ var pointShader = new PointShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = pointShader;
+var movementTarget = flatShadeVertexShader;
 
 
 
@@ -112,7 +112,7 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
-  renderer.models.push(models[1]);
+  //renderer.models.push(models[1]);
   console.log(models[1])
 
 
