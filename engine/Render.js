@@ -210,7 +210,11 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
 
   vertex.position = projectionMatrix.multMatrixVec3(vertex.position);
-  //vertex.position.position[2] = 1/vertex.position.position[2];
+  //normalize
+  vertex.position = vertex.position.divideScalar(vertex.position.position[3]);
+
+  //save inverse for perspective correct interpolation
+  vertex.position.position[3] = 1/vertex.position.position[3];
 
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
@@ -274,72 +278,72 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
-  if(v0.position.position[2] < 0 &&
-     v1.position.position[2] < 0 &&
-     v2.position.position[2] < 0) {
-       console.log("true6");
-
-       console.log(v0.position.position[2]);
-       console.log(v1.position.position[2]);
-       console.log(v2.position.position[2]);
-
-      return;
-  }
-  if(v0.position.position[0] > v0.position.position[3] &&
-     v1.position.position[0] > v1.position.position[3] &&
-     v2.position.position[0] > v2.position.position[3]) {
-       console.log("true1");
-
-       console.log(v0.position.position[0] + " > " + v0.position.position[3]);
-       console.log(v1.position.position[0] + " > " + v1.position.position[3]);
-       console.log(v2.position.position[0] + " > " + v2.position.position[3]);
-
-      return;
-    }
-    if(v0.position.position[0] < -v0.position.position[3] &&
-       v1.position.position[0] < -v1.position.position[3] &&
-       v2.position.position[0] < -v2.position.position[3]) {
-         console.log("true2");
-
-         console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
-         console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
-         console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
-
-        return;
-    }
-    if(v0.position.position[1] > v0.position.position[3] &&
-       v1.position.position[1] > v1.position.position[3] &&
-       v2.position.position[1] > v2.position.position[3]) {
-         console.log("true3");
-
-         console.log(v0.position.position[1] + " > " + v0.position.position[3]);
-         console.log(v1.position.position[1] + " > " + v1.position.position[3]);
-         console.log(v2.position.position[1] + " > " + v2.position.position[3]);
-
-        return;
-      }
-      if(v0.position.position[1] < -v0.position.position[3] &&
-         v1.position.position[1] < -v1.position.position[3] &&
-         v2.position.position[1] < -v2.position.position[3]) {
-           console.log("true4");
-
-           console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
-           console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
-           console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
-
-          return;
-        }
-  if(v0.position.position[2] > v0.position.position[3] &&
-     v1.position.position[2] > v1.position.position[3] &&
-     v2.position.position[2] > v2.position.position[3]) {
-       console.log("true5");
-
-       console.log(v0.position.position[2] + " > " + v0.position.position[3]);
-       console.log(v1.position.position[2] + " > " + v1.position.position[3]);
-       console.log(v2.position.position[2] + " > " + v2.position.position[3]);
-
-      return;
-  }
+  // if(v0.position.position[2] < 0 &&
+  //    v1.position.position[2] < 0 &&
+  //    v2.position.position[2] < 0) {
+  //      console.log("true6");
+  //
+  //      console.log(v0.position.position[2]);
+  //      console.log(v1.position.position[2]);
+  //      console.log(v2.position.position[2]);
+  //
+  //     return;
+  // }
+  // if(v0.position.position[0] > v0.position.position[3] &&
+  //    v1.position.position[0] > v1.position.position[3] &&
+  //    v2.position.position[0] > v2.position.position[3]) {
+  //      console.log("true1");
+  //
+  //      console.log(v0.position.position[0] + " > " + v0.position.position[3]);
+  //      console.log(v1.position.position[0] + " > " + v1.position.position[3]);
+  //      console.log(v2.position.position[0] + " > " + v2.position.position[3]);
+  //
+  //     return;
+  //   }
+  //   if(v0.position.position[0] < -v0.position.position[3] &&
+  //      v1.position.position[0] < -v1.position.position[3] &&
+  //      v2.position.position[0] < -v2.position.position[3]) {
+  //        console.log("true2");
+  //
+  //        console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
+  //        console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
+  //        console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
+  //
+  //       return;
+  //   }
+  //   if(v0.position.position[1] > v0.position.position[3] &&
+  //      v1.position.position[1] > v1.position.position[3] &&
+  //      v2.position.position[1] > v2.position.position[3]) {
+  //        console.log("true3");
+  //
+  //        console.log(v0.position.position[1] + " > " + v0.position.position[3]);
+  //        console.log(v1.position.position[1] + " > " + v1.position.position[3]);
+  //        console.log(v2.position.position[1] + " > " + v2.position.position[3]);
+  //
+  //       return;
+  //     }
+  //     if(v0.position.position[1] < -v0.position.position[3] &&
+  //        v1.position.position[1] < -v1.position.position[3] &&
+  //        v2.position.position[1] < -v2.position.position[3]) {
+  //          console.log("true4");
+  //
+  //          console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
+  //          console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
+  //          console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
+  //
+  //         return;
+  //       }
+  // if(v0.position.position[2] > v0.position.position[3] &&
+  //    v1.position.position[2] > v1.position.position[3] &&
+  //    v2.position.position[2] > v2.position.position[3]) {
+  //      console.log("true5");
+  //
+  //      console.log(v0.position.position[2] + " > " + v0.position.position[3]);
+  //      console.log(v1.position.position[2] + " > " + v1.position.position[3]);
+  //      console.log(v2.position.position[2] + " > " + v2.position.position[3]);
+  //
+  //     return;
+  // }
 
 
   this.postProcessFace(v0, v1, v2, texture);
@@ -413,13 +417,19 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
           //z-buffer test
 
-          //The vertices' Z is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
           currentP.position[2] =  (v0.position.position[2] +
                                     (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
                                     (w2_current * (v2.position.position[2] - v0.position.position[2])));
-          //console.log(1/currentP.position[2]);
-          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
 
+          //The vertices' w is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
+
+          currentP.position[3] =  1/ (v0.position.position[3] +
+                                    (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
+                                    (w2_current * (v2.position.position[3] - v0.position.position[3])));
+          //console.log(currentP.position[3]);
+
+
+          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
             //Assemble Vertex
             var p = new Vertex();
             p.position = currentP;
@@ -499,9 +509,9 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
 
 
   //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
-  vertex.position.position[0] = (vertex.position.position[0] )  * zInv;
-  vertex.position.position[1] = (vertex.position.position[1] ) * zInv;
-  vertex.position.position[2] = vertex.position.position[2] *  zInv
+  // vertex.position.position[0] = (vertex.position.position[0] )  * zInv;
+  // vertex.position.position[1] = (vertex.position.position[1] ) * zInv;
+  // vertex.position.position[2] = vertex.position.position[2] *  zInv
 
   // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
   //console.log("new");
