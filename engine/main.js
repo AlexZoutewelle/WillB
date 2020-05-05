@@ -145,8 +145,8 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
-  transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  //transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
+  //transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
   if(playerState.input.escape === true) {

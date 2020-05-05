@@ -362,6 +362,8 @@ Vector3.prototype.multiplyScalar = function(scalar) {
   result.position[0] = this.position[0] * scalar;
   result.position[1] = this.position[1] * scalar;
   result.position[2] = this.position[2] * scalar;
+  result.position[3] = this.position[3];
+
   return result;
 }
 
@@ -370,6 +372,7 @@ Vector3.prototype.divideScalar = function(scalar) {
   result.position[0] = this.position[0] / scalar;
   result.position[1] = this.position[1] / scalar;
   result.position[2] = this.position[2] / scalar;
+  result.position[3] = this.position[3];
   return result;
 
 }

@@ -1,6 +1,32 @@
-/**
-Draw holds a reference to the context of the canvas
-**/
+
+
+//Used for rasterization:
+
+  //milimeters
+  var focalLength = 15;
+  var filmWidth = 21.023;
+  var filmHeight = 21.023;
+
+  var Znear = 1;
+  var Zfar = 1000;
+
+  // var angleOfView = 90;
+  //var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
+
+  //Canvas dimensions
+  var ctop = (filmHeight * 0.5 / focalLength) * Znear ;
+  var cbottom = -ctop;
+  var cright = (filmWidth * 0.5 / focalLength) * Znear;
+  var cleft = -cright;
+
+console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
+
+//used for creating the NDC fustrum (culling and clipping)
+
+  var n = Znear;
+  var f = 1000;
+  var w = 3;
+
 function Render(screenWidth, screenHeight) {
   this.canvas = document.getElementById('screen');
 
@@ -63,25 +89,6 @@ Render.prototype.draw = function() {
   this.ctx.putImageData(this.imageData, 0, 0);
 }
 
-
-//milimeters
-var focalLength = 15;
-var filmWidth = 21.023;
-var filmHeight = 21.023;
-
-var Znear = 1;
-var Zfar = 1000;
-
-// var angleOfView = 90;
-//var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
-
-//Canvas dimensions
-var ctop = (filmHeight * 0.5 / focalLength) * Znear ;
-var cbottom = -ctop;
-var cright = (filmWidth * 0.5 / focalLength) * Znear;
-var cleft = -cright;
-
-console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
 Render.prototype.drawPixel = function(x, y, color) {
   //console.log(color.position[0] + " " + color.position[1] + " " + color.position[2] + " " + color.position[3]);
@@ -180,16 +187,15 @@ Render.prototype.render = function(camera_inverse, camera) {
 
   this.draw();
 }
-var n = 1;
-var f = 100;
-var w = 1.5;
-//  console.log(vertex.position.position[3]);
 
-var projection = new Transformation([
-  [2 * n / w, 0,      0,              0],
-  [0,         2* n/w, 0,              0],
-  [0,         0,      f / (f - n),    -1],
-  [0,         0,      n * f/(f - n), 0]
+
+
+
+var projectionMatrix = new Transformation([
+  [2 * n / (cright - cleft), 0,      0,              0],
+  [0,         2* n/(ctop - cbottom), 0,              0],
+  [0,         0,      (f + n) /(f - n) ,    -1],
+  [0,         0,      (2 * f * n / (f - n)), 0]
 ]);
 
 //Transformation matrices
@@ -201,15 +207,11 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
   //Transform to camera coordinate system
   vertex.position = camera_inverse.multMatrixVec3(vertex.position);
-  var n = 1;
-  var f = 1000;
-  var w = 2;
-//  console.log(vertex.position.position[3]);
 
 
+  vertex.position = projectionMatrix.multMatrixVec3(vertex.position);
+  //vertex.position.position[2] = 1/vertex.position.position[2];
 
-  vertex.position = projection.multMatrixVec3(vertex.position);
-  //console.log(vertex.position.position[2]);
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)
 
   return vertex_out;
@@ -272,18 +274,36 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
-  console.log(v0.position.position[2] + " " + v0.position.position[3]);
+  if(v0.position.position[2] < 0 &&
+     v1.position.position[2] < 0 &&
+     v2.position.position[2] < 0) {
+       console.log("true6");
 
+       console.log(v0.position.position[2]);
+       console.log(v1.position.position[2]);
+       console.log(v2.position.position[2]);
+
+      return;
+  }
   if(v0.position.position[0] > v0.position.position[3] &&
      v1.position.position[0] > v1.position.position[3] &&
      v2.position.position[0] > v2.position.position[3]) {
        console.log("true1");
+
+       console.log(v0.position.position[0] + " > " + v0.position.position[3]);
+       console.log(v1.position.position[0] + " > " + v1.position.position[3]);
+       console.log(v2.position.position[0] + " > " + v2.position.position[3]);
+
       return;
     }
     if(v0.position.position[0] < -v0.position.position[3] &&
        v1.position.position[0] < -v1.position.position[3] &&
        v2.position.position[0] < -v2.position.position[3]) {
          console.log("true2");
+
+         console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
+         console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
+         console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
 
         return;
     }
@@ -292,29 +312,36 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
        v2.position.position[1] > v2.position.position[3]) {
          console.log("true3");
 
+         console.log(v0.position.position[1] + " > " + v0.position.position[3]);
+         console.log(v1.position.position[1] + " > " + v1.position.position[3]);
+         console.log(v2.position.position[1] + " > " + v2.position.position[3]);
+
         return;
       }
       if(v0.position.position[1] < -v0.position.position[3] &&
          v1.position.position[1] < -v1.position.position[3] &&
          v2.position.position[1] < -v2.position.position[3]) {
-           console.log("true3");
+           console.log("true4");
+
+           console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
+           console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
+           console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
 
           return;
         }
   if(v0.position.position[2] > v0.position.position[3] &&
      v1.position.position[2] > v1.position.position[3] &&
      v2.position.position[2] > v2.position.position[3]) {
-       console.log("true4");
-
-      return;
-  }
-  if(v0.position.position[2] < 0 &&
-     v1.position.position[2] < 0 &&
-     v2.position.position[2] < 0) {
        console.log("true5");
 
+       console.log(v0.position.position[2] + " > " + v0.position.position[3]);
+       console.log(v1.position.position[2] + " > " + v1.position.position[3]);
+       console.log(v2.position.position[2] + " > " + v2.position.position[3]);
+
       return;
   }
+
+
   this.postProcessFace(v0, v1, v2, texture);
 }
 
@@ -387,8 +414,10 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
           //z-buffer test
 
           //The vertices' Z is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
-          currentP.position[2] = 1 / (v0.position.position[2] + (w1_current * (v1.position.position[2] - v0.position.position[2]) ) + (w2_current * (v2.position.position[2] - v0.position.position[2])));
-
+          currentP.position[2] =  (v0.position.position[2] +
+                                    (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
+                                    (w2_current * (v2.position.position[2] - v0.position.position[2])));
+          //console.log(1/currentP.position[2]);
           if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
 
             //Assemble Vertex
@@ -464,27 +493,28 @@ Render.prototype.renderWireFrame = function(pixels, edges) {
 
 Render.prototype.vertexToRaster = function(vertex_orig) {
   var vertex = vertex_orig;
-  var zInv = (1/vertex.position.position[2]);
+  var zInv = (1/vertex.position.position[3]);
 
 
 
-  //vertex = vertex.multiplyScalar(-zInv);
 
   //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
-  vertex.position.position[0] = (vertex.position.position[0] )  * Znear / vertex.position.position[2];
-  vertex.position.position[1] = (vertex.position.position[1] ) * Znear / vertex.position.position[2];
+  vertex.position.position[0] = (vertex.position.position[0] )  * zInv;
+  vertex.position.position[1] = (vertex.position.position[1] ) * zInv;
+  vertex.position.position[2] = vertex.position.position[2] *  zInv
+
   // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
   //console.log("new");
   //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
 
-  //ndc (range of [0,1])
+  // ndc (range of [0,1])
   vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
   vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
 
   //raster coords (pixels)
   vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
   vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
-  vertex.position.position[2] = zInv;
+  //vertex.position.position[2] = 1/vertex.position.position[2];
   return vertex;
 }
 
