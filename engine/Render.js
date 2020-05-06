@@ -415,21 +415,23 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
           var w1_current =  w1 / area;
           var w2_current =  w2 / area;
 
-          //z-buffer test
-
+          //z-buffer test. Normal interpolation for z.
           currentP.position[2] =  (v0.position.position[2] +
                                     (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
                                     (w2_current * (v2.position.position[2] - v0.position.position[2])));
 
-          //The vertices' w is saved as 1 / z. So, to get the true Z, we should take its reciprocal once more after interpolating
 
-          currentP.position[3] =  1/ (v0.position.position[3] +
-                                    (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
-                                    (w2_current * (v2.position.position[3] - v0.position.position[3])));
-          //console.log(currentP.position[3]);
 
 
           if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
+
+            //We use W for perspective correction.
+            //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating
+
+            currentP.position[3] =  1/ (v0.position.position[3] +
+                                      (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
+                                      (w2_current * (v2.position.position[3] - v0.position.position[3])));
+
             //Assemble Vertex
             var p = new Vertex();
             p.position = currentP;
