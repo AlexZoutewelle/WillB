@@ -7,8 +7,8 @@
   var filmWidth = 21.023;
   var filmHeight = 21.023;
 
-  var Znear = 1;
-  var Zfar = 1000;
+  var Znear = 1.1;
+  var Zfar = 50;
 
   // var angleOfView = 90;
   //var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
@@ -277,6 +277,7 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
+
   if(v0.position.position[2] < 0 &&
      v1.position.position[2] < 0 &&
      v2.position.position[2] < 0) {
@@ -528,12 +529,12 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
 
   // ndc (range of [0,1])
-  vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-  vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
+  // vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+  // vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
 
   //raster coords (pixels)
-  vertex.position.position[0] = ((vertex.position.position[0] * this.screenWidth) ) | 0;
-  vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight) ) | 0;
+  vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5) ) + cleft | 0;
+  vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight * 0.5) ) + cright | 0;
   //vertex.position.position[2] = 1/vertex.position.position[2];
   return vertex;
 }

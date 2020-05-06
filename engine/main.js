@@ -88,7 +88,7 @@ Promise.all(models).then(function(results) {
   object2_rotate.fields = object2_rotate.rotate(0, 270, 0)
 
 
-
+  
   for(var i = 0; i < models[0].positions.length; i++) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
@@ -145,7 +145,7 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  //transformModel(models[0], 1, 1, 1, 0, 0, 0, 300, 0, 0 , dt);
+  //transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
   //transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
