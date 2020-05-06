@@ -21,11 +21,12 @@
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-//used for creating the NDC fustrum (culling and clipping)
+var scale = Math.tan(120 * 0.5 * Math.PI / 180) * 1;
+var rp = (1) * scale, lp = -rp;
+var tp = scale, bp = -tp;
+var np = 1
+var f = Zfar
 
-  var n = Znear;
-  var f = 1000;
-  var w = 3;
 
 function Render(screenWidth, screenHeight) {
   this.canvas = document.getElementById('screen');
@@ -190,14 +191,6 @@ Render.prototype.render = function(camera_inverse, camera) {
 
 
 
-
-var projectionMatrix = new Transformation([
-  [2 * n / (cright - cleft), 0,      0,              0],
-  [0,         2* n/(ctop - cbottom), 0,              0],
-  [0,         0,      (f + n) /(f - n) ,    -1],
-  [0,         0,      (2 * f * n / (f - n)), 0]
-]);
-
 //Transformation matrices
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
@@ -266,11 +259,21 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   return true;
 }
 
+var projectionMatrix = new Transformation([
+  [(2 * Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
+  [0,                              (2* Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
+  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -((2 * Zfar * Znear) / (Zfar - Znear))],
+  [0,                              0,                            1,                                   0]
+]);
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Fustrum Cull test
   //We need to check if a triangle is completely out of the visible fustrum. If it is, we return immediately: we cull this triangle.
+
+  // log(v0.position);
+  // log(v1.position);
+  // log(v2.position);
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
@@ -278,10 +281,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
      v1.position.position[2] < 0 &&
      v2.position.position[2] < 0) {
        console.log("true6");
-
-       console.log(v0.position.position[2]);
-       console.log(v1.position.position[2]);
-       console.log(v2.position.position[2]);
+       //
+       // console.log(v0.position.position[2]);
+       // console.log(v1.position.position[2]);
+       // console.log(v2.position.position[2]);
 
       return;
   }
@@ -289,10 +292,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
      v1.position.position[0] > v1.position.position[3] &&
      v2.position.position[0] > v2.position.position[3]) {
        console.log("true1");
-
-       console.log(v0.position.position[0] + " > " + v0.position.position[3]);
-       console.log(v1.position.position[0] + " > " + v1.position.position[3]);
-       console.log(v2.position.position[0] + " > " + v2.position.position[3]);
+       //
+       // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
+       // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
+       // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
 
       return;
     }
@@ -300,10 +303,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
        v1.position.position[0] < -v1.position.position[3] &&
        v2.position.position[0] < -v2.position.position[3]) {
          console.log("true2");
-
-         console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
-         console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
-         console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
+         //
+         // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
+         // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
+         // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
 
         return;
     }
@@ -311,10 +314,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
        v1.position.position[1] > v1.position.position[3] &&
        v2.position.position[1] > v2.position.position[3]) {
          console.log("true3");
-
-         console.log(v0.position.position[1] + " > " + v0.position.position[3]);
-         console.log(v1.position.position[1] + " > " + v1.position.position[3]);
-         console.log(v2.position.position[1] + " > " + v2.position.position[3]);
+         //
+         // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
+         // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
+         // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
 
         return;
       }
@@ -322,10 +325,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
          v1.position.position[1] < -v1.position.position[3] &&
          v2.position.position[1] < -v2.position.position[3]) {
            console.log("true4");
-
-           console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
-           console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
-           console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
+           //
+           // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
+           // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
+           // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
 
           return;
         }
@@ -333,10 +336,10 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
      v1.position.position[2] > v1.position.position[3] &&
      v2.position.position[2] > v2.position.position[3]) {
        console.log("true5");
-
-       console.log(v0.position.position[2] + " > " + v0.position.position[3]);
-       console.log(v1.position.position[2] + " > " + v1.position.position[3]);
-       console.log(v2.position.position[2] + " > " + v2.position.position[3]);
+       //
+       // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
+       // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
+       // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
 
       return;
   }
