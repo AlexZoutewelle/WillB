@@ -353,13 +353,13 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   //Z Clipping test
   if(v0.position.position[2] < 0){
-    if(v1.position.position[2]) {
+    if(v1.position.position[2] < 0 ) {
       //Clip for v0 and v1
       this.clipForTwo(v0, v1, v2);
     }
     else if(v2.position.position[2] < 0) {
       //Clip for v0 and v2
-      this.clipForTwo(v0, v2, v1);
+      this.clipForTwo(v2, v0, v1);
     }
     else {
       //Clip for v0
@@ -394,11 +394,12 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
     //We need to create 2 new vertices, because we will be clipping v0 on the Z axis here.
     //So, we interpolate v0.z -> v1.z   and v0.z -> v2.z
     //How do we know the order of these vertices? All because of our previously done Clipping tests.
-    var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
-    var alphaB = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
+    var alphaA = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
+    var alphaB = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
 
     var v0a = v0.interpolateTo(v1, alphaA);
     var v0b = v0.interpolateTo(v2, alphaB);
+    console.log(alphaA + " " + alphaB);
 
     //So now, we have 2 new triangles to process.
 
@@ -413,15 +414,15 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
-  console.log("clip for 2");
+  console.log("clip for 2")
   //We again need to create 2 new vertices.
-  var alphaA = (-v0.position.position[2]) / (v0.position.position[2] - v1.position.position[2]);
-  var alphaB = (-v2.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
+  var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
+  var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
 
   console.log(alphaA + " " + alphaB);
 
-  var v0 = v0.interpolateTo(v1, alphaA);
-  var v2 = v2.interpolateTo(v1, alphaB);
+   v0 = v0.interpolateTo(v2, alphaA);
+   v1 = v1.interpolateTo(v2, alphaB);
 
   //We only need to process a single face this time though.
   this.postProcessFace(v0, v1, v2);

@@ -125,7 +125,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 8.5
+var movement = 4.5
 
 
 //FPS measurement
