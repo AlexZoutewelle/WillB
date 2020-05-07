@@ -7,7 +7,7 @@
   var filmWidth = 21.023;
   var filmHeight = 21.023;
 
-  var Znear = 1.1;
+  var Znear = 0.5;
   var Zfar = 50;
 
   // var angleOfView = 90;
@@ -191,7 +191,13 @@ Render.prototype.render = function(camera_inverse, camera) {
 
 
 
-//Transformation matrices
+var projectionMatrix = new Transformation([
+  [(2 * Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
+  [0,                              (2* Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
+  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -((2 * Zfar * Znear) / (Zfar - Znear))],
+  [0,                              0,                            1,                                   0]
+]);
+
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
   //Vertex shaders
@@ -251,7 +257,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   // )
 
   var dot_result = v0.position.dot(normal);
-  //var dot_result = normal.dot(face.vertices[0].position);
   if(dot_result >= 0) {
     return false;
   }
@@ -259,12 +264,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   return true;
 }
 
-var projectionMatrix = new Transformation([
-  [(2 * Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
-  [0,                              (2* Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
-  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -((2 * Zfar * Znear) / (Zfar - Znear))],
-  [0,                              0,                            1,                                   0]
-]);
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
@@ -278,72 +277,72 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
 
-  if(v0.position.position[2] < 0 &&
-     v1.position.position[2] < 0 &&
-     v2.position.position[2] < 0) {
-       console.log("true6");
-       //
-       // console.log(v0.position.position[2]);
-       // console.log(v1.position.position[2]);
-       // console.log(v2.position.position[2]);
-
-      return;
-  }
-  if(v0.position.position[0] > v0.position.position[3] &&
-     v1.position.position[0] > v1.position.position[3] &&
-     v2.position.position[0] > v2.position.position[3]) {
-       console.log("true1");
-       //
-       // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
-       // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
-       // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
-
-      return;
-    }
-    if(v0.position.position[0] < -v0.position.position[3] &&
-       v1.position.position[0] < -v1.position.position[3] &&
-       v2.position.position[0] < -v2.position.position[3]) {
-         console.log("true2");
-         //
-         // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
-         // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
-         // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
-
-        return;
-    }
-    if(v0.position.position[1] > v0.position.position[3] &&
-       v1.position.position[1] > v1.position.position[3] &&
-       v2.position.position[1] > v2.position.position[3]) {
-         console.log("true3");
-         //
-         // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
-         // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
-         // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
-
-        return;
-      }
-      if(v0.position.position[1] < -v0.position.position[3] &&
-         v1.position.position[1] < -v1.position.position[3] &&
-         v2.position.position[1] < -v2.position.position[3]) {
-           console.log("true4");
-           //
-           // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
-           // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
-           // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
-
-          return;
-        }
-  if(v0.position.position[2] > v0.position.position[3] &&
-     v1.position.position[2] > v1.position.position[3] &&
-     v2.position.position[2] > v2.position.position[3]) {
-       console.log("true5");
-       //
-       // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
-       // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
-       // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
-
-      return;
-  }
+  // if(v0.position.position[2] < 0 &&
+  //    v1.position.position[2] < 0 &&
+  //    v2.position.position[2] < 0) {
+  //      console.log("true6");
+  //      //
+  //      // console.log(v0.position.position[2]);
+  //      // console.log(v1.position.position[2]);
+  //      // console.log(v2.position.position[2]);
+  //
+  //     return;
+  // }
+  // if(v0.position.position[0] > v0.position.position[3] &&
+  //    v1.position.position[0] > v1.position.position[3] &&
+  //    v2.position.position[0] > v2.position.position[3]) {
+  //      console.log("true1");
+  //      //
+  //      // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
+  //      // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
+  //      // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
+  //
+  //     return;
+  //   }
+  //   if(v0.position.position[0] < -v0.position.position[3] &&
+  //      v1.position.position[0] < -v1.position.position[3] &&
+  //      v2.position.position[0] < -v2.position.position[3]) {
+  //        console.log("true2");
+  //        //
+  //        // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
+  //        // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
+  //        // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
+  //
+  //       return;
+  //   }
+  //   if(v0.position.position[1] > v0.position.position[3] &&
+  //      v1.position.position[1] > v1.position.position[3] &&
+  //      v2.position.position[1] > v2.position.position[3]) {
+  //        console.log("true3");
+  //        //
+  //        // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
+  //        // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
+  //        // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
+  //
+  //       return;
+  //     }
+  //     if(v0.position.position[1] < -v0.position.position[3] &&
+  //        v1.position.position[1] < -v1.position.position[3] &&
+  //        v2.position.position[1] < -v2.position.position[3]) {
+  //          console.log("true4");
+  //          //
+  //          // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
+  //          // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
+  //          // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
+  //
+  //         return;
+  //       }
+  // if(v0.position.position[2] > v0.position.position[3] &&
+  //    v1.position.position[2] > v1.position.position[3] &&
+  //    v2.position.position[2] > v2.position.position[3]) {
+  //      console.log("true5");
+  //      //
+  //      // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
+  //      // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
+  //      // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
+  //
+  //     return;
+  // }
 
   //normalize
   v0.position = v0.position.divideScalar(v0.position.position[3]);
@@ -355,13 +354,76 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
   v2.position = v2.position.divideScalar(v2.position.position[3]);
   v2.position.position[3] = 1/v2.position.position[3];
 
-  //save inverse for perspective correct interpolation
-  this.postProcessFace(v0, v1, v2, texture);
+
+  //Z Clipping test
+  if(v0.position.position[2] < 0){
+    if(v1.position.position[2]) {
+      //Clip for v0 and v1
+      this.clipForTwo(v0, v1, v2);
+    }
+    else if(v2.position.position[2] < 0) {
+      //Clip for v0 and v2
+      this.clipForTwo(v1, v2, v1);
+    }
+    else {
+      //Clip for v0
+      this.clipForOne(v0, v1, v2);
+    }
+  }
+
+  else if(v1.position.position[2] < 0) {
+    if(v2.position.position[2] < 0) {
+      //Clip for v1 and v2
+      this.clipForTwo(v1, v2, v0);
+    }
+    else {
+      //Clip for v1
+      this.clipForOne(v1, v0, v2);
+    }
+  }
+
+  else if(v2.position.position[2] < 0) {
+    //Clip for v2
+    this.clipForOne(v2, v0, v1);
+  }
+
+  else {
+    //No need for clipping
+      this.postProcessFace(v0, v1, v2, texture);
+  }
 }
+
+Render.prototype.clipForOne = function(v0,v1,v2) {
+    //We need to create 2 new vertices, because we will be clipping v0 on the Z axis here.
+    //So, we interpolate v0.z -> v1.z   and v0.z -> v2.z
+    //How do we know the order of these vertices? All because of our previously done Clipping tests.
+    var alphaA = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
+    var alphaB = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
+
+    var v0a = v0.interpolateTo(v1, alphaA);
+    var v0b = v0.interpolateTo(v2, alphaB);
+
+    //So now, we have 2 new triangles to process.
+    this.postProcessFace(v0a, v1, v2);
+    this.postProcessFace(v0b, v0a, v2);
+}
+
+Render.prototype.clipForTwo = function(v0,v1,v2) {
+
+  //We again need to create 2 new vertices.
+  var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
+  var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
+
+  var v0 = v0.interpolateTo(v2, alphaA);
+  var v1 = v1.interpolateTo(v2, alphaB);
+
+  //We only need to process a single face this time though.
+  this.postProcessFace(v0, v1, v2);
+
+ }
 
 Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
 
-  //this.renderFace(v0, v1, v2, texture);
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
@@ -401,6 +463,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
   //Face area
   var area = EdgeFunction(v0.position,v1.position,v2.position);
 
+
   var currentP = new Vector3(minX, minY, 1);
   //Set up barycentric coordinates at minX and minY
 
@@ -419,7 +482,6 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
     for(currentP.position[0] = minX; currentP.position[0] < maxX; currentP.position[0] += 1) {
       if((w0 | w1 | w2) >= 0) {
-
           //barycentric coordinates
           var w0_current =  w0 / area;
           var w1_current =  w1 / area;

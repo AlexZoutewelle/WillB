@@ -23,6 +23,9 @@ LightBlendPS.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
   if(vertex.color.position[2] > 255) {vertex.color.position[2] = 255;}
 
   vertex.color.position[3] = 255;
+  // if(vertex.color.position[0] === 0 && vertex.color.position[1] === 0 && vertex.color.position[2] === 0){
+  //   console.log('all is 0');
+  // }
 
   return vertex;
 }

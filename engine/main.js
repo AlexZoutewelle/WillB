@@ -88,10 +88,10 @@ Promise.all(models).then(function(results) {
   object2_rotate.fields = object2_rotate.rotate(0, 270, 0)
 
 
-  
-  for(var i = 0; i < models[0].positions.length; i++) {
-    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
-  }
+  //
+  // for(var i = 0; i < models[0].positions.length; i++) {
+  //   models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
+  // }
 
   for(var i = 0; i < models[1].positions.length; i++) {
 
@@ -261,12 +261,12 @@ function frame() {
   renderer.render(camera_inverse, camera);
 
 
-  // console.log("CAMERA -----------");
-  // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
-  // console.log(camera.fields[1][0] + " "  + camera.fields[1][1] + " " + camera.fields[1][2] + " "  + camera.fields[1][3]);
-  // console.log(camera.fields[2][0] + " "  + camera.fields[2][1] + " " + camera.fields[2][2] + " "  + camera.fields[2][3]);
-  // console.log(camera.fields[3][0] + " "  + camera.fields[3][1] + " " + camera.fields[3][2] + " "  + camera.fields[3][3]);
-  // console.log("------------------");
+  console.log("CAMERA -----------");
+  console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
+  console.log(camera.fields[1][0] + " "  + camera.fields[1][1] + " " + camera.fields[1][2] + " "  + camera.fields[1][3]);
+  console.log(camera.fields[2][0] + " "  + camera.fields[2][1] + " " + camera.fields[2][2] + " "  + camera.fields[2][3]);
+  console.log(camera.fields[3][0] + " "  + camera.fields[3][1] + " " + camera.fields[3][2] + " "  + camera.fields[3][3]);
+  console.log("------------------");
 
 
   // console.log("OBJECT TRANSFORM-------");
