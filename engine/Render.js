@@ -7,7 +7,7 @@
   var filmWidth = 21.023;
   var filmHeight = 21.023;
 
-  var Znear = 0.5;
+  var Znear = 1;
   var Zfar = 50;
 
   // var angleOfView = 90;
@@ -150,6 +150,7 @@ Render.prototype.render = function(camera_inverse, camera) {
       //Assemble vertex
       var vertexIds = modelGeometry.vertexIds[i];
       var vertex_in = new Vertex();
+      vertex_in.id = i;
 
       vertex_in.position = modelGeometry.positions[vertexIds.pos];
       if(typeof(modelGeometry.uvs) !== "undefined") {
@@ -393,20 +394,26 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
     //We need to create 2 new vertices, because we will be clipping v0 on the Z axis here.
     //So, we interpolate v0.z -> v1.z   and v0.z -> v2.z
     //How do we know the order of these vertices? All because of our previously done Clipping tests.
-    var alphaA = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
-    var alphaB = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
+    var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
+    var alphaB = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
 
     var v0a = v0.interpolateTo(v1, alphaA);
     var v0b = v0.interpolateTo(v2, alphaB);
-    console.log(alphaA + " " + alphaB);
 
     //So now, we have 2 new triangles to process.
-    this.postProcessFace(v1, v2, v0b);
-    this.postProcessFace(v0a,v1, v0b);
+
+    //We need to make copies of v1, and of v0b.
+    v1c = v1.copy();
+    v0bc = v0b.copy();
+
+    this.postProcessFace(v0a,v1c, v0bc);
+
+    this.postProcessFace( v0b, v1, v2);
+
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
-
+  console.log("clip for 2");
   //We again need to create 2 new vertices.
   var alphaA = (-v0.position.position[2]) / (v0.position.position[2] - v1.position.position[2]);
   var alphaB = (-v2.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);

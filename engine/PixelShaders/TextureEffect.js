@@ -39,7 +39,7 @@ TextureEffect.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
   vertex.uv = uv;
 
   //Perspective correction: multiply all the uv coordinates by the vertex' Z position
-  vertex.uv = vertex.uv.multiplyScalar(1/vertex.position.position[3]);
+  vertex.uv = vertex.uv.multiplyScalar(vertex.position.position[3]);
 
 
   var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);

@@ -12,7 +12,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -40],
+        [0, 0, 1, -20],
         [0, 0, 0, 1]
 ]);
 
@@ -30,7 +30,7 @@ var flatColorPS = new FlatColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
 //var wireFramePS = new WireFramePS(renderer);
-//var vertexPositionPS = new VertexPositionPS(renderer);
+var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
@@ -125,7 +125,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 25
+var movement = 8.5
 
 
 //FPS measurement

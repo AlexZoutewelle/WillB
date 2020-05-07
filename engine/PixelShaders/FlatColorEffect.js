@@ -16,13 +16,12 @@ FlatColorEffect.prototype.getVertex = function(vert_in, w0, w1, w2, v0, v1, v2) 
   color.position[2] = v0.color.position[2] + (w1 * (v1.color.position[2] - v0.color.position[2]) ) + (w2 * (v2.color.position[2] - v0.color.position[2]));
   vert_in.color = color
 
-  // if(color.position[0] > 255 || color.position[1] > 255 || color.position[2] > 255) {
-  //   console.log("bigger");
-  //   console.log(color)
-  // }
-  // if(color.position[0] < 0 || color.position[1] < 0 || color.position[2] < 0) {
-  //   console.log(color)
-  // }
+  vert_in.color = vert_in.color.multiplyScalar(vert_in.position.position[3]);
+
+  if(color.position[0] > 255 || color.position[1] > 255 || color.position[2] > 255) {
+  }
+  if(color.position[0] < 0 || color.position[1] < 0 || color.position[2] < 0) {
+  }
 
   // if(typeof(vert_in.color) !== 'undefined') {
   //   return [vert_in.color.position[0] ,

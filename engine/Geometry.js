@@ -341,11 +341,14 @@ Vector3.prototype.divideVector = function(vector) {
   result.position[2] = this.position[2] / vector.position[2];
   return result;
 }
-Vector3.prototype.subtractVector = function(vector) {
+Vector3.prototype.subtractVector = function(vector, w) {
   var result = new Vector3();
   result.position[0] = this.position[0] - vector.position[0];
   result.position[1] = this.position[1] - vector.position[1];
   result.position[2] = this.position[2] - vector.position[2];
+  if(w) {
+    result.position[3] = this.position[3] - vector.position[3];
+  }
   return result;
 }
 
@@ -357,12 +360,17 @@ Vector3.prototype.addVector = function(vector) {
   return result;
 }
 
-Vector3.prototype.multiplyScalar = function(scalar) {
+Vector3.prototype.multiplyScalar = function(scalar, w) {
   var result = new Vector3();
   result.position[0] = this.position[0] * scalar;
   result.position[1] = this.position[1] * scalar;
   result.position[2] = this.position[2] * scalar;
-  result.position[3] = this.position[3];
+  if(w) {
+    result.position[3] = this.position[3] * scalar;
+  }
+  else {
+    result.position[3] = this.position[3];
+  }
 
   return result;
 }
@@ -382,10 +390,8 @@ Vector3.prototype.divideScalar = function(scalar) {
 Vector3.prototype.interpolateTo = function(vector, alpha) {
   var result = new Vector3();
 
-  result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
-  // if(vector.position[3] !== 1) {
-  //   result.divideScalar(vector.position[3]);
-  // }
+  result = this.addVector(vector.subtractVector(this, true).multiplyScalar(alpha, true));
+
   return result;
 }
 
