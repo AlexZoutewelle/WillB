@@ -169,23 +169,18 @@ Render.prototype.render = function(camera_inverse, camera) {
       var v0 = verticesOut[face.vertices[0]];
       var v1 = verticesOut[face.vertices[1]];
       var v2 = verticesOut[face.vertices[2]];
+
+
       if(!this.backFaceCull(v0, v1, v2, camera)) {
         continue;
       }
+
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
-
-    //Wireframe mode
-    // if(globalState.wireFrame === true) {
-    //   this.renderWireFrame(pixels, modelGeometry.edges);
-    // }
   }
 
 
   //Actually draw the image array on the canvas
-
-
-
   this.draw();
 }
 
@@ -277,82 +272,82 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
 
-  // if(v0.position.position[2] < 0 &&
-  //    v1.position.position[2] < 0 &&
-  //    v2.position.position[2] < 0) {
-  //      console.log("true6");
-  //      //
-  //      // console.log(v0.position.position[2]);
-  //      // console.log(v1.position.position[2]);
-  //      // console.log(v2.position.position[2]);
-  //
-  //     return;
-  // }
-  // if(v0.position.position[0] > v0.position.position[3] &&
-  //    v1.position.position[0] > v1.position.position[3] &&
-  //    v2.position.position[0] > v2.position.position[3]) {
-  //      console.log("true1");
-  //      //
-  //      // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
-  //      // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
-  //      // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
-  //
-  //     return;
-  //   }
-  //   if(v0.position.position[0] < -v0.position.position[3] &&
-  //      v1.position.position[0] < -v1.position.position[3] &&
-  //      v2.position.position[0] < -v2.position.position[3]) {
-  //        console.log("true2");
-  //        //
-  //        // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
-  //        // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
-  //        // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
-  //
-  //       return;
-  //   }
-  //   if(v0.position.position[1] > v0.position.position[3] &&
-  //      v1.position.position[1] > v1.position.position[3] &&
-  //      v2.position.position[1] > v2.position.position[3]) {
-  //        console.log("true3");
-  //        //
-  //        // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
-  //        // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
-  //        // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
-  //
-  //       return;
-  //     }
-  //     if(v0.position.position[1] < -v0.position.position[3] &&
-  //        v1.position.position[1] < -v1.position.position[3] &&
-  //        v2.position.position[1] < -v2.position.position[3]) {
-  //          console.log("true4");
-  //          //
-  //          // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
-  //          // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
-  //          // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
-  //
-  //         return;
-  //       }
-  // if(v0.position.position[2] > v0.position.position[3] &&
-  //    v1.position.position[2] > v1.position.position[3] &&
-  //    v2.position.position[2] > v2.position.position[3]) {
-  //      console.log("true5");
-  //      //
-  //      // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
-  //      // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
-  //      // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
-  //
-  //     return;
-  // }
+  if(v0.position.position[2] < 0 &&
+     v1.position.position[2] < 0 &&
+     v2.position.position[2] < 0) {
+       console.log("true6");
+       //
+       // console.log(v0.position.position[2]);
+       // console.log(v1.position.position[2]);
+       // console.log(v2.position.position[2]);
+
+      return;
+  }
+  if(v0.position.position[0] > v0.position.position[3] &&
+     v1.position.position[0] > v1.position.position[3] &&
+     v2.position.position[0] > v2.position.position[3]) {
+       console.log("true1");
+       //
+       // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
+       // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
+       // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
+
+      return;
+    }
+    if(v0.position.position[0] < -v0.position.position[3] &&
+       v1.position.position[0] < -v1.position.position[3] &&
+       v2.position.position[0] < -v2.position.position[3]) {
+         console.log("true2");
+         //
+         // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
+         // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
+         // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
+
+        return;
+    }
+    if(v0.position.position[1] > v0.position.position[3] &&
+       v1.position.position[1] > v1.position.position[3] &&
+       v2.position.position[1] > v2.position.position[3]) {
+         console.log("true3");
+         //
+         // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
+         // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
+         // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
+
+        return;
+      }
+      if(v0.position.position[1] < -v0.position.position[3] &&
+         v1.position.position[1] < -v1.position.position[3] &&
+         v2.position.position[1] < -v2.position.position[3]) {
+           console.log("true4");
+           //
+           // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
+           // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
+           // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
+
+          return;
+        }
+  if(v0.position.position[2] > v0.position.position[3] &&
+     v1.position.position[2] > v1.position.position[3] &&
+     v2.position.position[2] > v2.position.position[3]) {
+       console.log("true5");
+       //
+       // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
+       // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
+       // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
+
+      return;
+  }
 
   //normalize
-  v0.position = v0.position.divideScalar(v0.position.position[3]);
-  v0.position.position[3] = 1/v0.position.position[3];
-
-  v1.position = v1.position.divideScalar(v1.position.position[3]);
-  v1.position.position[3] = 1/v1.position.position[3];
-
-  v2.position = v2.position.divideScalar(v2.position.position[3]);
-  v2.position.position[3] = 1/v2.position.position[3];
+  // v0.position = v0.position.divideScalar(v0.position.position[3]);
+  // v0.position.position[3] = 1/v0.position.position[3];
+  //
+  // v1.position = v1.position.divideScalar(v1.position.position[3]);
+  // v1.position.position[3] = 1/v1.position.position[3];
+  //
+  // v2.position = v2.position.divideScalar(v2.position.position[3]);
+  // v2.position.position[3] = 1/v2.position.position[3];
 
 
   //Z Clipping test
@@ -363,7 +358,7 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
     }
     else if(v2.position.position[2] < 0) {
       //Clip for v0 and v2
-      this.clipForTwo(v1, v2, v1);
+      this.clipForTwo(v0, v2, v1);
     }
     else {
       //Clip for v0
@@ -389,11 +384,12 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
   else {
     //No need for clipping
-      this.postProcessFace(v0, v1, v2, texture);
+      this.postProcessFace(v0, v1, v2);
   }
 }
 
 Render.prototype.clipForOne = function(v0,v1,v2) {
+  console.log("clip for one");
     //We need to create 2 new vertices, because we will be clipping v0 on the Z axis here.
     //So, we interpolate v0.z -> v1.z   and v0.z -> v2.z
     //How do we know the order of these vertices? All because of our previously done Clipping tests.
@@ -402,10 +398,11 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
 
     var v0a = v0.interpolateTo(v1, alphaA);
     var v0b = v0.interpolateTo(v2, alphaB);
+    console.log(alphaA + " " + alphaB);
 
     //So now, we have 2 new triangles to process.
     this.postProcessFace(v0a, v1, v2);
-    this.postProcessFace(v0b, v0a, v2);
+    this.postProcessFace(v0a, v0b, v2);
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
@@ -413,6 +410,8 @@ Render.prototype.clipForTwo = function(v0,v1,v2) {
   //We again need to create 2 new vertices.
   var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
   var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
+
+  console.log(alphaA + " " + alphaB);
 
   var v0 = v0.interpolateTo(v2, alphaA);
   var v1 = v1.interpolateTo(v2, alphaB);
@@ -430,7 +429,36 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
   this.drawFace(v0, v1, v2 )
 }
 
+//Perspective_divide, ndc, raster space
+//We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
+Render.prototype.vertexToRaster = function(vertex_orig) {
+  var vertex = vertex_orig;
+
+
+
+
+  vertex.position = vertex.position.divideScalar(vertex.position.position[3]);
+  vertex.position.position[3] = 1/vertex.position.position[3];
+
+
+
+  // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
+  //console.log("new");
+  //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
+
+  // ndc (range of [0,1])
+  // vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
+  // vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
+
+  //raster coords (pixels)
+  //vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5) ) + cleft | 0;
+  // vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight * 0.5) ) + cright | 0;
+  vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5 + ((filmWidth / 2)))) | 0;
+  vertex.position.position[1] = (( (1 - vertex.position.position[1]) * this.screenHeight * 0.5  + ((filmHeight / 2)))) | 0;
+  //vertex.position.position[2] = (((Zfar - Znear) * 0.5) * vertex.position.position[2] + ((Zfar + Znear)*0.5) ) | 0;
+  return vertex;
+}
 
 Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
@@ -546,60 +574,6 @@ Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
   return vertex.color;
 }
 
-
-
-Render.prototype.renderWireFrame = function(pixels, edges) {
-
-  for(var vId = 0; vId < pixels.length;  vId++) {
-    //vId is the id of the current vertex. We get all the ids of the vertices that are adjacent to it
-      var adjacentList = edges[vId];
-
-      //If we want to draw a wireframe, we draw the lines connecting these pixels now
-
-      //Triangle idea is:   start at pixel 0. Move to pixel 1, draw.
-      //               go to pixel 1. Move to pixel 2, draw.
-      //               go to pixel 2. Move to pixel 3, draw.
-      //               go to pixel 3. Move to pixel 1, draw
-
-      for(var k = 0; k < adjacentList.length; k++) {
-
-        var adjId = adjacentList[k];
-        if(pixels[adjId] && pixels[vId]) {
-
-          this.bresenham(this.imgArray, pixels[vId].position[0] ,pixels[vId].position[1] ,pixels[adjId].position[0], pixels[adjId].position[1], [255, 0, 0, 255]);
-        }
-      }
-  }
-}
-
-//Perspective_divide, ndc, raster space
-//We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
-
-Render.prototype.vertexToRaster = function(vertex_orig) {
-  var vertex = vertex_orig;
-
-
-
-
-  //persp_divide. Only need to multiply with ZNear now, since we already multiplied by the inverse of Z
-  // vertex.position.position[0] = (vertex.position.position[0] )  * zInv;
-  // vertex.position.position[1] = (vertex.position.position[1] ) * zInv;
-  // vertex.position.position[2] = vertex.position.position[2] *  zInv
-
-  // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
-  //console.log("new");
-  //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
-
-  // ndc (range of [0,1])
-  // vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-  // vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
-
-  //raster coords (pixels)
-  vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5) ) + cleft | 0;
-  vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight * 0.5) ) + cright | 0;
-  //vertex.position.position[2] = 1/vertex.position.position[2];
-  return vertex;
-}
 
 //Bresenham algorithm to draw lines
 Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {

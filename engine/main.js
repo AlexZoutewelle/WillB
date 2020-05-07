@@ -24,8 +24,8 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var texturePS = new TextureEffect(renderer);
-//var flatColorPS = new FlatColorEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
@@ -33,8 +33,8 @@ var lightBlendPS = new LightBlendPS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-//var flatColorVS = new FlatColorVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+var flatColorVS = new FlatColorVS(renderer);
 var flatShadeVertexShader = new FlatShadeVS(renderer);
 // var pointShader = new PointShadeVS(renderer);
 
@@ -59,7 +59,7 @@ var movementTarget = flatShadeVertexShader;
 
 //Load models
 var model_name1 = "cube";
-var model_name2 = "cow";
+var model_name2 = "triangle";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -85,13 +85,13 @@ Promise.all(models).then(function(results) {
   object2_srt.fields = object2_srt.scale(1,1,1);
 
   var object2_rotate = new Transformation()
-  object2_rotate.fields = object2_rotate.rotate(0, 270, 0)
+  object2_rotate.fields = object2_rotate.rotate(0, 0, 0)
 
 
-  //
-  // for(var i = 0; i < models[0].positions.length; i++) {
-  //   models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
-  // }
+
+  for(var i = 0; i < models[0].positions.length; i++) {
+    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
+  }
 
   for(var i = 0; i < models[1].positions.length; i++) {
 
@@ -111,8 +111,8 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  renderer.models.push(models[0]);
-  //renderer.models.push(models[1]);
+  //renderer.models.push(models[0]);
+  renderer.models.push(models[1]);
   console.log(models[1])
 
 
@@ -145,7 +145,7 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  //transformModel(models[0], 1, 1, 1, 0, 0, 0, 100, 0, 0 , dt);
+  transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 0 , dt);
   //transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
@@ -261,12 +261,12 @@ function frame() {
   renderer.render(camera_inverse, camera);
 
 
-  console.log("CAMERA -----------");
-  console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
-  console.log(camera.fields[1][0] + " "  + camera.fields[1][1] + " " + camera.fields[1][2] + " "  + camera.fields[1][3]);
-  console.log(camera.fields[2][0] + " "  + camera.fields[2][1] + " " + camera.fields[2][2] + " "  + camera.fields[2][3]);
-  console.log(camera.fields[3][0] + " "  + camera.fields[3][1] + " " + camera.fields[3][2] + " "  + camera.fields[3][3]);
-  console.log("------------------");
+  // console.log("CAMERA -----------");
+  // console.log(camera.fields[0][0] + " "  + camera.fields[0][1] + " " + camera.fields[0][2] + " "  + camera.fields[0][3]);
+  // console.log(camera.fields[1][0] + " "  + camera.fields[1][1] + " " + camera.fields[1][2] + " "  + camera.fields[1][3]);
+  // console.log(camera.fields[2][0] + " "  + camera.fields[2][1] + " " + camera.fields[2][2] + " "  + camera.fields[2][3]);
+  // console.log(camera.fields[3][0] + " "  + camera.fields[3][1] + " " + camera.fields[3][2] + " "  + camera.fields[3][3]);
+  // console.log("------------------");
 
 
   // console.log("OBJECT TRANSFORM-------");

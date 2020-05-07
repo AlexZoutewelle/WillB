@@ -380,7 +380,12 @@ Vector3.prototype.divideScalar = function(scalar) {
 
 
 Vector3.prototype.interpolateTo = function(vector, alpha) {
-  var result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  var result = new Vector3();
+
+  result = this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  // if(vector.position[3] !== 1) {
+  //   result.divideScalar(vector.position[3]);
+  // }
   return result;
 }
 
