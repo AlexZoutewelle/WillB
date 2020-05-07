@@ -14,6 +14,6 @@ TextureVS.prototype.getVertex = function(vertex_in, camera_inverse) {
     return vertex_in;
   }
 
-  vertex_in.uv = vertex_in.uv.multiplyScalar(1/vertex_in.position.position[3]);
+  vertex_in.uv = vertex_in.uv.multiplyScalar(vertex_in.position.position[3]);
   return vertex_in;
 }

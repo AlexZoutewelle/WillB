@@ -373,7 +373,7 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
     }
     else {
       //Clip for v1
-      this.clipForOne(v1, v0, v2);
+      this.clipForOne(v1, v2, v0);
     }
   }
 
@@ -401,8 +401,8 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
     console.log(alphaA + " " + alphaB);
 
     //So now, we have 2 new triangles to process.
-    this.postProcessFace(v0a, v1, v2);
-    this.postProcessFace(v0a, v0b, v2);
+    this.postProcessFace(v1, v2, v0b);
+    this.postProcessFace(v0a,v1, v0b);
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
