@@ -190,7 +190,7 @@ Render.prototype.render = function(camera_inverse, camera) {
 var projectionMatrix = new Transformation([
   [(2 * Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
   [0,                              (2* Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
-  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -((2 * Zfar * Znear) / (Zfar - Znear))],
+  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -(( Zfar * Znear) / (Zfar - Znear))],
   [0,                              0,                            1,                                   0]
 ]);
 
