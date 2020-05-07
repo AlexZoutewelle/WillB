@@ -408,13 +408,13 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
 Render.prototype.clipForTwo = function(v0,v1,v2) {
 
   //We again need to create 2 new vertices.
-  var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
-  var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
+  var alphaA = (-v0.position.position[2]) / (v0.position.position[2] - v1.position.position[2]);
+  var alphaB = (-v2.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
 
   console.log(alphaA + " " + alphaB);
 
-  var v0 = v0.interpolateTo(v2, alphaA);
-  var v1 = v1.interpolateTo(v2, alphaB);
+  var v0 = v0.interpolateTo(v1, alphaA);
+  var v2 = v2.interpolateTo(v1, alphaB);
 
   //We only need to process a single face this time though.
   this.postProcessFace(v0, v1, v2);
