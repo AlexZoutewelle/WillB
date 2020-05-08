@@ -17,6 +17,7 @@ FlatColorEffect.prototype.getVertex = function(vert_in, w0, w1, w2, v0, v1, v2) 
   vert_in.color = color
 
   vert_in.color = vert_in.color.multiplyScalar(vert_in.position.position[3]);
+  vert_in.color.position[3] = 255;
 
   if(color.position[0] > 255 || color.position[1] > 255 || color.position[2] > 255) {
   }

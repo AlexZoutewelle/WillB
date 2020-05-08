@@ -25,17 +25,17 @@ renderer.camera = camera;
 //Initialize pixel and vertex shaders
 
 //var texturePS = new TextureEffect(renderer);
-//var flatColorPS = new FlatColorEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
-//var lightBlendPS = new LightBlendPS(renderer);
-var wireFramePS = new WireFramePS(renderer);
+var lightBlendPS = new LightBlendPS(renderer);
+//var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
 // var pointShader = new PointShadeVS(renderer);
 
 
@@ -45,7 +45,7 @@ var flatColorVS = new FlatColorVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-//var movementTarget = flatShadeVertexShader;
+var movementTarget = flatShadeVertexShader;
 
 
 

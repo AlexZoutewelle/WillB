@@ -219,10 +219,11 @@ Render.prototype.render = function(camera_inverse, camera) {
         continue;
       }
 
+
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
   }
-  console.log('cullCount: ' + cullCount);
+  //console.log('cullCount: ' + cullCount);
 
   //Actually draw the image array on the canvas
   this.draw();
@@ -255,7 +256,6 @@ Render.prototype.invokeVertexShaders = function(vertex_in, camera_inverse) {
 
 
 Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
-  //console.log(v0);
   //Dot product, back culling
   //renderVertices will do all the transformations and conversion to raster_coordinates
   //It returns the indices of the imgArray it should be drawn on
@@ -303,15 +303,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   )
 
 
-  // var view_vec = new Vector3(
-  //   -v0.position.position[0]+this.camera.fields[3][0],
-  //   -v0.position.position[1]+this.camera.fields[3][1],
-  //   -v0.position.position[2]+this.camera.fields[3][2]
-  // )
-
-  // view_vec = view_vec.subtractVector(v0.position);
-  // view_vec = projectionMatrix.multMatrixVec3(view_vec);
-  // normal = projectionMatrix.multMatrixVec3(normal);
 
   var dot_result = normal.dot(view_vec);
   if(dot_result < 0) {
@@ -321,8 +312,6 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   if(renderNormalBool) {
     this.renderNormal(v0,v1,v2, normal);
   }
-
-
 
   return true;
 }
@@ -379,18 +368,18 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
   //   log(normal);
   // }
   // console.log('----- PRE RASTER ------')
-  console.log('NORMAL');
-  log(normal);
+  // console.log('NORMAL');
+  // log(normal);
   // console.log('v0');
   // log(v0.position);
   // console.log('v1');
   // log(v1.position);
   // console.log('v2');
   // log(v2.position);
-  console.log('VMIDDLE');
-  log(vmiddle.position);
-  console.log('VNEND');
-  log(vnend.position);
+  // console.log('VMIDDLE');
+  // log(vmiddle.position);
+  // console.log('VNEND');
+  // log(vnend.position);
 
 
 
@@ -678,6 +667,7 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
+
   this.drawFace(v0, v1, v2 )
 }
 
@@ -791,6 +781,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
             //draw
             //Get the color that the vertex must output
+
             var outputColor = this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2);
             this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
           }
@@ -820,7 +811,7 @@ Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
   }
 
   if(typeof(vertex.color) === "undefined") {
-    vertex.color = new Vector3(255,255,255);
+    vertex.color = new Vector3(245,255,255);
     vertex.color.position[3] = 255;
   }
   return vertex.color;

@@ -1,7 +1,7 @@
 function FlatColorVS(renderer) {
   renderer.setVertexShader(this);
 
-  this.color = new Vector3(100, 0, 100);
+  this.color = new Vector3(221, 15, 0);
   this.color.position[3] = 255;
 
   this.colorsArray = [
@@ -27,6 +27,7 @@ FlatColorVS.prototype.getVertex = function(vertex_in, camera_inverse) {
   // }
 
   vertex_in.color = this.color;
+  vertex_in.color = vertex_in.color.multiplyScalar(1/vertex_in.position.position[3]);
 
 
   return vertex_in;
