@@ -290,7 +290,7 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
   // console.log(line1);
   // console.log(line2);
-  var normal = line1.cross(line2);
+  var normal = line1.cross(line2).normalize();
 
   //console.log('normal for: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
   //log(normal);
@@ -318,13 +318,9 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
 
     return false;
   }
-  // if(renderNormalBool && v0.id ===0 && v1.id === 1 && v2.id === 2) {
-  //   this.renderNormal(v0,v1,v2, normal);
-  // }
-  // if(normal.position[2] > 0) {
-  //
-  //   return false;
-  // }
+  if(renderNormalBool) {
+    this.renderNormal(v0,v1,v2, normal);
+  }
 
 
 
@@ -365,10 +361,10 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
 
   var vnend = new Vertex();
 
-  vnend.position = normal;
+  vnend.position = projectionMatrix.multMatrixVec3(normal);
 
 
-  var nendPos = vmiddle.position.addVector(vnend.position).multiplyScalar(0.02);
+  var nendPos = vmiddle.position.addVector(vnend.position)
   vnend.position = nendPos;
 
   //
@@ -383,18 +379,18 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
   //   log(normal);
   // }
   // console.log('----- PRE RASTER ------')
-  // console.log('NORMAL');
-  // log(normal);
+  console.log('NORMAL');
+  log(normal);
   // console.log('v0');
   // log(v0.position);
   // console.log('v1');
   // log(v1.position);
   // console.log('v2');
   // log(v2.position);
-  // console.log('VMIDDLE');
-  // log(vmiddle.position);
-  // console.log('VNEND');
-  // log(vnend.position);
+  console.log('VMIDDLE');
+  log(vmiddle.position);
+  console.log('VNEND');
+  log(vnend.position);
 
 
 
