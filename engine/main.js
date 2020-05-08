@@ -25,17 +25,17 @@ renderer.camera = camera;
 //Initialize pixel and vertex shaders
 
 //var texturePS = new TextureEffect(renderer);
-var flatColorPS = new FlatColorEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
-var lightBlendPS = new LightBlendPS(renderer);
-//var wireFramePS = new WireFramePS(renderer);
-var vertexPositionPS = new VertexPositionPS(renderer);
+//var lightBlendPS = new LightBlendPS(renderer);
+var wireFramePS = new WireFramePS(renderer);
+//var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
 // var pointShader = new PointShadeVS(renderer);
 
 
@@ -45,7 +45,7 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = flatShadeVertexShader;
+//var movementTarget = flatShadeVertexShader;
 
 
 
@@ -59,7 +59,7 @@ var movementTarget = flatShadeVertexShader;
 
 //Load models
 var model_name1 = "cube";
-var model_name2 = "triangle";
+var model_name2 = "cube";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -125,7 +125,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 4.5
+var movement = 8
 
 
 //FPS measurement

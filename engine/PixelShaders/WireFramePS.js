@@ -14,7 +14,7 @@ WireFramePS.prototype.getVertex = function(vert_in, w0, w1, w2, v0, v1, v2) {
 
   //console.log(w0 + " " + w1 + "  " + w2);
   if(w0 < 0.01 || w1 < 0.01 || w2 < 0.01) {
-    vert_in.color = new Vector3(255,255,255);
+    vert_in.color = new Vector3(0,0,0);
     vert_in.color.position[3] = 255;
   }
 

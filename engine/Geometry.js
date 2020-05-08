@@ -288,6 +288,15 @@ Vector3.prototype.copy = function() {
   result.position[2] = this.position[2];
   return result;
 }
+
+Vector3.prototype.absolute = function() {
+  var result = new Vector3();
+  result.position[0] = Math.abs(this.position[0]);
+  result.position[1] = Math.abs(this.position[1]);
+  result.position[2] = Math.abs(this.position[2]);
+  return result;
+
+}
 Vector3.prototype.translate = function (x,y,z) {
   this.position[0] += x;
   this.position[1] += y;
@@ -357,6 +366,8 @@ Vector3.prototype.addVector = function(vector) {
   result.position[0] = this.position[0] + vector.position[0];
   result.position[1] = this.position[1] + vector.position[1];
   result.position[2] = this.position[2] + vector.position[2];
+  result.position[3] = this.position[3] + vector.position[3];
+
   return result;
 }
 

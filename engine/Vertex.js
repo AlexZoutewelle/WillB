@@ -75,18 +75,18 @@ Vertex.prototype.interpolateTo = function(v2, alpha) {
   var newV = this.copy();
   var v1 = this;
 
-  // Object.keys(v1).forEach(function (key, index) {
-  //   //console.log(key);
-  // //   if(key !== 'id' && key !== 'normal') {
-  // //
-  // //   var result = Reflect.getOwnPropertyDescriptor(v1, key).value.interpolateTo(Reflect.getOwnPropertyDescriptor(v2, key).value, alpha);
-  // //   }
-  // //   Reflect.set(newV, key, result)
-  // //
-  // // });
-  // //
-  // //
-  // // return newV;
+  Object.keys(v1).forEach(function (key, index) {
+    //console.log(key);
+    if(key !== 'id' ) {
+
+    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.interpolateTo(Reflect.getOwnPropertyDescriptor(v2, key).value, alpha);
+    }
+    Reflect.set(newV, key, result)
+
+  });
+
+
+  return newV;
 
 
   var result = this.copy();

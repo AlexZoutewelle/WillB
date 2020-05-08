@@ -1,4 +1,4 @@
-
+var renderNormalBool = true;
 
 //Used for rasterization:
 
@@ -21,11 +21,37 @@
 
 console.log(ctop + " "  + cbottom + " " + cright + " "  + cleft);
 
-var scale = Math.tan(120 * 0.5 * Math.PI / 180) * 1;
-var rp = (1) * scale, lp = -rp;
-var tp = scale, bp = -tp;
-var np = 1
-var f = Zfar
+var aspect_ratio = 1.33333;
+var hfov = 1.333;
+var vfov = hfov / aspect_ratio;
+
+
+//w, h, n f
+//hfov, aspect_ratio, 0.2, 6.0
+
+console.log(cright - cleft)
+console.log(filmWidth/2);
+// var projectionMatrix = new Transformation([
+//   [(Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
+//   [0,                              (Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
+//   [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -(( Zfar * Znear) / (Zfar - Znear))],
+//   [0,                              0,                            1,                                   0]
+// ]);
+// var projectionMatrix = new Transformation([
+//   [(Znear * 2) / (cright - cleft), 0,                            0,                                   0],
+//   [0,                              (Znear * 2)/(ctop - cbottom),  0,                                  0],
+//   [0,                              0,                            (2) /(Zfar - Znear),                 (( Zfar + Znear) / (Zfar - Znear))],
+//   [0,                              0,                            1,                                   0]
+// ]);
+var projectionMatrix = new Transformation([
+  [(Znear * 2) / (hfov),     0,                                       0,                                   0],
+  [0,                                  (Znear * 2)/(aspect_ratio),            0,                                  0],
+  [0,                                   0,                                      (Zfar ) /(Zfar - Znear),      1],
+  [0,                                   0,                                ((-Znear * Zfar) / (Zfar - Znear)),   0]
+]);
+
+projectionMatrix = projectionMatrix.transpose();
+
 
 
 function Render(screenWidth, screenHeight) {
@@ -91,7 +117,7 @@ Render.prototype.draw = function() {
 }
 
 
-Render.prototype.drawPixel = function(x, y, color) {
+Render.prototype.drawPixel = function(x, y, color, z) {
   //console.log(color.position[0] + " " + color.position[1] + " " + color.position[2] + " " + color.position[3]);
   var pixel = (y * this.screenWidth + x);
   this.buf32[pixel] =
@@ -99,6 +125,12 @@ Render.prototype.drawPixel = function(x, y, color) {
     (color.position[2] << 16)  |   //B
     (color.position[1] << 8)   |   //G
     (color.position[0]);           //R
+
+
+
+    if(z) {
+      this.ZBuffer.Ztest(x, y, 0.000001)
+    }
 }
 
 
@@ -121,7 +153,7 @@ Render.prototype.newModel = function(model) {
 **/
 Render.prototype.render = function(camera_inverse, camera) {
 
-
+  // console.log('new loop');
   this.ZBuffer.clear();
 
   this.clear();
@@ -152,47 +184,49 @@ Render.prototype.render = function(camera_inverse, camera) {
       var vertex_in = new Vertex();
       vertex_in.id = i;
 
+
+
       vertex_in.position = modelGeometry.positions[vertexIds.pos];
       if(typeof(modelGeometry.uvs) !== "undefined") {
         vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
       }
       vertex_in.normal = modelGeometry.normals[vertexIds.norm];
 
-      verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse, object_transform));
+      verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse));
 
     }
 
     //Triangle assembly
+    var cullCount = 0;
     var faceCount = modelGeometry.faces.length;
     for (var i = 0; i < faceCount; i++) {
 
       var face = modelGeometry.faces[i];
       var v0 = verticesOut[face.vertices[0]];
+      // v0.color = new Vector3(255, 0, 0);
+      // v0.color.position[3] = 255;
       var v1 = verticesOut[face.vertices[1]];
+      // v1.color = new Vector3(0, 255, 0);
+      // v1.color.position[3] = 255;
       var v2 = verticesOut[face.vertices[2]];
+      // v2.color = new Vector3(0, 0, 255);
+      // v2.color.position[3] = 255;
 
 
       if(!this.backFaceCull(v0, v1, v2, camera)) {
+        cullCount = cullCount + 1;
+        // console.log('culled: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
         continue;
       }
 
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
   }
-
+  console.log('cullCount: ' + cullCount);
 
   //Actually draw the image array on the canvas
   this.draw();
 }
-
-
-
-var projectionMatrix = new Transformation([
-  [(2 * Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
-  [0,                              (2* Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
-  [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -(( Zfar * Znear) / (Zfar - Znear))],
-  [0,                              0,                            1,                                   0]
-]);
 
 Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
@@ -230,36 +264,250 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   //We can only compute this by creaing 2 vectors of the vertices of the face, and crossing them.
   //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
   //If the dot product results in 0 or less, it means the normal is pointing away from us.
+
+  var v0c = v0.copy();
+  // v0c.position = v0c.position.divideScalar(v0c.position.position[3])
+
+  var v1c = v1.copy();
+
+  // v1c.position = v1c.position.divideScalar(v1c.position.position[3])
+
+  var v2c = v2.copy();
+
+  // v2c.position = v2c.position.divideScalar(v2c.position.position[3])
+
+
   var line1 = new Vector3(
-      v1.position.position[0] - v0.position.position[0],
-      v1.position.position[1] - v0.position.position[1],
-      v1.position.position[2] - v0.position.position[2]
+      v1c.position.position[0] - v0c.position.position[0],
+      v1c.position.position[1] - v0c.position.position[1],
+      v1c.position.position[3] - v0c.position.position[3]
     );
   var line2 = new Vector3(
-      v2.position.position[0] - v0.position.position[0],
-      v2.position.position[1] - v0.position.position[1],
-      v2.position.position[2] - v0.position.position[2]
+      v2c.position.position[0] - v0c.position.position[0],
+      v2c.position.position[1] - v0c.position.position[1],
+      v2c.position.position[3] - v0c.position.position[3]
   );
 
   // console.log(line1);
   // console.log(line2);
   var normal = line1.cross(line2);
 
-  //
+  //console.log('normal for: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
+  //log(normal);
+
+
+  var view_vec = new Vector3(
+      -v0.position.position[0] ,
+      -v0.position.position[1] ,
+      -v0.position.position[3]
+  )
+
+
   // var view_vec = new Vector3(
-  //   0 - face.vertices[1].position.position[0],
-  //   0 - face.vertices[1].position.position[1],
-  //   0 - face.vertices[1].position.position[2]
+  //   -v0.position.position[0]+this.camera.fields[3][0],
+  //   -v0.position.position[1]+this.camera.fields[3][1],
+  //   -v0.position.position[2]+this.camera.fields[3][2]
   // )
 
-  var dot_result = v0.position.dot(normal);
-  if(dot_result >= 0) {
+  // view_vec = view_vec.subtractVector(v0.position);
+  // view_vec = projectionMatrix.multMatrixVec3(view_vec);
+  // normal = projectionMatrix.multMatrixVec3(normal);
+
+  var dot_result = normal.dot(view_vec);
+  if(dot_result < 0) {
+
     return false;
   }
+  // if(renderNormalBool && v0.id ===0 && v1.id === 1 && v2.id === 2) {
+  //   this.renderNormal(v0,v1,v2, normal);
+  // }
+  // if(normal.position[2] > 0) {
+  //
+  //   return false;
+  // }
+
+
 
   return true;
 }
 
+Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
+  //We want to get a position vector that is exactly in the middle of v0, v1 and v2
+  //var area = EdgeFunction(v0,v1,v2);
+  v0 = v0c.copy();
+  v1 = v1c.copy();
+  v2 = v2c.copy();
+
+
+  var w0_current =  1/3 ;
+  var w1_current =  1/3 ;
+  var w2_current =  1/3 ;
+
+
+  var vmiddle = new Vertex();
+  vmiddle.position = new Vector3();
+
+  vmiddle.position.position[0] =  (v0.position.position[0] +
+                            (w1_current * (v1.position.position[0] - v0.position.position[0]) ) +
+                            (w2_current * (v2.position.position[0] - v0.position.position[0])));
+  vmiddle.position.position[1] =  (v0.position.position[1] +
+                            (w1_current * (v1.position.position[1] - v0.position.position[1]) ) +
+                            (w2_current * (v2.position.position[1] - v0.position.position[1])));
+  vmiddle.position.position[2] =  (v0.position.position[2] +
+                            (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
+                            (w2_current * (v2.position.position[2] - v0.position.position[2])));
+  vmiddle.position.position[3] =  (v0.position.position[3] +
+                            (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
+                            (w2_current * (v2.position.position[3] - v0.position.position[3])));
+
+
+
+
+  var vnend = new Vertex();
+
+  vnend.position = normal;
+
+
+  var nendPos = vmiddle.position.addVector(vnend.position).multiplyScalar(0.02);
+  vnend.position = nendPos;
+
+  //
+  // if(v0c.id === 0 && v1c.id === 1 && v2c.id === 2){
+  //   console.log('v0')
+  //   log(v0c.position);
+  //   console.log('v1');
+  //   log(v1c.position);
+  //   console.log('v2');
+  //   log(v2c.position);
+  //   console.log('NORMAL');
+  //   log(normal);
+  // }
+  // console.log('----- PRE RASTER ------')
+  // console.log('NORMAL');
+  // log(normal);
+  // console.log('v0');
+  // log(v0.position);
+  // console.log('v1');
+  // log(v1.position);
+  // console.log('v2');
+  // log(v2.position);
+  // console.log('VMIDDLE');
+  // log(vmiddle.position);
+  // console.log('VNEND');
+  // log(vnend.position);
+
+
+
+
+
+  var green = new Vector3(255,0,0);
+  green.position[3] = 255;
+
+  //
+
+  v0 = this.vertexToRaster(v0);
+  v1 = this.vertexToRaster(v1);
+  v2 = this.vertexToRaster(v2);
+  vmiddle = this.vertexToRaster(vmiddle);
+  vnend = this.vertexToRaster(vnend);
+
+
+
+
+  //We want to drow from the vertex position to the end of the normal
+  //Meaning, we need to create a vector at the position of the end of the normal, to use bresenham on
+
+
+  //vnend.position = projectionMatrix.multMatrixVec3(nendPos);
+
+
+  // console.log('----- AFTER RASTER ------')
+  // console.log('v0');
+  // log(v0.position);
+  // console.log('v1');
+  // log(v1.position);
+  // console.log('v2');
+  // log(v2.position);
+  // console.log('VMIDDLE');
+  // log(vmiddle.position);
+  // console.log('VNEND');
+  // log(vnend.position);
+  // console.log('NORMAL');
+  // log(normal);
+
+
+    //----Drawing
+
+    var cyan = new Vector3(255,0,0);
+    cyan.position[3] = 255;
+
+    var red = new Vector3(0,255,255);
+    red.position[3] = 255;
+
+    var yellow = new Vector3(255,255,0);
+    yellow.position[3] = 255;
+
+
+
+
+    if(vmiddle.position.position[0] > 0  && vmiddle.position.position[1] < this.screenWidth) {
+      this.drawPixel(    vmiddle.position.position[0], vmiddle.position.position[1], cyan, true);
+      this.drawPixel(    vmiddle.position.position[0] + 1, vmiddle.position.position[1] + 1, cyan, true);
+      this.drawPixel(    vmiddle.position.position[0], vmiddle.position.position[1] + 1, cyan, true);
+      this.drawPixel(    vmiddle.position.position[0] + 1, vmiddle.position.position[1], cyan, true);
+    }
+
+
+
+    if(v0.position.position[0] > 0  && v0.position.position[1] < this.screenWidth) {
+      this.drawPixel(    v0.position.position[0], v0.position.position[1], red, true);
+      this.drawPixel(    v0.position.position[0] + 1, v0.position.position[1] + 1, red, true);
+      this.drawPixel(    v0.position.position[0], v0.position.position[1] + 1, red, true);
+      this.drawPixel(    v0.position.position[0] + 1, v0.position.position[1], red, true);
+      this.drawPixel(    v0.position.position[0] - 1, v0.position.position[1] - 1, red, true);
+      this.drawPixel(    v0.position.position[0], v0.position.position[1] - 1, red, true);
+      this.drawPixel(    v0.position.position[0] - 1, v0.position.position[1], red, true);
+    }
+
+
+    if(v1.position.position[0] > 0  && v1.position.position[1] < this.screenWidth) {
+      this.drawPixel(    v1.position.position[0], v1.position.position[1], red, true);
+      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1] + 1, red, true);
+      this.drawPixel(    v1.position.position[0], v1.position.position[1] + 1, red, true);
+      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1], red, true);
+      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1] - 1, red, true);
+      this.drawPixel(    v1.position.position[0], v1.position.position[1] - 1, red, true);
+      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1], red, true);
+    }
+
+
+
+    if(v2.position.position[0] > 0  && v2.position.position[1] < this.screenWidth) {
+      this.drawPixel(    v2.position.position[0], v2.position.position[1], red, true);
+      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1] + 1, red, true);
+      this.drawPixel(    v2.position.position[0], v2.position.position[1] + 1, red, true);
+      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1], red, true);
+      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1] - 1, red, true);
+      this.drawPixel(    v2.position.position[0], v2.position.position[1] - 1, red, true);
+      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1], red, true);
+    }
+
+
+    if(vnend.position.position[0] > 0  && vnend.position.position[1] < this.screenWidth) {
+      this.drawPixel(    vnend.position.position[0], vnend.position.position[1], yellow, true);
+      this.drawPixel(    vnend.position.position[0] + 1, vnend.position.position[1] + 1, yellow, true);
+      this.drawPixel(    vnend.position.position[0], vnend.position.position[1] + 1, yellow, true);
+      this.drawPixel(    vnend.position.position[0] + 1, vnend.position.position[1], yellow, true);
+      this.drawPixel(    vnend.position.position[0] - 1, vnend.position.position[1] - 1, yellow, true);
+      this.drawPixel(    vnend.position.position[0], vnend.position.position[1] - 1, yellow, true);
+      this.drawPixel(    vnend.position.position[0] - 1, vnend.position.position[1], yellow, true);
+    }
+
+
+
+  this.bresenham(vmiddle.position.position[0], vmiddle.position.position[1], vnend.position.position[0], vnend.position.position[1], green);
+
+}
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
@@ -462,8 +710,8 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   //raster coords (pixels)
   //vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5) ) + cleft | 0;
   // vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight * 0.5) ) + cright | 0;
-  vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5 + ((filmWidth / 2)))) | 0;
-  vertex.position.position[1] = (( (1 - vertex.position.position[1]) * this.screenHeight * 0.5  + ((filmHeight / 2)))) | 0;
+  vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5 )) | 0;
+  vertex.position.position[1] = (( (1 - vertex.position.position[1]) * this.screenHeight * 0.5 )) | 0;
   //vertex.position.position[2] = (((Zfar - Znear) * 0.5) * vertex.position.position[2] + ((Zfar + Znear)*0.5) ) | 0;
   return vertex;
 }
@@ -584,7 +832,7 @@ Render.prototype.invokePixelShaders = function(vertex, w0, w1, w2, v0, v1, v2) {
 
 
 //Bresenham algorithm to draw lines
-Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {
+Render.prototype.bresenham = function(x1, y1, x2, y2, color) {
   //First check cases
   var dx = x2 - x1;
   var dy = y2 - y1;
@@ -597,12 +845,12 @@ Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {
     //Lastly, we need to check the direction of the driving axis: y
     if(y1 > y2) {
       //We go downwards, so we should take point 2 as the starting point here.
-      this.bresenhamPlotLineHigh(imgArray, x2, y2, x1, y1, color);
+      this.bresenhamPlotLineHigh(x2, y2, x1, y1, color);
     }
 
     else {
         //We go upwards, so we should take point 1 as the starting point_pd
-        this.bresenhamPlotLineHigh(imgArray, x1, y1, x2, y2, color);
+        this.bresenhamPlotLineHigh(x1, y1, x2, y2, color);
     }
 
 
@@ -612,19 +860,19 @@ Render.prototype.bresenham = function(imgArray, x1, y1, x2, y2, color) {
     //Here X is the driving axis, because dx is smaller than dy.
     if(x1 > x2) {
       //We go from right to left here. So, we should take point 2 as the starting point.
-      this.bresenhamPlotLineLow(imgArray, x2, y2, x1, y1, color);
+      this.bresenhamPlotLineLow(x2, y2, x1, y1, color);
     }
 
     else {
       //Here we go from left to right, so we should do as normal
-      this.bresenhamPlotLineLow(imgArray, x1, y1, x2, y2, color);
+      this.bresenhamPlotLineLow(x1, y1, x2, y2, color);
     }
   }
 
 }
 
 
-Render.prototype.bresenhamPlotLineHigh = function(imgArray, x1, y1, x2, y2, color) {
+Render.prototype.bresenhamPlotLineHigh = function(x1, y1, x2, y2, color) {
   var dx = x2 - x1;
   var dy = y2 - y1;
 
@@ -644,7 +892,7 @@ Render.prototype.bresenhamPlotLineHigh = function(imgArray, x1, y1, x2, y2, colo
   for(var y = y1; y <= y2; y++) {
 
     if(x > 0 && x < this.screenWidth) {
-      this.drawPixel(imgArray, x, y, color[0], color[1], color[2], color[3]);
+      this.drawPixel(x, y, color, true);
     }
 
     if(P > 0) {
@@ -657,7 +905,7 @@ Render.prototype.bresenhamPlotLineHigh = function(imgArray, x1, y1, x2, y2, colo
   }
 }
 
-Render.prototype.bresenhamPlotLineLow = function(imgArray, x1, y1, x2, y2, color)  {
+Render.prototype.bresenhamPlotLineLow = function(x1, y1, x2, y2, color)  {
 
   var dx = x2 - x1;
   var dy = y2 - y1;
@@ -677,7 +925,7 @@ Render.prototype.bresenhamPlotLineLow = function(imgArray, x1, y1, x2, y2, color
 
   for(var x = x1; x <= x2; x++) {
     if(x > 0 && x < this.screenWidth) {
-      this.drawPixel(imgArray, x, y, color[0], color[1], color[2], color[3])
+      this.drawPixel(x, y, color, true)
     }
 
 
