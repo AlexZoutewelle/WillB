@@ -82,7 +82,7 @@ Promise.all(models).then(function(results) {
   object2_srt.fields = object2_srt.rotate(0, 270, 0)
   object2_srt.fields = object2_srt.translate(12, 0, 0);
 
-  object2_srt.fields = object2_srt.scale(1,1,1);
+  object2_srt.fields = object2_srt.scale(0.5,0.5,0.5);
 
   var object2_rotate = new Transformation()
   object2_rotate.fields = object2_rotate.rotate(0, 0, 0)
@@ -146,8 +146,8 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
-  transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  // transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  // transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
   if(playerState.input.escape === true) {

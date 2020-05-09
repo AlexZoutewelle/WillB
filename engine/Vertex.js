@@ -75,6 +75,7 @@ Vertex.prototype.multiply = function(v2) {
   var v0Pos = v0.position;
   var v1Pos = v1.position;
   var v2Pos = v2.position;
+
   Object.keys(v1).forEach(function (key, index) {
 
     //Use this for vertex attributes, except for ID and Position. If you want to interpolate positions using the interpolateTo functionality,
@@ -82,14 +83,19 @@ Vertex.prototype.multiply = function(v2) {
     if(key !== 'id' && key !== 'position') {
 
         //Recover perspective corrected attributes, by undoing the division by w
-        var v2Attribute = Reflect.getOwnPropertyDescriptor(v2, key).value.multiplyScalar(v2Pos.position[3]);
-        var v1Attribute = Reflect.getOwnPropertyDescriptor(v1, key).value.multiplyScalar(v1Pos.position[3]);
+        var v1Attribute = Reflect.getOwnPropertyDescriptor(v1, key).value;
+        var v2Attribute = Reflect.getOwnPropertyDescriptor(v2, key).value;
 
-        var result = v1Attribute.interpolateTo(v2Attribute, alpha);
+        if(typeof(v1Attribute) !== 'undefined') {
+          v1Attribute = v1Attribute.multiplyScalar(v1Pos.position[3]);
+          v2Attribute = v2Attribute.multiplyScalar(v2Pos.position[3]);
 
-        //Redo perspective correction, by dividing by the v0's w
-        result = result.multiplyScalar(1/v0Pos.position[3]);
+          var result = v1Attribute.interpolateTo(v2Attribute, alpha);
 
+          //Redo perspective correction, by dividing by the v0's w
+          result = result.multiplyScalar(1/v0Pos.position[3]);
+
+        }
       }
     Reflect.set(v0, key, result)
 

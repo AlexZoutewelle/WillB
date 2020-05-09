@@ -418,67 +418,32 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
   if(v0.position.position[2] < 0 &&
      v1.position.position[2] < 0 &&
      v2.position.position[2] < 0) {
-       console.log("true6");
-       //
-       // console.log(v0.position.position[2]);
-       // console.log(v1.position.position[2]);
-       // console.log(v2.position.position[2]);
-
       return;
   }
   if(v0.position.position[0] > v0.position.position[3] &&
      v1.position.position[0] > v1.position.position[3] &&
      v2.position.position[0] > v2.position.position[3]) {
-       console.log("true1");
-       //
-       // console.log(v0.position.position[0] + " > " + v0.position.position[3]);
-       // console.log(v1.position.position[0] + " > " + v1.position.position[3]);
-       // console.log(v2.position.position[0] + " > " + v2.position.position[3]);
-
       return;
     }
     if(v0.position.position[0] < -v0.position.position[3] &&
        v1.position.position[0] < -v1.position.position[3] &&
        v2.position.position[0] < -v2.position.position[3]) {
-         console.log("true2");
-         //
-         // console.log(v0.position.position[0] + " < -" + -v0.position.position[3]);
-         // console.log(v1.position.position[0] + " < -" + -v1.position.position[3]);
-         // console.log(v2.position.position[0] + " < -" + -v2.position.position[3]);
-
         return;
     }
     if(v0.position.position[1] > v0.position.position[3] &&
        v1.position.position[1] > v1.position.position[3] &&
        v2.position.position[1] > v2.position.position[3]) {
-         console.log("true3");
-         //
-         // console.log(v0.position.position[1] + " > " + v0.position.position[3]);
-         // console.log(v1.position.position[1] + " > " + v1.position.position[3]);
-         // console.log(v2.position.position[1] + " > " + v2.position.position[3]);
-
         return;
       }
       if(v0.position.position[1] < -v0.position.position[3] &&
          v1.position.position[1] < -v1.position.position[3] &&
          v2.position.position[1] < -v2.position.position[3]) {
-           console.log("true4");
-           //
-           // console.log(v0.position.position[1] + " < -" + v0.position.position[3]);
-           // console.log(v1.position.position[1] + " < -" + v1.position.position[3]);
-           // console.log(v2.position.position[1] + " < -" + v2.position.position[3]);
-
           return;
         }
   if(v0.position.position[2] > v0.position.position[3] &&
      v1.position.position[2] > v1.position.position[3] &&
      v2.position.position[2] > v2.position.position[3]) {
        console.log("true5");
-       //
-       // console.log(v0.position.position[2] + " > " + v0.position.position[3]);
-       // console.log(v1.position.position[2] + " > " + v1.position.position[3]);
-       // console.log(v2.position.position[2] + " > " + v2.position.position[3]);
-
       return;
   }
   //Z Clipping test
