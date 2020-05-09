@@ -71,28 +71,34 @@ Vertex.prototype.multiply = function(v2) {
 
 }
 
-Vertex.prototype.interpolateTo = function(v2, alpha) {
-  var newV = this.copy();
-  var v1 = this;
-
+ function interpolateTo(v0, v1, v2, alpha) {
+  var v0Pos = v0.position;
+  var v1Pos = v1.position;
+  var v2Pos = v2.position;
   Object.keys(v1).forEach(function (key, index) {
-    //console.log(key);
-    if(key !== 'id' ) {
 
-    var result = Reflect.getOwnPropertyDescriptor(v1, key).value.interpolateTo(Reflect.getOwnPropertyDescriptor(v2, key).value, alpha);
-    }
-    Reflect.set(newV, key, result)
+    //Use this for vertex attributes, except for ID and Position. If you want to interpolate positions using the interpolateTo functionality,
+    //use its Vector3 counterpart
+    if(key !== 'id' && key !== 'position') {
+        console.log(key);
+        // v2.color = v2.color.multiplyScalar(v2.position.position[3])
+
+        //Recover perspective corrected attributes, by undoing the division by w
+        var v2Attribute = Reflect.getOwnPropertyDescriptor(v2, key).value.multiplyScalar(v2Pos.position[3]);
+        var v1Attribute = Reflect.getOwnPropertyDescriptor(v1, key).value.multiplyScalar(v1Pos.position[3]);
+
+        var result = v1Attribute.interpolateTo(v2Attribute, alpha);
+
+        //Redo perspective correction, by dividing by the v0's w
+        result = result.multiplyScalar(1/v0Pos.position[3]);
+
+      }
+    Reflect.set(v0, key, result)
 
   });
 
-
-  return newV;
-
-
-  var result = this.copy();
-  result.position = this.position.interpolateTo(v2.position, alpha);
-  result.uv = this.uv.interpolateTo(v2.uv, alpha);
-  return result;
+  v0.position = v0Pos;
+  return v0;
 }
 
 Vertex.prototype.divideScalar = function(scalar) {

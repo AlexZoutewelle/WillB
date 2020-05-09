@@ -1,5 +1,6 @@
 function FlatColorEffect(renderer) {
   renderer.setPixelShader(this);
+  this.renderer = renderer;
 }
 
 FlatColorEffect.prototype.newModel = function(model) {
@@ -23,6 +24,7 @@ FlatColorEffect.prototype.getVertex = function(vert_in, w0, w1, w2, v0, v1, v2) 
   }
   if(color.position[0] < 0 || color.position[1] < 0 || color.position[2] < 0) {
   }
+
 
   // if(typeof(vert_in.color) !== 'undefined') {
   //   return [vert_in.color.position[0] ,

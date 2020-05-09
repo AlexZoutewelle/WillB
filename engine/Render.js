@@ -31,18 +31,7 @@ var vfov = hfov / aspect_ratio;
 
 console.log(cright - cleft)
 console.log(filmWidth/2);
-// var projectionMatrix = new Transformation([
-//   [(Znear) / (cright - cleft), 0,                            (cright + cleft)/ (cright - cleft),  0],
-//   [0,                              (Znear)/(ctop - cbottom),  (ctop + cbottom) / (ctop - cbottom), 0],
-//   [0,                              0,                            (Zfar + Znear) /(Zfar - Znear),      -(( Zfar * Znear) / (Zfar - Znear))],
-//   [0,                              0,                            1,                                   0]
-// ]);
-// var projectionMatrix = new Transformation([
-//   [(Znear * 2) / (cright - cleft), 0,                            0,                                   0],
-//   [0,                              (Znear * 2)/(ctop - cbottom),  0,                                  0],
-//   [0,                              0,                            (2) /(Zfar - Znear),                 (( Zfar + Znear) / (Zfar - Znear))],
-//   [0,                              0,                            1,                                   0]
-// ]);
+
 var projectionMatrix = new Transformation([
   [(Znear * 2) / (hfov),     0,                                       0,                                   0],
   [0,                                  (Znear * 2)/(aspect_ratio),            0,                                  0],
@@ -265,44 +254,24 @@ Render.prototype.backFaceCull = function(v0, v1, v2, camera_inverse) {
   //Then, we do a dot product with our viewing vector, which is the difference between the camera's position and the normal vector
   //If the dot product results in 0 or less, it means the normal is pointing away from us.
 
-  var v0c = v0.copy();
-  // v0c.position = v0c.position.divideScalar(v0c.position.position[3])
-
-  var v1c = v1.copy();
-
-  // v1c.position = v1c.position.divideScalar(v1c.position.position[3])
-
-  var v2c = v2.copy();
-
-  // v2c.position = v2c.position.divideScalar(v2c.position.position[3])
-
-
   var line1 = new Vector3(
-      v1c.position.position[0] - v0c.position.position[0],
-      v1c.position.position[1] - v0c.position.position[1],
-      v1c.position.position[3] - v0c.position.position[3]
+      v1.position.position[0] - v0.position.position[0],
+      v1.position.position[1] - v0.position.position[1],
+      v1.position.position[3] - v0.position.position[3]
     );
   var line2 = new Vector3(
-      v2c.position.position[0] - v0c.position.position[0],
-      v2c.position.position[1] - v0c.position.position[1],
-      v2c.position.position[3] - v0c.position.position[3]
+      v2.position.position[0] - v0.position.position[0],
+      v2.position.position[1] - v0.position.position[1],
+      v2.position.position[3] - v0.position.position[3]
   );
 
-  // console.log(line1);
-  // console.log(line2);
   var normal = line1.cross(line2).normalize();
-
-  //console.log('normal for: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
-  //log(normal);
-
 
   var view_vec = new Vector3(
       -v0.position.position[0] ,
       -v0.position.position[1] ,
       -v0.position.position[3]
   )
-
-
 
   var dot_result = normal.dot(view_vec);
   if(dot_result < 0) {
@@ -356,39 +325,8 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
   var nendPos = vmiddle.position.addVector(vnend.position)
   vnend.position = nendPos;
 
-  //
-  // if(v0c.id === 0 && v1c.id === 1 && v2c.id === 2){
-  //   console.log('v0')
-  //   log(v0c.position);
-  //   console.log('v1');
-  //   log(v1c.position);
-  //   console.log('v2');
-  //   log(v2c.position);
-  //   console.log('NORMAL');
-  //   log(normal);
-  // }
-  // console.log('----- PRE RASTER ------')
-  // console.log('NORMAL');
-  // log(normal);
-  // console.log('v0');
-  // log(v0.position);
-  // console.log('v1');
-  // log(v1.position);
-  // console.log('v2');
-  // log(v2.position);
-  // console.log('VMIDDLE');
-  // log(vmiddle.position);
-  // console.log('VNEND');
-  // log(vnend.position);
-
-
-
-
-
   var green = new Vector3(255,0,0);
   green.position[3] = 255;
-
-  //
 
   v0 = this.vertexToRaster(v0);
   v1 = this.vertexToRaster(v1);
@@ -403,24 +341,6 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
   //Meaning, we need to create a vector at the position of the end of the normal, to use bresenham on
 
 
-  //vnend.position = projectionMatrix.multMatrixVec3(nendPos);
-
-
-  // console.log('----- AFTER RASTER ------')
-  // console.log('v0');
-  // log(v0.position);
-  // console.log('v1');
-  // log(v1.position);
-  // console.log('v2');
-  // log(v2.position);
-  // console.log('VMIDDLE');
-  // log(vmiddle.position);
-  // console.log('VNEND');
-  // log(vnend.position);
-  // console.log('NORMAL');
-  // log(normal);
-
-
     //----Drawing
 
     var cyan = new Vector3(255,0,0);
@@ -432,17 +352,12 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
     var yellow = new Vector3(255,255,0);
     yellow.position[3] = 255;
 
-
-
-
     if(vmiddle.position.position[0] > 0  && vmiddle.position.position[1] < this.screenWidth) {
       this.drawPixel(    vmiddle.position.position[0], vmiddle.position.position[1], cyan, true);
       this.drawPixel(    vmiddle.position.position[0] + 1, vmiddle.position.position[1] + 1, cyan, true);
       this.drawPixel(    vmiddle.position.position[0], vmiddle.position.position[1] + 1, cyan, true);
       this.drawPixel(    vmiddle.position.position[0] + 1, vmiddle.position.position[1], cyan, true);
     }
-
-
 
     if(v0.position.position[0] > 0  && v0.position.position[1] < this.screenWidth) {
       this.drawPixel(    v0.position.position[0], v0.position.position[1], red, true);
@@ -454,7 +369,6 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
       this.drawPixel(    v0.position.position[0] - 1, v0.position.position[1], red, true);
     }
 
-
     if(v1.position.position[0] > 0  && v1.position.position[1] < this.screenWidth) {
       this.drawPixel(    v1.position.position[0], v1.position.position[1], red, true);
       this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1] + 1, red, true);
@@ -464,8 +378,6 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
       this.drawPixel(    v1.position.position[0], v1.position.position[1] - 1, red, true);
       this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1], red, true);
     }
-
-
 
     if(v2.position.position[0] > 0  && v2.position.position[1] < this.screenWidth) {
       this.drawPixel(    v2.position.position[0], v2.position.position[1], red, true);
@@ -496,12 +408,9 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
 
 Render.prototype.processFace = function(v0, v1, v2, texture) {
 
+
   //Fustrum Cull test
   //We need to check if a triangle is completely out of the visible fustrum. If it is, we return immediately: we cull this triangle.
-
-  // log(v0.position);
-  // log(v1.position);
-  // log(v2.position);
 
   //Z-plane clipping
   //The Z-Plane clipper outputs 1 or more triangles as a result of clipping the original triangle
@@ -630,20 +539,80 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
     var alphaA = (-v0.position.position[2]) / (v1.position.position[2] - v0.position.position[2]);
     var alphaB = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
 
-    var v0a = v0.interpolateTo(v1, alphaA);
-    var v0b = v0.interpolateTo(v2, alphaB);
-    console.log(alphaA + " " + alphaB);
+    var v0a = new Vertex();
+    var v0b = new Vertex();
 
-    //So now, we have 2 new triangles to process.
+    //Interpolate position
+    v0a.position = v0.position.interpolateTo(v1.position, alphaA);
+    v0b.position = v0.position.interpolateTo(v2.position, alphaB);
+
+    //Interpolate attributes
+    v0a = interpolateTo(v0a, v0, v1, alphaA);
+    v0b = interpolateTo(v0b, v0, v2, alphaB);
+
 
     //We need to make copies of v1, and of v0b.
     v1c = v1.copy();
     v0bc = v0b.copy();
 
-    this.postProcessFace(v0a,v1c, v0bc);
 
+    //So now, we have 2 new triangles to process.
     this.postProcessFace( v0b, v1, v2);
+    this.postProcessFace( v0a, v1c, v0bc);
 
+
+
+
+    //----BARYCENTRIC COORDINATES METHOD ----
+
+    // var v0a = v0.position.interpolateTo(v1.position, alphaA);
+    // var v0b = v0.position.interpolateTo(v2.position, alphaB);
+
+    //So now, we have 2 new triangles to process.
+
+    // var area1 = EdgeFunction(v0.position, v1.position, v2.position);
+    // console.log(area1);
+    //
+    // var w1a = EdgeFunction(v2.position, v0.position, v0a) / area1;
+    // var w2a = EdgeFunction(v0.position, v1.position, v0a) / area1;
+    //
+    // var w1b = EdgeFunction(v2.position, v0.position, v0b) / area1;
+    // var w2b = EdgeFunction(v0.position, v1.position, v0b) / area1;
+    //
+    // var p1 = new Vertex();
+    // p1.position = v0a;
+    // var p2 = new Vertex();
+    // p2.position = v0b;
+    //
+    //
+    // v0c = v0.copy();
+    // v1c = v1.copy();
+    // v2c = v2.copy();
+    //
+    // v0c.color = v0c.color.multiplyScalar(v0c.position.position[3])
+    // v1c.color = v1c.color.multiplyScalar(v1c.position.position[3])
+    // v2c.color = v2c.color.multiplyScalar(v2c.position.position[3])
+    //
+    // var color = new Vector3(0,0,0);
+    // color.position[0] = v0c.color.position[0] + (w1a * (v1c.color.position[0] - v0c.color.position[0]) ) + (w2a * (v2c.color.position[0] - v0c.color.position[0]));
+    // color.position[1] = v0c.color.position[1] + (w1a * (v1c.color.position[1] - v0c.color.position[1]) ) + (w2a * (v2c.color.position[1] - v0c.color.position[1]));
+    // color.position[2] = v0c.color.position[2] + (w1a * (v1c.color.position[2] - v0c.color.position[2]) ) + (w2a * (v2c.color.position[2] - v0c.color.position[2]));
+    // color.position[3] = 255;
+    // p1.color = color.multiplyScalar(1/p1.position.position[3]);
+    //
+    // var color2 = new Vector3(0,0,0);
+    // color2.position[0] = v0c.color.position[0] + (w1b * (v1c.color.position[0] - v0c.color.position[0]) ) + (w2b * (v2c.color.position[0] - v0c.color.position[0]));
+    // color2.position[1] = v0c.color.position[1] + (w1b * (v1c.color.position[1] - v0c.color.position[1]) ) + (w2b * (v2c.color.position[1] - v0c.color.position[1]));
+    // color2.position[2] = v0c.color.position[2] + (w1b * (v1c.color.position[2] - v0c.color.position[2]) ) + (w2b * (v2c.color.position[2] - v0c.color.position[2]));
+    // color.position[3] = 255;
+    // p2.color = color2.multiplyScalar(1/p2.position.position[3]);
+
+    // p2c = p2.copy();
+    // v1c = v1.copy();
+
+
+    // this.postProcessFace( p2, v1, v2);
+    // this.postProcessFace(p1,v1c, p2c);
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
@@ -652,13 +621,19 @@ Render.prototype.clipForTwo = function(v0,v1,v2) {
   var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
   var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
 
-  console.log(alphaA + " " + alphaB);
+  //Interpolate attributes
+  v0c = v0.copy();
+  v1c = v1.copy();
 
-   v0 = v0.interpolateTo(v2, alphaA);
-   v1 = v1.interpolateTo(v2, alphaB);
+  //Interpolate position
+   v0c.position = v0.position.interpolateTo(v2.position, alphaA);
+   v1c.position = v1.position.interpolateTo(v2.position, alphaB);
+
+   v0c = interpolateTo(v0c, v0, v2, alphaA);
+   v1c = interpolateTo(v1c, v1, v2, alphaB);
 
   //We only need to process a single face this time though.
-  this.postProcessFace(v0, v1, v2);
+  this.postProcessFace(v0c, v1c, v2);
 
  }
 
@@ -671,31 +646,16 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
   this.drawFace(v0, v1, v2 )
 }
 
-//Perspective_divide, ndc, raster space
-//We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 
+
+//Perspective_divide->ndc, raster space
+//We multiply the entire vertex with the inverse of the Z position. Then, we do the normal raster conversion on the positions
 Render.prototype.vertexToRaster = function(vertex_orig) {
   var vertex = vertex_orig;
-
-
-
 
   vertex.position = vertex.position.divideScalar(vertex.position.position[3]);
   vertex.position.position[3] = 1/vertex.position.position[3];
 
-
-
-  // console.log(cleft + " " +  cright + " " + ctop + " " + cbottom + " " + Znear);
-  //console.log("new");
-  //console.log(point_pd.position[0] + " < " + (cleft - 10) + "?: " + (point_pd.position[0] < (cleft - 10)) );
-
-  // ndc (range of [0,1])
-  // vertex.position.position[0] = (vertex.position.position[0] + cright) / (2 * cright);       //x + canvas_width * 0.5    / canvas_width
-  // vertex.position.position[1] = (vertex.position.position[1] + ctop ) / (2 * ctop);       //y + canvas_height * 0.5 / canvas_height
-
-  //raster coords (pixels)
-  //vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5) ) + cleft | 0;
-  // vertex.position.position[1] = (((1 - vertex.position.position[1] ) * this.screenHeight * 0.5) ) + cright | 0;
   vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5 )) | 0;
   vertex.position.position[1] = (( (1 - vertex.position.position[1]) * this.screenHeight * 0.5 )) | 0;
   //vertex.position.position[2] = (((Zfar - Znear) * 0.5) * vertex.position.position[2] + ((Zfar + Znear)*0.5) ) | 0;

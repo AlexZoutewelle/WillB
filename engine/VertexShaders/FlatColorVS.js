@@ -1,7 +1,7 @@
 function FlatColorVS(renderer) {
   renderer.setVertexShader(this);
 
-  this.color = new Vector3(221, 15, 0);
+  this.color = new Vector3(255, 0, 255);
   this.color.position[3] = 255;
 
   this.colorsArray = [

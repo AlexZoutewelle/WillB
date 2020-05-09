@@ -401,6 +401,7 @@ Vector3.prototype.divideScalar = function(scalar) {
 Vector3.prototype.interpolateTo = function(vector, alpha) {
   var result = new Vector3();
 
+
   result = this.addVector(vector.subtractVector(this, true).multiplyScalar(alpha, true));
 
   return result;
