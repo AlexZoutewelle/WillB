@@ -80,8 +80,6 @@ Vertex.prototype.multiply = function(v2) {
     //Use this for vertex attributes, except for ID and Position. If you want to interpolate positions using the interpolateTo functionality,
     //use its Vector3 counterpart
     if(key !== 'id' && key !== 'position') {
-        console.log(key);
-        // v2.color = v2.color.multiplyScalar(v2.position.position[3])
 
         //Recover perspective corrected attributes, by undoing the division by w
         var v2Attribute = Reflect.getOwnPropertyDescriptor(v2, key).value.multiplyScalar(v2Pos.position[3]);

@@ -1,4 +1,4 @@
-var renderNormalBool = true;
+var renderNormalBool = false;
 
 //Used for rasterization:
 
@@ -481,18 +481,6 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 
       return;
   }
-
-  //normalize
-  // v0.position = v0.position.divideScalar(v0.position.position[3]);
-  // v0.position.position[3] = 1/v0.position.position[3];
-  //
-  // v1.position = v1.position.divideScalar(v1.position.position[3]);
-  // v1.position.position[3] = 1/v1.position.position[3];
-  //
-  // v2.position = v2.position.divideScalar(v2.position.position[3]);
-  // v2.position.position[3] = 1/v2.position.position[3];
-
-
   //Z Clipping test
   if(v0.position.position[2] < 0){
     if(v1.position.position[2] < 0 ) {
@@ -658,7 +646,7 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
 
   vertex.position.position[0] = (( (vertex.position.position[0] + 1) * this.screenWidth * 0.5 )) | 0;
   vertex.position.position[1] = (( (1 - vertex.position.position[1]) * this.screenHeight * 0.5 )) | 0;
-  //vertex.position.position[2] = (((Zfar - Znear) * 0.5) * vertex.position.position[2] + ((Zfar + Znear)*0.5) ) | 0;
+  vertex.position.position[2] = (((Zfar - Znear) * 0.5) * vertex.position.position[2] + ((Zfar + Znear)*0.5) ) | 0;
   return vertex;
 }
 

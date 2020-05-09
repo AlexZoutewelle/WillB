@@ -24,19 +24,19 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var texturePS = new TextureEffect(renderer);
-//var flatColorPS = new FlatColorEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
-//var lightBlendPS = new LightBlendPS(renderer);
+var lightBlendPS = new LightBlendPS(renderer);
 //var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-//var flatColorVS = new FlatColorVS(renderer);
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
-// var pointShader = new PointShadeVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+var flatColorVS = new FlatColorVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -45,7 +45,7 @@ var textureVertexShader = new TextureVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-//var movementTarget = flatShadeVertexShader;
+var movementTarget = flatShadeVertexShader;
 
 
 
@@ -59,7 +59,7 @@ var textureVertexShader = new TextureVS(renderer);
 
 //Load models
 var model_name1 = "cube";
-var model_name2 = "triangle";
+var model_name2 = "cow";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -112,7 +112,7 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  //renderer.models.push(models[0]);
+  renderer.models.push(models[0]);
   renderer.models.push(models[1]);
   console.log(models[1])
 
@@ -146,8 +146,8 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 0 , dt);
-  //transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
   if(playerState.input.escape === true) {
