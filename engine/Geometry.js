@@ -303,7 +303,6 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
 
       positions.push( new Vector3(x,             y,              tesselation) );
       //Create and push the uv vectors
-      vertexIds.push({pos: positions.length - 1, norm: 0});
 
       if(i !== rows && j !== cols) {
         //Create vertexIds. These are the vertexIds belonging to the current triangle.
@@ -312,18 +311,33 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
         var t0 = faces.length / 2 + y;
         var t12 = t1 + 1;
 
-        //create the first face
-        faces.push( new Face([ t0, t1 , t12 ]) );
 
 
-        //Each time we reach a triangle whose index is uneven, the second vertex increases
-        if(faces.length % 2 != 0) {
-          t1 += 1;
-        }
+        //Create the vertexids for this face
+        vertexIds.push({pos: t0 , norm: 0});
+        vertexIds.push({pos: t1 , norm: 0});
+        vertexIds.push({pos: t12, norm: 0});
+
+        //create the first face. These reference the three vertices in the vertexIds array.
+        var vertexIdsLength = vertexIds.length - 1;
+        faces.push( new Face([ vertexIdsLength - 2, vertexIdsLength - 1 , vertexIdsLength ]) );
+
+
+
+        //For the second triangle, we must increment the second index by 1
+        t1 += 1;
+
 
         var t22 = t1 - (tesselation + 1);
-        //Create the faces (triangles). These reference the three vertices in the vertexIds array.
-        faces.push( new Face([  t0, t1, t22     ]) );
+        console.log(t22);
+
+        //Create the vertexids for this face
+        vertexIds.push({pos: t0, norm: 0});
+        vertexIds.push({pos: t1, norm: 0});
+        vertexIds.push({pos: t22 , norm: 0});
+        //Create the second face. These reference the three vertices in the vertexIds array.
+        var vertexIdsLength = vertexIds.length - 1;
+        faces.push( new Face([ vertexIdsLength - 2, vertexIdsLength - 1 , vertexIdsLength ]) );
 
       }
     }
@@ -339,9 +353,9 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
   var p1 = positions[face.vertices[1]]
   var p2 = positions[face.vertices[2]]
 
-  var line1 = p2.subtractVector(p1);
-  var line2 = p0.subtractVector(p1);
-  var normal = line2.cross(line1).normalize();
+  var line1 = p1.subtractVector(p2);
+  var line2 = p1.subtractVector(p0);
+  var normal = line1.cross(line2).normalize();
   normals.push(normal);
 
 

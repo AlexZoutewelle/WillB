@@ -1,4 +1,4 @@
-var renderNormalBool = false;
+var renderNormalBool = true;
 
 //Used for rasterization:
 
@@ -180,10 +180,6 @@ Render.prototype.render = function(camera_inverse, camera) {
         vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
       }
       vertex_in.normal = modelGeometry.normals[vertexIds.norm];
-      if(modelGeometry.id === 'c1') {
-        log(vertex_in.position);
-
-      }
 
       //console.log(vertex_in);
       verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse));
@@ -227,6 +223,7 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
   //Vertex shaders
   //Save a copy of the world position
+
   vertex.worldPos = vertex.position.copy();
 
   //Transform to camera coordinate system
@@ -234,6 +231,7 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
 
   vertex.position = projectionMatrix.multMatrixVec3(vertex.position);
+  log(vertex.position);
 
 
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)

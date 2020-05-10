@@ -58,7 +58,7 @@ var movementTarget = flatShadeVertexShader;
 
 
 //Load models
-var model_name1 = "cube";
+var model_name1 = "plane";
 var model_name2 = "bear";
 
 var models = [
@@ -109,14 +109,14 @@ Promise.all(models).then(function(results) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  for(var i = 0; i < models[1].positions.length; i++) {
-
-    models[1].positions[i] = object2_srt.multMatrixVec3(models[1].positions[i]);
-  }
-  for(var i = 0; i < models[1].normals.length; i++) {
-    models[1].normals[i] = object2_rotate.inverse().transpose().multMatrixVec3(models[1].normals[i]).normalize();
-
-  }
+  // for(var i = 0; i < models[1].positions.length; i++) {
+  //
+  //   models[1].positions[i] = object2_srt.multMatrixVec3(models[1].positions[i]);
+  // }
+  // for(var i = 0; i < models[1].normals.length; i++) {
+  //   models[1].normals[i] = object2_rotate.inverse().transpose().multMatrixVec3(models[1].normals[i]).normalize();
+  //
+  // }
 
 
 
