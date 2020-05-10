@@ -12,7 +12,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -50],
+        [0, 0, 1, -30],
         [0, 0, 0, 1]
 ]);
 
@@ -35,8 +35,8 @@ var lightBlendPS = new LightBlendPS(renderer);
 //var defaultVertexShader = new DefaultVS(renderer);
 //var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-var flatShadeVertexShader = new FlatShadeVS(renderer);
-//var pointShader = new PointShadeVS(renderer);
+// var flatShadeVertexShader = new FlatShadeVS(renderer);
+var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -45,7 +45,7 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = flatShadeVertexShader;
+var movementTarget = pointShader;
 
 
 
@@ -72,7 +72,7 @@ Promise.all(models).then(function(results) {
 
   //creating a flat plane
   var wall = new Geometry();
-  wall.createPlane(4,4,1,'');
+  wall.createPlane(4,4,4,'');
   renderer.models.push(wall);
 
   var wall_transform = new Transformation();
@@ -86,7 +86,7 @@ Promise.all(models).then(function(results) {
 
 
 
-  console.log(models[0]);
+  //console.log(models[0]);
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();

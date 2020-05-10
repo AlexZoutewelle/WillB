@@ -231,7 +231,6 @@ Render.prototype.vertexTransformer = function(vertex, camera_inverse) {
 
 
   vertex.position = projectionMatrix.multMatrixVec3(vertex.position);
-  log(vertex.position);
 
 
   vertex_out = this.invokeVertexShaders(vertex, camera_inverse)

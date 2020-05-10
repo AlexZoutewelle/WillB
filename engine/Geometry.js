@@ -290,9 +290,10 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
   var widthStep = width / tesselation;
   var heightStep = height / tesselation;
 
-  var t1 = tesselation + 1;
 
   for(var i = 0; i <= rows; i++) {
+    var t1 = (tesselation + 1) * (i + 1);
+
     for (var j = 0; j <= cols; j++) {
       var y = heightStep * i;
 
@@ -308,7 +309,7 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
         //Create vertexIds. These are the vertexIds belonging to the current triangle.
         //Some of these id's reference positions that do not exist yet, they will be created on the next row.
         //i must not equal row, because if it is, there are no new triangles to create, only attributes.
-        var t0 = faces.length / 2 + y;
+        var t0 = faces.length / 2 + i;
         var t12 = t1 + 1;
 
 
@@ -329,7 +330,6 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
 
 
         var t22 = t1 - (tesselation + 1);
-        console.log(t22);
 
         //Create the vertexids for this face
         vertexIds.push({pos: t0, norm: 0});
@@ -349,15 +349,18 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
   var vertices = face.vertices;
   console.log(faces);
   //Get the three positions
-  var p0 = positions[face.vertices[0]];
-  var p1 = positions[face.vertices[1]]
-  var p2 = positions[face.vertices[2]]
+  var p0 = positions[vertexIds[face.vertices[0]].pos];
+  var p1 = positions[vertexIds[face.vertices[1]].pos]
+  var p2 = positions[vertexIds[face.vertices[2]].pos]
+  console.log(p0);
+  console.log(p1);
+  console.log(p2);
 
   var line1 = p1.subtractVector(p2);
   var line2 = p1.subtractVector(p0);
   var normal = line1.cross(line2).normalize();
   normals.push(normal);
-
+  console.log(normal);
 
   this.vertexIds = vertexIds;
   this.faces = faces;
