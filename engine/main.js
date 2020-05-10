@@ -12,7 +12,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 1, -20],
+        [0, 0, 1, -50],
         [0, 0, 0, 1]
 ]);
 
@@ -59,7 +59,7 @@ var movementTarget = flatShadeVertexShader;
 
 //Load models
 var model_name1 = "cube";
-var model_name2 = "cow";
+var model_name2 = "bear";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -69,6 +69,22 @@ var models = [
 
 Promise.all(models).then(function(results) {
   models = results;
+
+  //creating a flat plane
+  var wall = new Geometry();
+  wall.createPlane(4,4,1,'');
+  renderer.models.push(wall);
+
+  var wall_transform = new Transformation();
+  wall_transform.fields = wall_transform.translate(0,0,2);
+  // for(var i = 0; i < wall.positions.length; i++) {
+  //   wall.positions[0] = wall_transform.multMatrixVec3(wall.positions[i]);
+  // }
+  console.log(wall)
+
+
+
+
 
   console.log(models[0]);
 
@@ -82,7 +98,7 @@ Promise.all(models).then(function(results) {
   object2_srt.fields = object2_srt.rotate(0, 270, 0)
   object2_srt.fields = object2_srt.translate(12, 0, 0);
 
-  object2_srt.fields = object2_srt.scale(0.5,0.5,0.5);
+  object2_srt.fields = object2_srt.scale(0.2,0.2,0.2);
 
   var object2_rotate = new Transformation()
   object2_rotate.fields = object2_rotate.rotate(0, 0, 0)
@@ -112,9 +128,10 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  renderer.models.push(models[0]);
-  renderer.models.push(models[1]);
-  console.log(models[1])
+  //renderer.models.push(models[0]);
+  //renderer.models.push(models[1]);
+
+
 
 
 
@@ -125,7 +142,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 8
+var movement = 25
 
 
 //FPS measurement

@@ -277,207 +277,79 @@ Geometry.prototype.insertVertexAdjacency = function(edgeList, first, second) {
   return edgeList
 }
 
-function Vector3(x,y,z) {
-  this.position = [x || 0, y || 0, z || 0, 1];
-}
+//Creating a plane
+Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
+  var positions = [];
+  var faces = [];
+  var vertexIds = [];
+  var normals = [];
+  var uvs = [];
 
-Vector3.prototype.copy = function() {
-  var result = new Vector3();
-  result.position[0] = this.position[0];
-  result.position[1] = this.position[1];
-  result.position[2] = this.position[2];
-  return result;
-}
+  var rows = tesselation;
+  var cols = tesselation;
+  var widthStep = width / tesselation;
+  var heightStep = height / tesselation;
 
-Vector3.prototype.absolute = function() {
-  var result = new Vector3();
-  result.position[0] = Math.abs(this.position[0]);
-  result.position[1] = Math.abs(this.position[1]);
-  result.position[2] = Math.abs(this.position[2]);
-  return result;
+  var t1 = tesselation + 1;
 
-}
-Vector3.prototype.translate = function (x,y,z) {
-  this.position[0] += x;
-  this.position[1] += y;
-  this.position[2] += z;
-  return this;
-  //return new Vector(this.x + x, this.position[1] + y, this.position[2] + z);
-}
+  for(var i = 0; i <= rows; i++) {
+    for (var j = 0; j <= cols; j++) {
+      var y = heightStep * i;
 
-Vector3.prototype.dot = function(vector) {
-  var sum = 0;
-  sum += this.position[0] * vector.position[0];
-  sum += this.position[1] * vector.position[1];
-  sum += this.position[2] * vector.position[2];
+      var x = widthStep * j;
 
-  return sum;
-}
+      //Create and push the position vectors. These are the positions for the current row.
+      //So, this has nothing to do with the triangles just yet
 
-Vector3.prototype.cross = function(vector) {
-  var result = new Vector3();
-  result.position[0] = (this.position[1] * vector.position[2]) - (vector.position[1] * this.position[2]);
-  result.position[1] = (this.position[2] * vector.position[0]) - (vector.position[2] * this.position[0]) ;
-  result.position[2] = (this.position[0] * vector.position[1]) - (vector.position[0] * this.position[1]);
+      positions.push( new Vector3(x,             y,              tesselation) );
+      //Create and push the uv vectors
+      vertexIds.push({pos: positions.length - 1, norm: 0});
 
-  return result;
-}
+      if(i !== rows && j !== cols) {
+        //Create vertexIds. These are the vertexIds belonging to the current triangle.
+        //Some of these id's reference positions that do not exist yet, they will be created on the next row.
+        //i must not equal row, because if it is, there are no new triangles to create, only attributes.
+        var t0 = faces.length / 2 + y;
+        var t12 = t1 + 1;
 
-Vector3.prototype.normalize = function() {
-  var length = Math.sqrt( (this.position[0] **2) + (this.position[1] ** 2) + (this.position[2] **2) );
-  this.position[0] /= length;
-  this.position[1] /= length;
-  this.position[2] /= length;
-  return this;
-}
+        //create the first face
+        faces.push( new Face([ t0, t1 , t12 ]) );
 
-Vector3.prototype.length = function() {
-  return Math.sqrt( (this.position[0] **2) + (this.position[1] ** 2) + (this.position[2] **2) );
-}
 
-Vector3.prototype.multiplyVector = function(vector) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] * vector.position[0];
-  result.position[1] = this.position[1] * vector.position[1];
-  result.position[2] = this.position[2] * vector.position[2];
-  return result;
-}
+        //Each time we reach a triangle whose index is uneven, the second vertex increases
+        if(faces.length % 2 != 0) {
+          t1 += 1;
+        }
 
-Vector3.prototype.divideVector = function(vector) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] / vector.position[0];
-  result.position[1] = this.position[1] / vector.position[1];
-  result.position[2] = this.position[2] / vector.position[2];
-  return result;
-}
-Vector3.prototype.subtractVector = function(vector, w) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] - vector.position[0];
-  result.position[1] = this.position[1] - vector.position[1];
-  result.position[2] = this.position[2] - vector.position[2];
-  if(w) {
-    result.position[3] = this.position[3] - vector.position[3];
-  }
-  return result;
-}
+        var t22 = t1 - (tesselation + 1);
+        //Create the faces (triangles). These reference the three vertices in the vertexIds array.
+        faces.push( new Face([  t0, t1, t22     ]) );
 
-Vector3.prototype.addVector = function(vector) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] + vector.position[0];
-  result.position[1] = this.position[1] + vector.position[1];
-  result.position[2] = this.position[2] + vector.position[2];
-  result.position[3] = this.position[3] + vector.position[3];
-
-  return result;
-}
-
-Vector3.prototype.multiplyScalar = function(scalar, w) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] * scalar;
-  result.position[1] = this.position[1] * scalar;
-  result.position[2] = this.position[2] * scalar;
-  if(w) {
-    result.position[3] = this.position[3] * scalar;
-  }
-  else {
-    result.position[3] = this.position[3];
+      }
+    }
   }
 
-  return result;
-}
+  //This is a flat plane, so we need only 1 normal.
+  //Get the first face
+  var face = faces[0];
+  var vertices = face.vertices;
+  console.log(faces);
+  //Get the three positions
+  var p0 = positions[face.vertices[0]];
+  var p1 = positions[face.vertices[1]]
+  var p2 = positions[face.vertices[2]]
 
-Vector3.prototype.divideScalar = function(scalar) {
-  var result = new Vector3();
-  result.position[0] = this.position[0] / scalar;
-  result.position[1] = this.position[1] / scalar;
-  result.position[2] = this.position[2] / scalar;
-  result.position[3] = this.position[3];
-  return result;
-
-}
-
-
-
-Vector3.prototype.interpolateTo = function(vector, alpha) {
-  var result = new Vector3();
+  var line1 = p2.subtractVector(p1);
+  var line2 = p0.subtractVector(p1);
+  var normal = line2.cross(line1).normalize();
+  normals.push(normal);
 
 
-  result = this.addVector(vector.subtractVector(this, true).multiplyScalar(alpha, true));
-
-  return result;
-}
-
-function Vector2(x,y) {
-  this.position = [x || 0, y || 0];
-}
-
-Vector2.prototype.addScalar = function(scalar, position) {
-  var result = new Vector2();
-  if(position) {
-    result.position[position] += scalar;
-  }
-  else {
-    result.position[0] += scalar;
-    result.position[1] += scalar;
-  }
-
-  return result;
-}
-
-Vector2.prototype.addVector = function(vector) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] + vector.position[0];
-  result.position[1] = this.position[1] + vector.position[1];
-  return result;
-}
-
-Vector2.prototype.divideScalar = function(scalar) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] / scalar;
-  result.position[1] = this.position[1] / scalar;
-  return result;
-}
-
-Vector2.prototype.subtractScalar = function(scalar, axis) {
-  var result = new Vector2();
-  if(axis) {
-    result.position[axis] = this.position[axis] - scalar;
-  }
-  else {
-    result.position[0] = this.position[0] - scalar;
-    result.position[1] = this.position[1] - scalar;
-  }
-  return result;
-}
-
-Vector2.prototype.multiplyScalar = function(scalar) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] * scalar;
-  result.position[1] = this.position[1] * scalar;
-  return result;
-}
-
-Vector2.prototype.subtractVector = function(vector) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] - vector.position[0];
-  result.position[1] = this.position[1] - vector.position[1];
-  return result;
-}
-
-Vector2.prototype.divideVector = function(vector) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] / vector.position[0];
-  result.position[1] = this.position[1] / vector.position[1];
-  return result;
-}
-
-Vector2.prototype.multiplyVector = function(vector) {
-  var result = new Vector2();
-  result.position[0] = this.position[0] * vector.position[0];
-  result.position[1] = this.position[1] * vector.position[1];
-  return result;
-}
-
-Vector2.prototype.interpolateTo = function(vector, alpha) {
-  return this.addVector(vector.subtractVector(this).multiplyScalar(alpha));
+  this.vertexIds = vertexIds;
+  this.faces = faces;
+  this.positions = positions;
+  this.uvs = uvs;
+  this.normals = normals;
+  this.texture = texture;
+  this.id = "c1";
 }

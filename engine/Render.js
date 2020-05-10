@@ -159,6 +159,7 @@ Render.prototype.render = function(camera_inverse, camera) {
     var models = this.models;
     var modelGeometry = models[m];
 
+
     //Let our pixel shaders know that we are working with a new model
     this.newModel(models[m]);
 
@@ -174,13 +175,17 @@ Render.prototype.render = function(camera_inverse, camera) {
       vertex_in.id = i;
 
 
-
       vertex_in.position = modelGeometry.positions[vertexIds.pos];
       if(typeof(modelGeometry.uvs) !== "undefined") {
         vertex_in.uv = modelGeometry.uvs[vertexIds.uv];
       }
       vertex_in.normal = modelGeometry.normals[vertexIds.norm];
+      if(modelGeometry.id === 'c1') {
+        log(vertex_in.position);
 
+      }
+
+      //console.log(vertex_in);
       verticesOut.push(this.vertexTransformer(vertex_in, camera_inverse));
 
     }
@@ -212,7 +217,7 @@ Render.prototype.render = function(camera_inverse, camera) {
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
   }
-  //console.log('cullCount: ' + cullCount);
+  console.log('cullCount: ' + cullCount);
 
   //Actually draw the image array on the canvas
   this.draw();
