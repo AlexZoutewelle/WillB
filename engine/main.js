@@ -100,18 +100,18 @@ Promise.all(models).then(function(results) {
 
   var wallBottom = new Geometry();
   wallBottom.createPlane(20,20,3,'grass');
-  wallBottom.id = 'floor';
   transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
   renderer.models.push(wallBottom);
 
 
-
-
-  console.log(wallBottom);
+  var wallClose = new Geometry();
+  wallClose.createPlane(20,20,3,'mountain');
+  transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
+  renderer.models.push(wallClose);
 
 
   // //Models are loaded. Place them somewhere in the world
-  transformModel(models[0], 0, 0, 0, 10, 5, -9, 0, 290, 0 , 1);
+  transformModel(models[0], 0, 0, 0, 10, 3.5, -9, 0, 290, 0 , 1);
 
 
   // var object_transform1 = new Transformation();

@@ -42,11 +42,11 @@ TextureEffect.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
   vertex.uv = vertex.uv.multiplyScalar(vertex.position.position[3]);
 
 
-  var textureX = Math.max(Math.min(Math.trunc(vertex.uv.position[0] * this.texture_width), this.tex_clamp_x), 0);
+  var textureX = Math.max(Math.min(Math.trunc( (vertex.uv.position[0] ) * this.texture_width), this.tex_clamp_x), 0);
   if(textureX < 0) {
     textureX = 0;
   }
-  var textureY = Math.max(Math.min(Math.trunc(vertex.uv.position[1] * this.texture_height), this.tex_clamp_y), 0);
+  var textureY = Math.max(Math.min(Math.trunc( (vertex.uv.position[1] ) * this.texture_height), this.tex_clamp_y), 0);
   if(textureY < 0) {
     textureY = 0;
   }
