@@ -677,7 +677,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
 
 
-          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[3])) {
+          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
 
             //We use W for perspective correction.
             //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating

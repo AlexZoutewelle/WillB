@@ -3,10 +3,11 @@
   <style>
     canvas {
       //width:1000px;
-      height:800px ;
+      //height:800px ;
 
     }
     img {
+      width: 50%;
       display: none;
     }
   </style>
@@ -16,10 +17,12 @@
 <body>
   <img id = "cube" src="models/checkerboard.jpg"/>
   <img id = "cube2" src="models/cube.jpg"/>
+  <img id = "grass" src="models/grass.jpg"/>
+  <img id = "sky" src="models/sky.png"/>
 
 
   <div id = 'fps'></div>
-  <canvas id="screen" width="640" height="480" style="border: 1px solid black; padding: 2px; margin: 2px;"></canvas>
+  <canvas id="screen" width="340" height="240" style="border: 1px solid black; padding: 2px; margin: 2px;"></canvas>
   <script src="engine/Util.js"></script>
   <script src="engine/mdlLoad.js"></script>
   <script src="engine/Vertex.js"></script>

@@ -1,8 +1,8 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 
-var screenWidth = 640;
-var screenHeight = 480;
+var screenWidth = 320;
+var screenHeight = 240;
 
 //Get the context
 
@@ -10,8 +10,8 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
+        [1, 0, 0, 10],
+        [0, 1, 0, 10],
         [0, 0, 1, -30],
         [0, 0, 0, 1]
 ]);
@@ -37,7 +37,7 @@ var lightBlendPS = new LightBlendPS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
 var textureVertexShader = new TextureVS(renderer);
 
-// var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
 
 
@@ -47,7 +47,7 @@ var pointShader = new PointShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-// var movementTarget = flatShadeVertexShader;
+//var movementTarget = flatShadeVertexShader;
 var movementTarget = pointShader;
 
 
@@ -75,7 +75,7 @@ Promise.all(models).then(function(results) {
 
   //creating a flat plane
   var wallFar = new Geometry();
-  wallFar.createPlane(20,20,3,'cube');
+  wallFar.createPlane(20,20,3,'sky');
 
   //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
   renderer.models.push(wallFar);
@@ -83,52 +83,54 @@ Promise.all(models).then(function(results) {
 
 
   var wallLeft = new Geometry();
-  wallLeft.createPlane(20,20,3,'cube');
+  wallLeft.createPlane(20,20,3,'sky');
   transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
   renderer.models.push(wallLeft);
 
   var wallRight = new Geometry();
-  wallRight.createPlane(20,20,3,'cube');
-  transformModel(wallRight, 20, 0, 0, 0, 0, -20, 0, -750, 0 , 1);
-
+  wallRight.createPlane(20,20,3,'sky');
+  transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
   renderer.models.push(wallRight);
 
+  var wallTop = new Geometry();
+  wallTop.createPlane(20,20,3,'sky');
+  transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
+  renderer.models.push(wallTop);
+
+
   var wallBottom = new Geometry();
-  wallBottom.createPlane(20,20,3,'cube');
+  wallBottom.createPlane(20,20,3,'grass');
   wallBottom.id = 'floor';
-  //renderer.models.push(wallBottom);
-
-
-  var wall_transform = new Transformation();
-
-  wall_transform.fields = wall_transform.translate(-10,0,0);
-  wall_transform.fields = wall_transform.rotate(0,45,0);
+  transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
+  renderer.models.push(wallBottom);
 
 
 
 
-  //Models are loaded. Place them somewhere in the world
-  var object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.rotate(0,210,0);
-  object_transform1.fields = object_transform1.translate(-10, 3.5, 5);
-  object_transform1.fields = object_transform1.scale(1,1,1);
+  console.log(wallBottom);
 
 
-  for(var i = 0; i < models[0].positions.length; i++) {
-    models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
-  }
-
-  object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.rotate(0,180,0);
-
-  for(var i = 0; i < models[0].normals.length; i++) {
-    models[0].normals[i] = object_transform1.inverse().transpose().multMatrixVec3(models[0].normals[i]).normalize();
-
-  }
+  // //Models are loaded. Place them somewhere in the world
+  transformModel(models[0], 0, 0, 0, 10, 5, -9, 0, 290, 0 , 1);
 
 
-
-  object_transform = new Transformation();
+  // var object_transform1 = new Transformation();
+  // object_transform1.fields = object_transform1.rotate(0,210,0);
+  // object_transform1.fields = object_transform1.translate(-10, 3.5, 5);
+  // object_transform1.fields = object_transform1.scale(1,1,1);
+  //
+  //
+  // for(var i = 0; i < models[0].positions.length; i++) {
+  //   models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
+  // }
+  //
+  // object_transform1 = new Transformation();
+  // object_transform1.fields = object_transform1.rotate(0,180,0);
+  //
+  // for(var i = 0; i < models[0].normals.length; i++) {
+  //   models[0].normals[i] = object_transform1.inverse().transpose().multMatrixVec3(models[0].normals[i]).normalize();
+  //
+  // }
 
 
   //model ids
@@ -136,7 +138,7 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  //renderer.models.push(models[0]);
+  renderer.models.push(models[0]);
   //renderer.models.push(models[1]);
 
 
