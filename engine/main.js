@@ -24,8 +24,9 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//var texturePS = new TextureEffect(renderer);
 var flatColorPS = new FlatColorEffect(renderer);
+var texturePS = new TextureEffect(renderer);
+
 //var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
@@ -33,8 +34,9 @@ var lightBlendPS = new LightBlendPS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
+
 // var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
 
@@ -45,6 +47,7 @@ var pointShader = new PointShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
+// var movementTarget = flatShadeVertexShader;
 var movementTarget = pointShader;
 
 
@@ -58,8 +61,8 @@ var movementTarget = pointShader;
 
 
 //Load models
-var model_name1 = "plane";
-var model_name2 = "bear";
+var model_name1 = "cow";
+var model_name2 = "cube";
 
 var models = [
   mdlLoad.loadObject("models/" + model_name1 + ".obj", "cube"),
@@ -71,52 +74,57 @@ Promise.all(models).then(function(results) {
   models = results;
 
   //creating a flat plane
-  var wall = new Geometry();
-  wall.createPlane(4,4,4,'');
-  renderer.models.push(wall);
+  var wallFar = new Geometry();
+  wallFar.createPlane(20,20,3,'cube');
+
+  //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  renderer.models.push(wallFar);
+
+
+
+  var wallLeft = new Geometry();
+  wallLeft.createPlane(20,20,3,'cube');
+  transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
+  renderer.models.push(wallLeft);
+
+  var wallRight = new Geometry();
+  wallRight.createPlane(20,20,3,'cube');
+  transformModel(wallRight, 20, 0, 0, 0, 0, -20, 0, -750, 0 , 1);
+
+  renderer.models.push(wallRight);
+
+  var wallBottom = new Geometry();
+  wallBottom.createPlane(20,20,3,'cube');
+  wallBottom.id = 'floor';
+  //renderer.models.push(wallBottom);
+
 
   var wall_transform = new Transformation();
-  wall_transform.fields = wall_transform.translate(0,0,2);
-  // for(var i = 0; i < wall.positions.length; i++) {
-  //   wall.positions[0] = wall_transform.multMatrixVec3(wall.positions[i]);
-  // }
-  console.log(wall)
+
+  wall_transform.fields = wall_transform.translate(-10,0,0);
+  wall_transform.fields = wall_transform.rotate(0,45,0);
 
 
 
-
-
-  //console.log(models[0]);
 
   //Models are loaded. Place them somewhere in the world
   var object_transform1 = new Transformation();
-  object_transform1.fields = object_transform1.translate(-12, 0, 0);
-  object_transform1.fields = object_transform1.scale(0.5,0.5,0.5);
-
-  var object2_srt = new Transformation();
-
-  object2_srt.fields = object2_srt.rotate(0, 270, 0)
-  object2_srt.fields = object2_srt.translate(12, 0, 0);
-
-  object2_srt.fields = object2_srt.scale(0.2,0.2,0.2);
-
-  var object2_rotate = new Transformation()
-  object2_rotate.fields = object2_rotate.rotate(0, 0, 0)
-
+  object_transform1.fields = object_transform1.rotate(0,210,0);
+  object_transform1.fields = object_transform1.translate(-10, 3.5, 5);
+  object_transform1.fields = object_transform1.scale(1,1,1);
 
 
   for(var i = 0; i < models[0].positions.length; i++) {
     models[0].positions[i] = object_transform1.multMatrixVec3(models[0].positions[i]);
   }
 
-  // for(var i = 0; i < models[1].positions.length; i++) {
-  //
-  //   models[1].positions[i] = object2_srt.multMatrixVec3(models[1].positions[i]);
-  // }
-  // for(var i = 0; i < models[1].normals.length; i++) {
-  //   models[1].normals[i] = object2_rotate.inverse().transpose().multMatrixVec3(models[1].normals[i]).normalize();
-  //
-  // }
+  object_transform1 = new Transformation();
+  object_transform1.fields = object_transform1.rotate(0,180,0);
+
+  for(var i = 0; i < models[0].normals.length; i++) {
+    models[0].normals[i] = object_transform1.inverse().transpose().multMatrixVec3(models[0].normals[i]).normalize();
+
+  }
 
 
 
@@ -163,7 +171,7 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  // transformModel(models[0], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
+  //transformModel(models[0], 50, -16, 1, 0, 0, 0, 0, 100, 0 , dt);
   // transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
@@ -307,16 +315,22 @@ function frame() {
 
 function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
 
-  dt = Math.min(dt, 0.02)
+  //dt = Math.min(dt, 0.02)
   var positions = model.positions.length;
   var normals = model.normals.length;
   var transformation = new Transformation();
 
-  // transformation.fields = transformation.scale(dt * s1,dt * s2, dt * s3)
+  console.log(positions);
+  console.log(normals);
 
-  transformation.fields = transformation.rotate(dt * o0, dt * o1, dt * o2);
 
   transformation.fields = transformation.translate(dt * x, dt * y, dt * z);
+  transformation.fields = transformation.rotate(dt * o0, dt * o1, dt * o2);
+
+  // transformation.fields = transformation.scale(dt * s1,dt * s2, dt * s3)
+
+
+
 
   for(var i = 0; i < positions; i++) {
     model.positions[i] = transformation.multMatrixVec3(model.positions[i]);
@@ -325,6 +339,7 @@ function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
     model.normals[i] = transformation.inverse().transpose().multMatrixVec3(model.normals[i]).normalize();
 
   }
+
 
 }
 

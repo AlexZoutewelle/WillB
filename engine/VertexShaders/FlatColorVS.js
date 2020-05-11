@@ -13,6 +13,16 @@ function FlatColorVS(renderer) {
 }
 
 FlatColorVS.prototype.newModel = function(newModel) {
+  if(newModel.id === 'c1') {
+    this.color = new Vector3(24, 24, 175);
+  }
+  else if(newModel.id === 'floor') {
+    this.color = new Vector3(45, 190, 38);
+
+  }
+  else {
+    this.color = new Vector3(210, 210, 210);
+  }
 
 }
 

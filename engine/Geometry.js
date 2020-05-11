@@ -289,6 +289,7 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
   var cols = tesselation;
   var widthStep = width / tesselation;
   var heightStep = height / tesselation;
+  var uvStep = 1 / tesselation;
 
 
   for(var i = 0; i <= rows; i++) {
@@ -302,7 +303,8 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
       //Create and push the position vectors. These are the positions for the current row.
       //So, this has nothing to do with the triangles just yet
 
-      positions.push( new Vector3(x,             y,              tesselation) );
+      uvs.push(       new Vector2(uvStep * j,    uvStep * i ));
+      positions.push( new Vector3(x,             y,              0) );
       //Create and push the uv vectors
 
       if(i !== rows && j !== cols) {
@@ -315,9 +317,9 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
 
 
         //Create the vertexids for this face
-        vertexIds.push({pos: t0 , norm: 0});
-        vertexIds.push({pos: t1 , norm: 0});
-        vertexIds.push({pos: t12, norm: 0});
+        vertexIds.push({pos: t0 , uv: t0, norm: 0});
+        vertexIds.push({pos: t1 , uv: t1, norm: 0});
+        vertexIds.push({pos: t12, uv: t12,norm: 0});
 
         //create the first face. These reference the three vertices in the vertexIds array.
         var vertexIdsLength = vertexIds.length - 1;
@@ -332,9 +334,9 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
         var t22 = t1 - (tesselation + 1);
 
         //Create the vertexids for this face
-        vertexIds.push({pos: t0, norm: 0});
-        vertexIds.push({pos: t1, norm: 0});
-        vertexIds.push({pos: t22 , norm: 0});
+        vertexIds.push({pos: t0,  uv: t0, norm: 0});
+        vertexIds.push({pos: t1,  uv: t1, norm: 0});
+        vertexIds.push({pos: t22, uv: t22, norm: 0});
         //Create the second face. These reference the three vertices in the vertexIds array.
         var vertexIdsLength = vertexIds.length - 1;
         faces.push( new Face([ vertexIdsLength - 2, vertexIdsLength - 1 , vertexIdsLength ]) );
@@ -347,26 +349,39 @@ Geometry.prototype.createPlane = function(width, height, tesselation, texture) {
   //Get the first face
   var face = faces[0];
   var vertices = face.vertices;
-  console.log(faces);
   //Get the three positions
   var p0 = positions[vertexIds[face.vertices[0]].pos];
   var p1 = positions[vertexIds[face.vertices[1]].pos]
   var p2 = positions[vertexIds[face.vertices[2]].pos]
-  console.log(p0);
-  console.log(p1);
-  console.log(p2);
+
 
   var line1 = p1.subtractVector(p2);
   var line2 = p1.subtractVector(p0);
   var normal = line1.cross(line2).normalize();
   normals.push(normal);
-  console.log(normal);
+
+
+  //Get the texture, if defined
+  if(texture !== undefined) {
+    //Finally, get its texture image, and create a context for it
+    var image = document.getElementById(texture);
+    var canvas = document.createElement('canvas');
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+
+    this.texture = canvas.getContext('2d').getImageData(0, 0, image.width, image.height);
+  }
+
+
+
+
 
   this.vertexIds = vertexIds;
   this.faces = faces;
   this.positions = positions;
   this.uvs = uvs;
   this.normals = normals;
-  this.texture = texture;
   this.id = "c1";
 }

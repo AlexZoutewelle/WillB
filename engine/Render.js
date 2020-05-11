@@ -1,4 +1,4 @@
-var renderNormalBool = true;
+var renderNormalBool = false;
 
 //Used for rasterization:
 
@@ -8,7 +8,7 @@ var renderNormalBool = true;
   var filmHeight = 21.023;
 
   var Znear = 1;
-  var Zfar = 50;
+  var Zfar = 10000;
 
   // var angleOfView = 90;
   //var canvasSize = 2 * Math.atan(angleOfView * 0.5) * Znear;
@@ -213,7 +213,7 @@ Render.prototype.render = function(camera_inverse, camera) {
       this.processFace(v0, v1, v2, modelGeometry.texture);
     }
   }
-  console.log('cullCount: ' + cullCount);
+  // console.log('cullCount: ' + cullCount);
 
   //Actually draw the image array on the canvas
   this.draw();
@@ -445,7 +445,6 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
   if(v0.position.position[2] > v0.position.position[3] &&
      v1.position.position[2] > v1.position.position[3] &&
      v2.position.position[2] > v2.position.position[3]) {
-       console.log("true5");
       return;
   }
   //Z Clipping test
@@ -487,7 +486,6 @@ Render.prototype.processFace = function(v0, v1, v2, texture) {
 }
 
 Render.prototype.clipForOne = function(v0,v1,v2) {
-  console.log("clip for one");
     //We need to create 2 new vertices, because we will be clipping v0 on the Z axis here.
     //So, we interpolate v0.z -> v1.z   and v0.z -> v2.z
     //How do we know the order of these vertices? All because of our previously done Clipping tests.
@@ -571,7 +569,6 @@ Render.prototype.clipForOne = function(v0,v1,v2) {
 }
 
 Render.prototype.clipForTwo = function(v0,v1,v2) {
-  console.log("clip for 2")
   //We again need to create 2 new vertices.
   var alphaA = (-v0.position.position[2]) / (v2.position.position[2] - v0.position.position[2]);
   var alphaB = (-v1.position.position[2]) / (v2.position.position[2] - v1.position.position[2]);
@@ -680,7 +677,7 @@ Render.prototype.drawFace = function(v0, v1, v2, texture) {
 
 
 
-          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
+          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[3])) {
 
             //We use W for perspective correction.
             //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating

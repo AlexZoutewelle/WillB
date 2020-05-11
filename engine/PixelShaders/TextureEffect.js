@@ -19,7 +19,7 @@ TextureEffect.prototype.setTexture = function(texture) {
 }
 
 TextureEffect.prototype.newModel = function(model) {
-  if(model.id !== 'pl1') {
+  if(model.id !== 'pl1' && typeof(model.texture) !== undefined) {
     this.setTexture(model.texture);
 
   }
@@ -50,7 +50,6 @@ TextureEffect.prototype.getVertex = function(vertex, w0, w1, w2, v0, v1, v2) {
   if(textureY < 0) {
     textureY = 0;
   }
-
   var pos = (textureX * 4) + (this.array_width * textureY);
   vertex.color = new Vector3(this.texture.data[pos],
                           this.texture.data[pos + 1],
