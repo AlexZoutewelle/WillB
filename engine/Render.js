@@ -348,8 +348,14 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
     var cyan = new Vector3(255,0,0);
     cyan.position[3] = 255;
 
-    var red = new Vector3(0,255,255);
+    var red = new Vector3(255,0,0);
     red.position[3] = 255;
+
+    var green = new Vector3(0,255,0);
+    green.position[3] = 255;
+
+    var blue = new Vector3(0,0,255);
+    blue.position[3] = 255;
 
     var yellow = new Vector3(255,255,0);
     yellow.position[3] = 255;
@@ -372,23 +378,23 @@ Render.prototype.renderNormal = function(v0c,v1c,v2c, normal) {
     }
 
     if(v1.position.position[0] > 0  && v1.position.position[1] < this.screenWidth) {
-      this.drawPixel(    v1.position.position[0], v1.position.position[1], red, true);
-      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1] + 1, red, true);
-      this.drawPixel(    v1.position.position[0], v1.position.position[1] + 1, red, true);
-      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1], red, true);
-      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1] - 1, red, true);
-      this.drawPixel(    v1.position.position[0], v1.position.position[1] - 1, red, true);
-      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1], red, true);
+      this.drawPixel(    v1.position.position[0], v1.position.position[1], green, true);
+      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1] + 1, green, true);
+      this.drawPixel(    v1.position.position[0], v1.position.position[1] + 1, green, true);
+      this.drawPixel(    v1.position.position[0] + 1, v1.position.position[1], green, true);
+      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1] - 1, green, true);
+      this.drawPixel(    v1.position.position[0], v1.position.position[1] - 1, green, true);
+      this.drawPixel(    v1.position.position[0] - 1, v1.position.position[1], green, true);
     }
 
     if(v2.position.position[0] > 0  && v2.position.position[1] < this.screenWidth) {
-      this.drawPixel(    v2.position.position[0], v2.position.position[1], red, true);
-      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1] + 1, red, true);
-      this.drawPixel(    v2.position.position[0], v2.position.position[1] + 1, red, true);
-      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1], red, true);
-      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1] - 1, red, true);
-      this.drawPixel(    v2.position.position[0], v2.position.position[1] - 1, red, true);
-      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1], red, true);
+      this.drawPixel(    v2.position.position[0], v2.position.position[1], blue, true);
+      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1] + 1, blue, true);
+      this.drawPixel(    v2.position.position[0], v2.position.position[1] + 1, blue, true);
+      this.drawPixel(    v2.position.position[0] + 1, v2.position.position[1], blue, true);
+      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1] - 1, blue, true);
+      this.drawPixel(    v2.position.position[0], v2.position.position[1] - 1, blue, true);
+      this.drawPixel(    v2.position.position[0] - 1, v2.position.position[1], blue, true);
     }
 
 
@@ -595,7 +601,9 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
 
-  this.drawFace(v0, v1, v2 )
+  this.startSweep(v0, v1, v2 )
+
+  //this.drawFace(v0, v1, v2 )
 }
 
 
@@ -614,105 +622,386 @@ Render.prototype.vertexToRaster = function(vertex_orig) {
   return vertex;
 }
 
-Render.prototype.drawFace = function(v0, v1, v2, texture) {
+var a12;
+var b12;
+var a20;
+var b20;
+var a01;
+var b01;
+var triArea;
 
-  //Bounding box
+Render.prototype.startSweep = function(v0, v1, v2) {
+  //Get the starting position: the UpperLeft-most vertex
+
   var minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
-  var maxX = getMax3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+  var minY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
 
-  var minY = getMin3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
-  var maxY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+  var currentP = new Vector3(minX, minY, 1);
+  //var currentP = new Vector3(v1.position.position[0], v1.position.position[1], 1);
 
-  //2d clipping
-  minX = Math.max(0, minX);
-  minY = Math.max(0, minY);
-  maxX = Math.min(this.screenWidth - 1, maxX);
-  maxY = Math.min(this.screenHeight - 1, maxY);
+  this.drawPixel(minX, minY, new Vector3(0,0,255), true)
+
+  var w0 = EdgeFunction(v1.position, v2.position, currentP);
+  var w1 = EdgeFunction(v2.position, v0.position, currentP);
+  var w2 = EdgeFunction(v0.position, v1.position, currentP);
+
+  w0_test = w0;
+  w1_test = w1;
+  w2_test = w2;
 
   //Setting up constants for the edge function. A is the unit step on the x-axis. B is the unit step on the y-axis
   //v1, v2, p
-  var A12 = v1.position.position[1] - v2.position.position[1];
-  var B12 = v2.position.position[0] - v1.position.position[0];
+  a12 = v1.position.position[1] - v2.position.position[1];
+  b12 = v2.position.position[0] - v1.position.position[0];
 
   //v2, v0, p
-  var A20 = v2.position.position[1] - v0.position.position[1];
-  var B20 = v0.position.position[0] - v2.position.position[0];
+  a20 = v2.position.position[1] - v0.position.position[1];
+  b20 = v0.position.position[0] - v2.position.position[0];
 
   //v0, v1, p
-  var A01 = v0.position.position[1] - v1.position.position[1];
-  var B01 = v1.position.position[0] - v0.position.position[0];
+  a01 = v0.position.position[1] - v1.position.position[1];
+  b01 = v1.position.position[0] - v0.position.position[0];
 
   //Face area
-  var area = EdgeFunction(v0.position,v1.position,v2.position);
+  triArea = EdgeFunction(v0.position,v1.position,v2.position);
 
+  var validUp = null;
+  var validDown = null;
+  console.log('new tri')
+  log(v0.position);
+  log(v1.position);
+  log(v2.position);
+  console.log(w0 + " " + w1 + " " + w2);
+  log(currentP);
 
-  var currentP = new Vector3(minX, minY, 1);
-  //Set up barycentric coordinates at minX and minY
+  while( (w0 | w1 | w2) > 0) {
+    console.log('ok')
+    //Vertex is still in the triangle
+    //Check for valid Up and Down, if they don't exist yet
+    if(!validUp) {
+      var w0_up = w0 + b12;
+      var w1_up = w1 + b20;
+      var w2_up = w2 + b01;
 
+      //console.log(w0_up + ' ' + w1_up + ' ' + w2_up)
 
-  var w0_in = EdgeFunction(v1.position, v2.position, currentP);
-  var w1_in = EdgeFunction(v2.position, v0.position, currentP);
-  var w2_in = EdgeFunction(v0.position, v1.position, currentP);
-
-  //loop over bounding box
-  for(currentP.position[1] = minY; currentP.position[1] < maxY; currentP.position[1] += 1){
-
-    //Barycentric coordinates at the start of the current row
-    var w0 = w0_in;
-    var w1 = w1_in;
-    var w2 = w2_in;
-
-    for(currentP.position[0] = minX; currentP.position[0] < maxX; currentP.position[0] += 1) {
-      if((w0 | w1 | w2) >= 0) {
-          //barycentric coordinates
-          var w0_current =  w0 / area;
-          var w1_current =  w1 / area;
-          var w2_current =  w2 / area;
-
-          //z-buffer test. Normal interpolation for z.
-          currentP.position[2] =  (v0.position.position[2] +
-                                    (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
-                                    (w2_current * (v2.position.position[2] - v0.position.position[2])));
-
-
-
-
-          if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
-
-            //We use W for perspective correction.
-            //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating
-
-            currentP.position[3] =  1/ (v0.position.position[3] +
-                                      (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
-                                      (w2_current * (v2.position.position[3] - v0.position.position[3])));
-
-            //Assemble Vertex
-            var p = new Vertex();
-            p.position = currentP;
-
-
-            //draw
-            //Get the color that the vertex must output
-
-            var outputColor = this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2);
-            this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
-          }
+      if( ( w0_up | w1_up |  w2_up ) >= 0) {
+        //We have a validUp. We need to save its context for a future call to sweepUp()
+        var upP = currentP.copy();
+        upP.position[1] += 1 ;
+        validUp = [upP, v0, v1, v2, w0_up, w1_up, w2_up];
       }
-      //One unit step on the x-axis
-      w0 += A12;
-      w1 += A20;
-      w2 += A01;
-
     }
-    //One unit step on the y-axis
-    w0_in += B12;
-    w1_in += B20;
-    w2_in += B01;
 
+    if(!validDown) {
+      var w0_down = w0 - b12;
+      var w1_down = w1 - b20;
+      var w2_down = w2 - b01;
+
+      if( ( w0_down | w1_down |  w2_down ) >= 0) {
+        //We have a validDown. We need to save its context for a future call to sweepUp()
+        var downP = currentP.copy();
+        downP.position[1] -= 1 ;
+        validDown = [downP, v0, v1, v2, w0_down, w1_down, w2_down];
+      }
+    }
+
+    //Draw the pixel
+
+    this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
+
+
+    //One step along the x-axis
+    currentP.position[0] += 1;
+    w0 += a12;
+    w1 += a20;
+    w2 += a01;
   }
 
+  //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
+  if(validUp) {
+    console.log('validUp')
+
+    this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
+  }
+  if(validDown) {
+    console.log('validDown')
+    this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
+  }
+}
+
+Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
+
+  //We initialize the haveValidUp bool as true, since this function IS for sweeping across valid Up positions
+  var haveValidUp = true;
+  while(haveValidUp) {
+    //console.log('sweep')
+
+    var validUp = null;
+    //initialize barycentrics for the potential Up position
+    var w0_up = w0;
+    var w1_up = w1;
+    var w2_up = w2;
+
+    while((w0 | w1 | w2) >= 0) {
+      // console.log(i);
+      if(!validUp){
+        w0_up += b12;
+        w1_up += b20;
+        w2_up += b01;
+
+        if( ( w0_up | w1_up |  w2_up ) >= 0) {
+          // console.log('got a new validUp: ' + w0_up + " " + w1_up + " " + w2_up);
+          //We have a validUp. We need to save its context for a future call to sweepUp()
+          var upP = currentP.copy();
+          upP.position[1] += 1 ;
+          validUp = [upP, w0_up, w1_up, w2_up];
+        }
+      }
+
+      //Draw the pixel
+      this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
+
+      //One step along the x-axis
+      currentP.position[0] += 1;
+      w0 += a12;
+      w1 += a20;
+      w2 += a01;
+    }
+
+    //The sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
+    if(validUp === null) {
+      //console.log('end of upper sweep')
+      //We have not found a new validUp
+      haveValidUp = false;
+      return;
+    }
+    else {
+      //We have fount a new ValidUp
+      currentP = validUp[0];
+      w0 = validUp[1];
+      w1 = validUp[2];
+      w2 = validUp[3];
+    }
+
+  }
+}
+
+Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
+
+
+    //We initialize the haveValidUp bool as true, since this function IS for sweeping across valid Up positions
+    var haveValidDown = true;
+
+    while(haveValidDown) {
+      var validDown = null;
+
+      //initialize barycentrics for the potential Up position
+
+
+      while((w0 | w1 | w2) >= 0) {
+        // var w0_down = w0;
+        // var w1_down = w1;
+        // var w2_down = w2;
+        // if(!validDown) {
+        //   var w0_down = w0 - b12;
+        //   var w1_down = w1 - b20;
+        //   var w2_down = w2 - b01;
+        //
+        //   if( ( w0_down | w1_down |  w2_down ) >= 0) {
+        //     //We have a validDown. We need to save its context for a future call to sweepUp()
+        //     var downP = currentP.copy();
+        //     downP.position[1] -= 1 ;
+        //     validDown = [downP, v0, v1, v2, w0_down, w1_down, w2_down];
+        //   }
+        // }
+
+
+        if(!validDown){
+          var w0_down = w0 - b12;
+          var w1_down = w1 - b20;
+          var w2_down = w2 - b01;
+
+          if( ( w0_down | w1_down |  w2_down ) >= 0) {
+            // console.log('got a new validUp: ' + w0_up + " " + w1_up + " " + w2_up);
+            //We have a validUp. We need to save its context for a future call to sweepUp()
+            var downP = currentP.copy();
+            downP.position[1] -= 1 ;
+            validDown = [downP, w0_down, w1_down, w2_down];
+          }
+        }
+
+        //Draw the pixel
+        this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
+
+        //One step along the x-axis
+        currentP.position[0] += 1;
+        w0 += a12;
+        w1 += a20;
+        w2 += a01;
+      }
+
+      //The sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
+      if(validDown === null) {
+        //console.log('end of upper sweep')
+        //We have not found a new validUp
+        haveValidDown = false;
+        return;
+      }
+      else {
+        //We have fount a new ValidUp
+        console.log('validDown')
+        currentP = validDown[0];
+        w0 = validDown[1];
+        w1 = validDown[2];
+        w2 = validDown[3];
+      }
+
+    }
 
 }
+
+
+
+Render.prototype.drawVertex = function(currentP, v0, v1, v2, w0, w1, w2) {
+  //barycentric coordinates
+  var w0_current =  w0 / triArea;
+  var w1_current =  w1 / triArea;
+  var w2_current =  w2 / triArea;
+
+  //z-buffer test. Normal interpolation for z.
+  currentP.position[2] =  (v0.position.position[2] +
+                            (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
+                            (w2_current * (v2.position.position[2] - v0.position.position[2])));
+
+
+
+
+  if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
+
+    //We use W for perspective correction.
+    //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating
+
+    currentP.position[3] =  1/ (v0.position.position[3] +
+                              (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
+                              (w2_current * (v2.position.position[3] - v0.position.position[3])));
+
+    //Assemble Vertex
+    var p = new Vertex();
+    p.position = currentP;
+
+
+    //draw
+    //Get the color that the vertex must output
+    var outputColor = this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2);
+    this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
+  }
+}
+
+//
+// Render.prototype.drawFace = function(v0, v1, v2, texture) {
+//
+//   //Bounding box
+//   var minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+//   var maxX = getMax3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+//
+//   var minY = getMin3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+//   var maxY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+//
+//   //2d clipping
+//   minX = Math.max(0, minX);
+//   minY = Math.max(0, minY);
+//   maxX = Math.min(this.screenWidth - 1, maxX);
+//   maxY = Math.min(this.screenHeight - 1, maxY);
+//
+//   //Setting up constants for the edge function. A is the unit step on the x-axis. B is the unit step on the y-axis
+//   //v1, v2, p
+//   var A12 = v1.position.position[1] - v2.position.position[1];
+//   var B12 = v2.position.position[0] - v1.position.position[0];
+//
+//   //v2, v0, p
+//   var A20 = v2.position.position[1] - v0.position.position[1];
+//   var B20 = v0.position.position[0] - v2.position.position[0];
+//
+//   //v0, v1, p
+//   var A01 = v0.position.position[1] - v1.position.position[1];
+//   var B01 = v1.position.position[0] - v0.position.position[0];
+//
+//   //Face area
+//   var area = EdgeFunction(v0.position,v1.position,v2.position);
+//
+//
+//
+//   //Initialize CurrentP as the starting point
+//   var currentP = new Vector3(minX, minY, 1);
+//   //Set up barycentric coordinates at minX and minY
+//
+//
+//   var w0_in = EdgeFunction(v1.position, v2.position, currentP);
+//   var w1_in = EdgeFunction(v2.position, v0.position, currentP);
+//   var w2_in = EdgeFunction(v0.position, v1.position, currentP);
+//
+//   //loop over bounding box
+//   for(currentP.position[1] = minY; currentP.position[1] < maxY; currentP.position[1] += 1){
+//
+//     //Barycentric coordinates at the start of the current row
+//     var w0 = w0_in;
+//     var w1 = w1_in;
+//     var w2 = w2_in;
+//
+//     for(currentP.position[0] = minX; currentP.position[0] < maxX; currentP.position[0] += 1) {
+//       if((w0 | w1 | w2) >= 0) {
+//
+//           //barycentric coordinates
+//           var w0_current =  w0 / area;
+//           var w1_current =  w1 / area;
+//           var w2_current =  w2 / area;
+//
+//           //z-buffer test. Normal interpolation for z.
+//           currentP.position[2] =  (v0.position.position[2] +
+//                                     (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
+//                                     (w2_current * (v2.position.position[2] - v0.position.position[2])));
+//
+//
+//
+//
+//           if(this.ZBuffer.Ztest(currentP.position[0], currentP.position[1], currentP.position[2])) {
+//
+//             //We use W for perspective correction.
+//             //The vertices' w is saved as 1 / w. So, to get the true W, we should take its reciprocal once more after interpolating
+//
+//             currentP.position[3] =  1/ (v0.position.position[3] +
+//                                       (w1_current * (v1.position.position[3] - v0.position.position[3]) ) +
+//                                       (w2_current * (v2.position.position[3] - v0.position.position[3])));
+//
+//             //Assemble Vertex
+//             var p = new Vertex();
+//             p.position = currentP;
+//
+//
+//             //draw
+//             //Get the color that the vertex must output
+//
+//             var outputColor = this.invokePixelShaders(p, w0_current, w1_current, w2_current, v0, v1, v2);
+//             this.drawPixel(p.position.position[0], p.position.position[1], outputColor);
+//           }
+//       }
+//
+//       //One unit step on the x-axis
+//       w0 += A12;
+//       w1 += A20;
+//       w2 += A01;
+//
+//     }
+//     //One unit step on the y-axis
+//     w0_in += B12;
+//     w1_in += B20;
+//     w2_in += B01;
+//
+//   }
+//
+//
+// }
 
 //Invoke all our pixels shaders on a given vertex
 //Each one will return a color.

@@ -37,8 +37,8 @@ var lightBlendPS = new LightBlendPS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
 var textureVertexShader = new TextureVS(renderer);
 
-//var flatShadeVertexShader = new FlatShadeVS(renderer);
-var pointShader = new PointShadeVS(renderer);
+var flatShadeVertexShader = new FlatShadeVS(renderer);
+//var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -47,8 +47,8 @@ var pointShader = new PointShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-//var movementTarget = flatShadeVertexShader;
-var movementTarget = pointShader;
+var movementTarget = flatShadeVertexShader;
+//var movementTarget = pointShader;
 
 
 
@@ -75,43 +75,43 @@ Promise.all(models).then(function(results) {
 
   //creating a flat plane
   var wallFar = new Geometry();
-  wallFar.createPlane(20,20,3,'sky');
+  wallFar.createPlane(20,20,1,'sky');
 
-  //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  // transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
   renderer.models.push(wallFar);
 
 
+  //
+  // var wallLeft = new Geometry();
+  // wallLeft.createPlane(20,20,3,'sky');
+  // transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
+  // renderer.models.push(wallLeft);
+  //
+  // var wallRight = new Geometry();
+  // wallRight.createPlane(20,20,3,'sky');
+  // transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
+  // renderer.models.push(wallRight);
+  //
+  // var wallTop = new Geometry();
+  // wallTop.createPlane(20,20,3,'sky');
+  // transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
+  // renderer.models.push(wallTop);
+  //
+  //
+  // var wallBottom = new Geometry();
+  // wallBottom.createPlane(20,20,3,'grass');
+  // transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
+  // renderer.models.push(wallBottom);
+  //
+  //
+  // var wallClose = new Geometry();
+  // wallClose.createPlane(20,20,3,'mountain');
+  // transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
+  // renderer.models.push(wallClose);
 
-  var wallLeft = new Geometry();
-  wallLeft.createPlane(20,20,3,'sky');
-  transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
-  renderer.models.push(wallLeft);
-
-  var wallRight = new Geometry();
-  wallRight.createPlane(20,20,3,'sky');
-  transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
-  renderer.models.push(wallRight);
-
-  var wallTop = new Geometry();
-  wallTop.createPlane(20,20,3,'sky');
-  transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
-  renderer.models.push(wallTop);
-
-
-  var wallBottom = new Geometry();
-  wallBottom.createPlane(20,20,3,'grass');
-  transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
-  renderer.models.push(wallBottom);
-
-
-  var wallClose = new Geometry();
-  wallClose.createPlane(20,20,3,'mountain');
-  transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
-  renderer.models.push(wallClose);
-
-
-  // //Models are loaded. Place them somewhere in the world
-  transformModel(models[0], 0, 0, 0, 10, 3.5, -9, 0, 290, 0 , 1);
+  //
+  // // //Models are loaded. Place them somewhere in the world
+  // transformModel(models[0], 0, 0, 0, 10, 3.5, -9, 0, 290, 0 , 1);
 
 
   // var object_transform1 = new Transformation();
@@ -138,12 +138,12 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  renderer.models.push(models[0]);
+  // renderer.models.push(models[0]);
   //renderer.models.push(models[1]);
 
 
 
-
+console.log(renderer.models);
 
 
 
@@ -173,7 +173,7 @@ function frame() {
   now = performance.now() / 1000;
 
   update();
-  //transformModel(models[0], 50, -16, 1, 0, 0, 0, 0, 100, 0 , dt);
+  //transformModel(renderer.models[0], 50, -16, 1, 0, 0, 0, 0, 100, 0 , dt);
   // transformModel(models[1], 1, 1, 1, 0, 0, 0, 0, 0, 100 , dt);
 
 
@@ -306,12 +306,13 @@ function frame() {
 
 
 
-    thisLoop = new Date();
-    var thisFrameTime = thisLoop - lastLoop;
-    g_frameTime += (thisFrameTime - g_frameTime) / 1;
-    lastLoop = thisLoop;
-    newNow = performance.now() / 1000;
-    requestAnimationFrame(frame);
+  thisLoop = new Date();
+  var thisFrameTime = thisLoop - lastLoop;
+  g_frameTime += (thisFrameTime - g_frameTime) / 1;
+  lastLoop = thisLoop;
+  newNow = performance.now() / 1000;
+  console.log('new frame');
+  //requestAnimationFrame(frame);
 
 }
 
@@ -322,8 +323,6 @@ function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
   var normals = model.normals.length;
   var transformation = new Transformation();
 
-  console.log(positions);
-  console.log(normals);
 
 
   transformation.fields = transformation.translate(dt * x, dt * y, dt * z);
