@@ -1,4 +1,4 @@
-var renderNormalBool = false;
+var renderNormalBool = true;
 
 //Used for rasterization:
 
@@ -667,15 +667,14 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   var validUp = null;
   var validDown = null;
-  console.log('new tri')
-  log(v0.position);
-  log(v1.position);
-  log(v2.position);
-  console.log(w0 + " " + w1 + " " + w2);
-  log(currentP);
+  // console.log('new tri')
+  // log(v0.position);
+  // log(v1.position);
+  // log(v2.position);
+  // console.log(w0 + " " + w1 + " " + w2);
+  // log(currentP);
 
   while( (w0 | w1 | w2) > 0) {
-    console.log('ok')
     //Vertex is still in the triangle
     //Check for valid Up and Down, if they don't exist yet
     if(!validUp) {
@@ -720,12 +719,12 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
   if(validUp) {
-    console.log('validUp')
+    // console.log('validUp')
 
     this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
   }
   if(validDown) {
-    console.log('validDown')
+    // console.log('validDown')
     this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
   }
 }
@@ -850,7 +849,7 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
       }
       else {
         //We have fount a new ValidUp
-        console.log('validDown')
+        // console.log('validDown')
         currentP = validDown[0];
         w0 = validDown[1];
         w1 = validDown[2];

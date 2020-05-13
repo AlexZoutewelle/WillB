@@ -30,7 +30,7 @@ var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 
 var lightBlendPS = new LightBlendPS(renderer);
-//var wireFramePS = new WireFramePS(renderer);
+var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
@@ -311,8 +311,8 @@ function frame() {
   g_frameTime += (thisFrameTime - g_frameTime) / 1;
   lastLoop = thisLoop;
   newNow = performance.now() / 1000;
-  console.log('new frame');
-  //requestAnimationFrame(frame);
+  //console.log('new frame');
+  requestAnimationFrame(frame);
 
 }
 
