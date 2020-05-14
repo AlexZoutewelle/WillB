@@ -108,7 +108,7 @@ Promise.all(models).then(function(results) {
 
   //
   // // //Models are loaded. Place them somewhere in the world
-  // transformModel(models[0], 0, 0, 0, 10, 3.5, -9, 0, 290, 0 , 1);
+  // transformModel(models[0], 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0);
 
 
   // var object_transform1 = new Transformation();
@@ -136,6 +136,8 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
+  //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+
   //renderer.models.push(models[1]);
 
 

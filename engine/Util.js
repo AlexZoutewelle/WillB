@@ -30,7 +30,7 @@ function getMax3(var1, var2, var3) {
 
 function getMinXVertex(v0,v1,v2) {
   if(v0.position.position[0] <= v1.position.position[0] && v0.position.position[0] <= v2.position.position[0]) {
-    return v1;
+    return v0;
   }
 
   else if(v1.position.position[0] <= v0.position.position[0] && v1.position.position[0] <= v2.position.position[0]) {
