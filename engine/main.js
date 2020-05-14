@@ -10,9 +10,9 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
-        [1, 0, 0, 10],
-        [0, 1, 0, 10],
-        [0, 0, 1, -30],
+        [1, 0, 0, 2],
+        [0, 1, 0, 2],
+        [0, 0, 1, -5],
         [0, 0, 0, 1]
 ]);
 
@@ -25,18 +25,15 @@ renderer.camera = camera;
 //Initialize pixel and vertex shaders
 
 var flatColorPS = new FlatColorEffect(renderer);
-var texturePS = new TextureEffect(renderer);
-
+//var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
-
 var lightBlendPS = new LightBlendPS(renderer);
-var wireFramePS = new WireFramePS(renderer);
+//var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-
+//var textureVertexShader = new TextureVS(renderer);
 var flatShadeVertexShader = new FlatShadeVS(renderer);
 //var pointShader = new PointShadeVS(renderer);
 
@@ -61,7 +58,7 @@ var movementTarget = flatShadeVertexShader;
 
 
 //Load models
-var model_name1 = "cow";
+var model_name1 = "triangle";
 var model_name2 = "cube";
 
 var models = [
@@ -74,13 +71,13 @@ Promise.all(models).then(function(results) {
   models = results;
 
   //creating a flat plane
-  var wallFar = new Geometry();
-  wallFar.createPlane(20,20,1,'sky');
-
-  // transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
-  renderer.models.push(wallFar);
-
-
+  // var wallFar = new Geometry();
+  // wallFar.createPlane(20,20,1,'sky');
+  //
+  // //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  // renderer.models.push(wallFar);
+  //
+  //
   //
   // var wallLeft = new Geometry();
   // wallLeft.createPlane(20,20,3,'sky');
@@ -138,12 +135,12 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  // renderer.models.push(models[0]);
+  renderer.models.push(models[0]);
   //renderer.models.push(models[1]);
 
 
 
-console.log(renderer.models);
+  console.log(renderer.models);
 
 
 
@@ -152,7 +149,7 @@ console.log(renderer.models);
 
 
 
-var movement = 25
+var movement = 50
 
 
 //FPS measurement
@@ -280,8 +277,6 @@ function frame() {
 
 
 
-  //console.log(renderer)
-
   camera_inverse = camera.inverse();
 
   renderer.camera = camera;
@@ -311,7 +306,7 @@ function frame() {
   g_frameTime += (thisFrameTime - g_frameTime) / 1;
   lastLoop = thisLoop;
   newNow = performance.now() / 1000;
-  //console.log('new frame');
+  //console.log('end frame');
   requestAnimationFrame(frame);
 
 }

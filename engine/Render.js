@@ -1,4 +1,4 @@
-var renderNormalBool = true;
+var renderNormalBool = false;
 
 //Used for rasterization:
 
@@ -205,7 +205,7 @@ Render.prototype.render = function(camera_inverse, camera) {
 
       if(!this.backFaceCull(v0, v1, v2, camera)) {
         cullCount = cullCount + 1;
-        // console.log('culled: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
+        //console.log('culled: ' +  v0.id + ' ' + v1.id + ' ' + v2.id)
         continue;
       }
 
@@ -601,6 +601,7 @@ Render.prototype.postProcessFace = function(v0, v1, v2, texture) {
   v1 = this.vertexToRaster(v1);
   v2 = this.vertexToRaster(v2);
 
+  //console.log('new tri')
   this.startSweep(v0, v1, v2 )
 
   //this.drawFace(v0, v1, v2 )
@@ -633,22 +634,6 @@ var triArea;
 Render.prototype.startSweep = function(v0, v1, v2) {
   //Get the starting position: the UpperLeft-most vertex
 
-  var minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
-  var minY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
-
-  var currentP = new Vector3(minX, minY, 1);
-  //var currentP = new Vector3(v1.position.position[0], v1.position.position[1], 1);
-
-  this.drawPixel(minX, minY, new Vector3(0,0,255), true)
-
-  var w0 = EdgeFunction(v1.position, v2.position, currentP);
-  var w1 = EdgeFunction(v2.position, v0.position, currentP);
-  var w2 = EdgeFunction(v0.position, v1.position, currentP);
-
-  w0_test = w0;
-  w1_test = w1;
-  w2_test = w2;
-
   //Setting up constants for the edge function. A is the unit step on the x-axis. B is the unit step on the y-axis
   //v1, v2, p
   a12 = v1.position.position[1] - v2.position.position[1];
@@ -662,48 +647,70 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   a01 = v0.position.position[1] - v1.position.position[1];
   b01 = v1.position.position[0] - v0.position.position[0];
 
-  //Face area
-  triArea = EdgeFunction(v0.position,v1.position,v2.position);
+  triArea = EdgeFunction(v0.position, v1.position, v2.position);
+
+  var currentP = getMinXVertex(v0,v1,v2).position;
+
+  var w0 = EdgeFunction(v1.position, v2.position, currentP);
+  var w1 = EdgeFunction(v2.position, v0.position, currentP);
+  var w2 = EdgeFunction(v0.position, v1.position, currentP);
+
+
+  var colorStart = new Vector3(255,0,0);
+  colorStart.position[3] = 255
+
+  var colorOther = new Vector3(0,0,255);
+  colorOther.position[3] = 255;
+
+
+  this.drawPixel(v0.position.position[0], v0.position.position[1], colorOther, false)
+  this.drawPixel(v1.position.position[0], v1.position.position[1], colorOther, false)
+  this.drawPixel(v2.position.position[0], v2.position.position[1], colorOther, false)
+  this.drawPixel(currentP.position[0], currentP.position[1], colorStart, false)
+
+
 
   var validUp = null;
   var validDown = null;
-  // console.log('new tri')
-  // log(v0.position);
-  // log(v1.position);
-  // log(v2.position);
-  // console.log(w0 + " " + w1 + " " + w2);
-  // log(currentP);
 
-  while( (w0 | w1 | w2) > 0) {
+  //Set up stamp edges
+  var o = new Vector2(currentP.position[0] - 0.5, currentP.position[1] + 0.5);
+  var rt = new Vector2(currentP.position[0] + 0.5, currentP.position[1] + 0.5);
+  var rb = new Vector2(currentP.position[0] + 0.5, currentP.position[1] - 0.5);
+  var lb = new Vector2(currentP.position[0] - 0.5, currentP.position[1] - 0.5);
+  //console.log('draw');
+  var validRight = this.probeRight(v0, v1, v2, rt, rb)
+  while(validRight) {
     //Vertex is still in the triangle
     //Check for valid Up and Down, if they don't exist yet
-    if(!validUp) {
-      var w0_up = w0 + b12;
-      var w1_up = w1 + b20;
-      var w2_up = w2 + b01;
-
-      //console.log(w0_up + ' ' + w1_up + ' ' + w2_up)
-
-      if( ( w0_up | w1_up |  w2_up ) >= 0) {
-        //We have a validUp. We need to save its context for a future call to sweepUp()
-        var upP = currentP.copy();
-        upP.position[1] += 1 ;
-        validUp = [upP, v0, v1, v2, w0_up, w1_up, w2_up];
-      }
-    }
-
-    if(!validDown) {
-      var w0_down = w0 - b12;
-      var w1_down = w1 - b20;
-      var w2_down = w2 - b01;
-
-      if( ( w0_down | w1_down |  w2_down ) >= 0) {
-        //We have a validDown. We need to save its context for a future call to sweepUp()
-        var downP = currentP.copy();
-        downP.position[1] -= 1 ;
-        validDown = [downP, v0, v1, v2, w0_down, w1_down, w2_down];
-      }
-    }
+    // if(!validUp) {
+    //   var w0_up = w0 + (b12/2);
+    //   var w1_up = w1 + (b20/2);
+    //   var w2_up = w2 + (b01/2);
+    //
+    //   //console.log(w0_up + ' ' + w1_up + ' ' + w2_up)
+    //
+    //   if( ( w0_up | w1_up |  w2_up ) >= 0) {
+    //     //We have a validUp. We need to save its context for a future call to sweepUp()
+    //     var upP = currentP.copy();
+    //     upP.position[1] += 1 ;
+    //     validUp = [upP, v0, v1, v2, w0_up, w1_up, w2_up];
+    //   }
+    // }
+    //
+    // if(!validDown) {
+    //   var w0_down = w0 - (b12/2);
+    //   var w1_down = w1 - (b20/2);
+    //   var w2_down = w2 - (b01/2);
+    //
+    //   if( ( w0_down | w1_down |  w2_down ) >= -0) {
+    //     //We have a validDown. We need to save its context for a future call to sweepUp()
+    //
+    //     var downP = currentP.copy();
+    //     downP.position[1] -= 1 ;
+    //     validDown = [downP, v0, v1, v2, w0_down, w1_down, w2_down];
+    //   }
+    // }
 
     //Draw the pixel
 
@@ -712,25 +719,65 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
     //One step along the x-axis
     currentP.position[0] += 1;
+    rt.position[0] += 1;
+    rb.position[0] += 1;
+    lb.position[0] += 1;
+
     w0 += a12;
     w1 += a20;
     w2 += a01;
+
+    validRight = this.probeRight(v0, v1, v2, rt, rb)
   }
+  //console.log('end draw')
+
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
-  if(validUp) {
-    // console.log('validUp')
+  // if(validUp) {
+  //   // console.log('validUp')
+  //
+  //   this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
+  // }
+  // if(validDown) {
+  //   // console.log('validDown')
+  //   this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
+  // }
 
-    this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
-  }
-  if(validDown) {
-    // console.log('validDown')
-    this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
-  }
+  // if(!validDown && !validUp) {
+  //
+  // }
 }
 
-Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
+//Probing left. Checking if we should move to the right
+//Couldn't we just increment the barycentrics with 0.5 to do these tests?
+Render.prototype.probeRight = function(v0, v1, v2, rt, rb) {
+  //console.log('probing');
 
+  //Is the edge to the right of v1-v2?
+  var wrt12 = EdgeFunction(v1.position, v2.position, rt);
+  //var wrb = EdgeFunction(v1.position, v2.position, rb);     //We dont need this one, it's a straight line
+
+  //Is the rt position above v2-v0?
+  var wrt20 = EdgeFunction(v2.position, v0.position, rt);
+
+  //Is the rb position below v0-v1?
+  var wrb01 = EdgeFunction(v0.position, v1.position, rb);
+
+  // console.log(rt);
+  // console.log(rb);
+  // console.log(wrt12 + " " + wrt20 + " " + wrb01);
+
+  if( (wrt12 | wrt20 | wrb01) >= 0) {
+    //console.log(true);
+    return true;
+  }
+
+  return false;
+}
+
+
+
+Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
   //We initialize the haveValidUp bool as true, since this function IS for sweeping across valid Up positions
   var haveValidUp = true;
   while(haveValidUp) {
@@ -738,16 +785,13 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
 
     var validUp = null;
     //initialize barycentrics for the potential Up position
-    var w0_up = w0;
-    var w1_up = w1;
-    var w2_up = w2;
 
     while((w0 | w1 | w2) >= 0) {
       // console.log(i);
       if(!validUp){
-        w0_up += b12;
-        w1_up += b20;
-        w2_up += b01;
+        var w0_up = w0 + b12;
+        var w1_up = w1 + b20;
+        var w2_up = w2 + b01;
 
         if( ( w0_up | w1_up |  w2_up ) >= 0) {
           // console.log('got a new validUp: ' + w0_up + " " + w1_up + " " + w2_up);
@@ -788,7 +832,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
 
 Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
 
-
+  // console.log('start sweeplower')
     //We initialize the haveValidUp bool as true, since this function IS for sweeping across valid Up positions
     var haveValidDown = true;
 
@@ -799,30 +843,14 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
 
 
       while((w0 | w1 | w2) >= 0) {
-        // var w0_down = w0;
-        // var w1_down = w1;
-        // var w2_down = w2;
-        // if(!validDown) {
-        //   var w0_down = w0 - b12;
-        //   var w1_down = w1 - b20;
-        //   var w2_down = w2 - b01;
-        //
-        //   if( ( w0_down | w1_down |  w2_down ) >= 0) {
-        //     //We have a validDown. We need to save its context for a future call to sweepUp()
-        //     var downP = currentP.copy();
-        //     downP.position[1] -= 1 ;
-        //     validDown = [downP, v0, v1, v2, w0_down, w1_down, w2_down];
-        //   }
-        // }
-
-
+        //console.log(w0 + " " + w1 + " "  + w2)
         if(!validDown){
           var w0_down = w0 - b12;
           var w1_down = w1 - b20;
           var w2_down = w2 - b01;
 
           if( ( w0_down | w1_down |  w2_down ) >= 0) {
-            // console.log('got a new validUp: ' + w0_up + " " + w1_up + " " + w2_up);
+            //console.log('got a new validDown: ' + w0_down + " " + w1_down + " " + w2_down);
             //We have a validUp. We need to save its context for a future call to sweepUp()
             var downP = currentP.copy();
             downP.position[1] -= 1 ;
@@ -868,6 +896,8 @@ Render.prototype.drawVertex = function(currentP, v0, v1, v2, w0, w1, w2) {
   var w1_current =  w1 / triArea;
   var w2_current =  w2 / triArea;
 
+  //console.log(w0 + " " + w0 + " " + w0);
+  // console.log(triArea);
   //z-buffer test. Normal interpolation for z.
   currentP.position[2] =  (v0.position.position[2] +
                             (w1_current * (v1.position.position[2] - v0.position.position[2]) ) +
