@@ -24,16 +24,16 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var flatColorPS = new FlatColorEffect(renderer);
-//var texturePS = new TextureEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
+var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 var lightBlendPS = new LightBlendPS(renderer);
 //var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var flatColorVS = new FlatColorVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
+//var flatColorVS = new FlatColorVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
 var flatShadeVertexShader = new FlatShadeVS(renderer);
 //var pointShader = new PointShadeVS(renderer);
 
@@ -44,7 +44,7 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = flatShadeVertexShader;
+//var movementTarget = flatShadeVertexShader;
 //var movementTarget = pointShader;
 
 
@@ -136,7 +136,7 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
-  //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+  transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
 
   //renderer.models.push(models[1]);
 
@@ -251,27 +251,39 @@ function frame() {
 
 
   //Secondary movement controls
-  var moveSpeed = 30;
+  var moveSpeed = 300;
   if(playerState.input.i === true) {
-    movementTarget.move(0,0, dt * moveSpeed);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 0, 1);
+
+    //movementTarget.move(0,0, dt * moveSpeed);
   }
   if(playerState.input.j === true) {
-    movementTarget.move(dt * -moveSpeed,0,0);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 1);
+
+    //movementTarget.move(dt * -moveSpeed,0,0);
 
   }
   if(playerState.input.k === true) {
-    movementTarget.move(0,0, dt * -moveSpeed);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+
+    //movementTarget.move(0,0, dt * -moveSpeed);
   }
   if(playerState.input.l === true) {
-    movementTarget.move(dt * moveSpeed,0, 0);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 1);
+
+    //movementTarget.move(dt * moveSpeed,0, 0);
 
   }
   if(playerState.input.u === true) {
-    movementTarget.move(0,dt * moveSpeed, 0);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+
+    //movementTarget.move(0,dt * moveSpeed, 0);
 
   }
   if(playerState.input.o === true) {
-    movementTarget.move(0,dt * -moveSpeed, 0);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+
+    //movementTarget.move(0,dt * -moveSpeed, 0);
 
   }
 

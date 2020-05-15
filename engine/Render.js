@@ -650,9 +650,7 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   triArea = EdgeFunction(v0.position, v1.position, v2.position);
 
-  var currentP = getMinXVertex(v0,v1,v2).position;
-
-
+  var currentP = getMinXVertex(v0,v1,v2).position.copy();
 
 
   var w0 = EdgeFunction(v1.position, v2.position, currentP);
@@ -662,10 +660,6 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   var colorStart = new Vector3(255,255,255);
   colorStart.position[3] = 255
-
-  var colorOther = new Vector3(0,0,255);
-  colorOther.position[3] = 255;
-
 
 
   this.drawPixel(currentP.position[0], currentP.position[1], colorStart, true)
@@ -681,6 +675,7 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   var lb = new Vector2(currentP.position[0] - 0.5, currentP.position[1] + 0.5);
 
   var validRight = this.probeRight(v0, v1, v2, rt, rb)
+
   while( (w0 | w1 | w2) >= 0 ) {
     //Vertex is still in the triangle
     //Check for valid Up and Down, if they don't exist yet
@@ -697,10 +692,10 @@ Render.prototype.startSweep = function(v0, v1, v2) {
     }
     //
     if(!validDown) {
-      if( this.probeDown(v0, v1, v2, lb, rb) ) {
-        // console.log('found first validDown')
 
-        //We have a validUp. We need to save its context for a future call to sweepUp()
+      if( this.probeDown(v0, v1, v2, lb, rb) ) {
+
+        //We have a validDown. We need to save its context for a future call to sweepDown()
         var downP = currentP.copy();
         downP.position[1] += 1 ;
 
@@ -735,9 +730,6 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   if(validDown) {
     this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
   }
-  this.drawPixel(v0.position.position[0], v0.position.position[1], colorOther, true)
-  this.drawPixel(v1.position.position[0], v1.position.position[1], colorOther, true)
-  this.drawPixel(v2.position.position[0], v2.position.position[1], colorOther, true)
 
 }
 
@@ -817,7 +809,6 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
 Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
   //We initialize the haveValidUp bool as true, since this function IS for sweeping across valid Up positions
   //Set up stamp edges
-
   var o = new Vector2(currentP.position[0] - 0.5, currentP.position[1] - 0.5);
   var rt = new Vector2(currentP.position[0] + 0.5, currentP.position[1] - 0.5);
   var rb = new Vector2(currentP.position[0] + 0.5, currentP.position[1] + 0.5);
@@ -833,14 +824,19 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
   colorStart.position[3] = 255
 
   this.drawPixel(currentP.position[0], currentP.position[1], colorStart, true)
-
+  var colorOther = new Vector3(0,0,255);
+  colorOther.position[3] = 255;
+  this.drawPixel(v0.position.position[0], v0.position.position[1], colorOther, true)
+  this.drawPixel(v1.position.position[0], v1.position.position[1], colorOther, true)
+  this.drawPixel(v2.position.position[0], v2.position.position[1], colorOther, true)
   while (sweep) {
+
     while( (w0 | w1 | w2) >= 0) {
       //Vertex is still in the triangle
       //Check for valid Up and Down, if they don't exist yet
       if(!validDown) {
         if( this.probeDown(v0, v1, v2, lb, rb) ) {
-          //We have a validUp. We need to save its context for a future call to sweepUp()
+          //We have a validDown. We need to save its context for a future call to sweepUp()
           var downP = currentP.copy();
           validDown = [downP, v0, v1, v2, w0 + b12, w1 + b20, w2 + b01, ];
         }
@@ -935,6 +931,9 @@ Render.prototype.probeDown = function(v0,v1,v2, lb, rb) {
   //Does the edge intersect v0-v1?
   var wrb01 = EdgeFunction(v0.position, v1.position, rb);
   //var wo01 = EdgeFunction(v0.position, v1.position, o);
+
+
+
   var wrb20 = EdgeFunction(v2.position, v0.position, rb);
 
   if( (wrb12 | wrb01 | wrb20) >= 0) {
