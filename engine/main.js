@@ -11,7 +11,7 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, -2],
-        [0, 1, 0, -2],
+        [0, 1, 0, 2],
         [0, 0, 1, -5],
         [0, 0, 0, 1]
 ]);
@@ -136,7 +136,7 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
-  transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+  transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 284, 1);
 
   //renderer.models.push(models[1]);
 
@@ -151,7 +151,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 50
+var movement = 20
 
 
 //FPS measurement
