@@ -51,3 +51,6 @@ function EdgeFunction(v0,v1,v2) {
 function log3(v) {
   console.log(v.position[0] + " " + v.position[1] + " " + v.position[2] + " " + v.position[3]);
 }
+function log2(v) {
+  console.log(v.position[0] + " " + v.position[1]);
+}

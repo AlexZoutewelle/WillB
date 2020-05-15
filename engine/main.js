@@ -10,8 +10,8 @@ var imgArray = new Uint8ClampedArray(4 * screenWidth * screenHeight);
 
 var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
-        [1, 0, 0, 2],
-        [0, 1, 0, 2],
+        [1, 0, 0, -2],
+        [0, 1, 0, -2],
         [0, 0, 1, -5],
         [0, 0, 0, 1]
 ]);
