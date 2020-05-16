@@ -1,8 +1,8 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 
-var screenWidth = 320;
-var screenHeight = 240;
+var screenWidth = 640;
+var screenHeight = 480;
 
 //Get the context
 
@@ -71,40 +71,40 @@ Promise.all(models).then(function(results) {
   models = results;
 
   //creating a flat plane
-  // var wallFar = new Geometry();
-  // wallFar.createPlane(20,20,1,'sky');
-  //
-  // //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
-  // renderer.models.push(wallFar);
-  //
-  //
-  //
-  // var wallLeft = new Geometry();
-  // wallLeft.createPlane(20,20,3,'sky');
-  // transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
-  // renderer.models.push(wallLeft);
-  //
-  // var wallRight = new Geometry();
-  // wallRight.createPlane(20,20,3,'sky');
-  // transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
-  // renderer.models.push(wallRight);
-  //
-  // var wallTop = new Geometry();
-  // wallTop.createPlane(20,20,3,'sky');
-  // transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
-  // renderer.models.push(wallTop);
-  //
-  //
-  // var wallBottom = new Geometry();
-  // wallBottom.createPlane(20,20,3,'grass');
-  // transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
-  // renderer.models.push(wallBottom);
-  //
-  //
-  // var wallClose = new Geometry();
-  // wallClose.createPlane(20,20,3,'mountain');
-  // transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
-  // renderer.models.push(wallClose);
+  var wallFar = new Geometry();
+  wallFar.createPlane(20,20,1,'sky');
+
+  //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  renderer.models.push(wallFar);
+
+
+
+  var wallLeft = new Geometry();
+  wallLeft.createPlane(20,20,3,'sky');
+  transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
+  renderer.models.push(wallLeft);
+
+  var wallRight = new Geometry();
+  wallRight.createPlane(20,20,3,'sky');
+  transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
+  renderer.models.push(wallRight);
+
+  var wallTop = new Geometry();
+  wallTop.createPlane(20,20,3,'sky');
+  transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
+  renderer.models.push(wallTop);
+
+
+  var wallBottom = new Geometry();
+  wallBottom.createPlane(20,20,3,'grass');
+  transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
+  renderer.models.push(wallBottom);
+
+
+  var wallClose = new Geometry();
+  wallClose.createPlane(20,20,3,'mountain');
+  transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
+  renderer.models.push(wallClose);
 
   //
   // // //Models are loaded. Place them somewhere in the world
@@ -135,8 +135,8 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  renderer.models.push(models[0]);
-  transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 284, 1);
+  // renderer.models.push(models[0]);
+  // transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 284, 1);
 
   //renderer.models.push(models[1]);
 
@@ -264,7 +264,7 @@ function frame() {
 
   }
   if(playerState.input.k === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 0, 1);
 
     //movementTarget.move(0,0, dt * -moveSpeed);
   }
@@ -275,13 +275,13 @@ function frame() {
 
   }
   if(playerState.input.u === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 1);
 
     //movementTarget.move(0,dt * moveSpeed, 0);
 
   }
   if(playerState.input.o === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 180, 1);
+    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 1);
 
     //movementTarget.move(0,dt * -moveSpeed, 0);
 
