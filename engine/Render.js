@@ -1,4 +1,4 @@
-var renderNormalBool = false;
+var renderNormalBool = true;
 
 //Used for rasterization:
 
@@ -761,14 +761,23 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   //v1, v2, p
   a12 = v1.position.position[1] - v2.position.position[1];
   b12 = v2.position.position[0] - v1.position.position[0];
+  a12_h = a12 / 2;
+  b12_h = b12 / 2;
+
 
   //v2, v0, p
   a20 = v2.position.position[1] - v0.position.position[1];
   b20 = v0.position.position[0] - v2.position.position[0];
+  a20_h = a20 / 2;
+  b20_h = b20 / 2;
+
 
   //v0, v1, p
   a01 = v0.position.position[1] - v1.position.position[1];
   b01 = v1.position.position[0] - v0.position.position[0];
+  a01_h = a01 / 2;
+  b01_h = b01 / 2;
+
 
   triArea = EdgeFunction(v0.position, v1.position, v2.position);
 
@@ -785,11 +794,33 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   var validUp = false;
   var validDown = false;
 
+
   //Set up stamp edges
-  var o = new Vector2(currentP.position[0] - 0.5, currentP.position[1] - 0.5);
-  var rt = new Vector2(currentP.position[0] + 0.5, currentP.position[1] - 0.5);
-  var rb = new Vector2(currentP.position[0] + 0.5, currentP.position[1] + 0.5);
-  var lb = new Vector2(currentP.position[0] - 0.5, currentP.position[1] + 0.5);
+  var wo01 = w2 - a01_h - b01_h;
+  var wo12 = w0 - a12_h - b12_h;
+  var wo20 = w1 - a20_h - b20_h;
+
+  var wrt01 = w2 + a01_h - b01_h;
+  var wrt12 = w0 + a12_h - b12_h;
+  var wrt20 = w1 + a20_h - b20_h;
+
+  var wrb01 = w2 + a01_h + b01_h;
+  var wrb12 = w0 + a12_h + b12_h;
+  var wrb20 = w1 + a20_h + b20_h;
+
+  var wlb01 = w2 - a01_h + b01_h;
+  var wlb12 = w0 - a12_h + b12_h;
+  var wlb20 = w1 - a20_h + b20_h;
+
+
+
+
+
+
+
+
+
+
 
   var validRight;
 
@@ -804,60 +835,56 @@ Render.prototype.startSweep = function(v0, v1, v2) {
     }
     //Vertex is still in the triangle
     //Check for valid Up and Down, if they don't exist yet
-    if(validUp === false) {
-      if( this.probeUp(v0, v1, v2, o, rt) ) {
-
-        //We have a validUp. We need to save its context for a future call to sweepUp()
-
-        var upP = currentP.copy();
-        upP.position[1] -= 1 ;
-        this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
-
-        validUp = [upP, v0, v1, v2, w0 - b12, w1 - b20, w2 - b01 ];
-      }
-    }
+    // if(validUp === false) {
+    //   if( this.probeUp(v0, v1, v2, o, rt) ) {
     //
-    if(validDown === false) {
-
-      if( this.probeDown(v0, v1, v2, lb, rb) ) {
-        //We have a validDown. We need to save its context for a future call to sweepDown()
-        var downP = currentP.copy();
-        downP.position[1] += 1 ;
-
-        validDown = [downP, v0, v1, v2, w0 + b12, w1 + b20, w2 + b01, ];
-      }
-    }
+    //     //We have a validUp. We need to save its context for a future call to sweepUp()
+    //
+    //     var upP = currentP.copy();
+    //     upP.position[1] -= 1 ;
+    //     this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
+    //
+    //     validUp = [upP, v0, v1, v2, w0 - b12, w1 - b20, w2 - b01 ];
+    //   }
+    // }
+    // //
+    // if(validDown === false) {
+    //
+    //   if( this.probeDown(v0, v1, v2, lb, rb) ) {
+    //     //We have a validDown. We need to save its context for a future call to sweepDown()
+    //     var downP = currentP.copy();
+    //     downP.position[1] += 1 ;
+    //
+    //     validDown = [downP, v0, v1, v2, w0 + b12, w1 + b20, w2 + b01, ];
+    //   }
+    // }
 
     //Draw the pixel
 
     this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
 
 
-    validRight = this.probeRight(v0, v1, v2, rt, rb)
+    //validRight = this.probeRight(v0, v1, v2, rt, rb)
 
     //One step along the x-axis
-    if(validRight) {
       currentP.position[0] += 1;
-      rt.position[0] += 1;
-      rb.position[0] += 1;
+      //rt.position[0] += 1;
+      //rb.position[0] += 1;
       lb.position[0] += 1;
-      o.position[0] += 1;
+      //o.position[0] += 1;
       w0 += a12;
       w1 += a20;
       w2 += a01;
-    }
-
-
-  } while(this.probeRight(v0, v1, v2, rt, rb));
+  } while( (w0 | w1 | w2) >= 0);
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
   if(validUp) {
     // console.log('calling sweep upper')
-    this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
+    //this.sweepUpper(validUp[0], validUp[1], validUp[2], validUp[3], validUp[4], validUp[5], validUp[6]);
   }
 
   if(validDown) {
-    this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
+    //this.sweepLower(validDown[0], validDown[1], validDown[2], validDown[3], validDown[4], validDown[5], validDown[6]);
   }
   if(!validDown && !validUp) {
     // console.log('nothing. steps tried: ' + i);
