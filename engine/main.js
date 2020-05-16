@@ -1,8 +1,8 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
 
-var screenWidth = 320;
-var screenHeight = 240;
+var screenWidth = document.getElementById('screen').width;
+var screenHeight = document.getElementById('screen').height;
 
 //Get the context
 
@@ -25,7 +25,7 @@ renderer.camera = camera;
 //Initialize pixel and vertex shaders
 
 var flatColorPS = new FlatColorEffect(renderer);
-var texturePS = new TextureEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
 
 //var dynColorPS = new DynColorEffect(renderer);
 
@@ -35,7 +35,7 @@ var lightBlendPS = new LightBlendPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
 var flatColorVS = new FlatColorVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
 
 //var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
@@ -321,10 +321,6 @@ function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
   var positions = model.positions.length;
   var normals = model.normals.length;
   var transformation = new Transformation();
-
-  console.log(positions);
-  console.log(normals);
-
 
   transformation.fields = transformation.translate(dt * x, dt * y, dt * z);
   transformation.fields = transformation.rotate(dt * o0, dt * o1, dt * o2);
