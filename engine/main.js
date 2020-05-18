@@ -44,7 +44,7 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-//var movementTarget = flatShadeVertexShader;
+var movementTarget = flatShadeVertexShader;
 //var movementTarget = pointShader;
 
 
@@ -164,8 +164,6 @@ var thisloop;
 var now = performance.now() / 1000;
 var newNow = performance.now() / 1000;
 var dt = 0;
-console.log(now);
-
 
 function frame() {
   dt = newNow - now;
@@ -251,45 +249,26 @@ function frame() {
 
 
   //Secondary movement controls
-  var moveSpeed = 300;
+  var moveSpeed = 50;
   if(playerState.input.i === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 0, 1);
-
-    //movementTarget.move(0,0, dt * moveSpeed);
+    movementTarget.move(0,0, dt * moveSpeed);
   }
   if(playerState.input.j === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 1);
-
-    //movementTarget.move(dt * -moveSpeed,0,0);
-
+    movementTarget.move(dt * -moveSpeed,0,0);
   }
   if(playerState.input.k === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 0, 1);
-
-    //movementTarget.move(0,0, dt * -moveSpeed);
+    movementTarget.move(0,0, dt * -moveSpeed);
   }
   if(playerState.input.l === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 1);
-
-    //movementTarget.move(dt * moveSpeed,0, 0);
+    movementTarget.move(dt * moveSpeed,0, 0);
 
   }
   if(playerState.input.u === true) {
-    //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 1);
-
-    //movementTarget.move(0,dt * moveSpeed, 0);
-    drawStartUpper = true;
+    movementTarget.move(0,dt * moveSpeed, 0);
   }
   if(playerState.input.o === true) {
-    //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 1);
-
-    //movementTarget.move(0,dt * -moveSpeed, 0);
-    drawStartUpper = false;
+    movementTarget.move(0,dt * -moveSpeed, 0);
   }
-
-
-
-
 
   camera_inverse = camera.inverse();
 
@@ -332,15 +311,9 @@ function transformModel(model, s1,s2, s3, x, y, z, o0, o1, o2, dt) {
   var normals = model.normals.length;
   var transformation = new Transformation();
 
-
-
   transformation.fields = transformation.translate(dt * x, dt * y, dt * z);
   transformation.fields = transformation.rotate(dt * o0, dt * o1, dt * o2);
-
   // transformation.fields = transformation.scale(dt * s1,dt * s2, dt * s3)
-
-
-
 
   for(var i = 0; i < positions; i++) {
     model.positions[i] = transformation.multMatrixVec3(model.positions[i]);
