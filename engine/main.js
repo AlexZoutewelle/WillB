@@ -1,6 +1,6 @@
 //// TODO:
 //low prio: Mouse view is not perfect.
-
+var renderNormalBool = true;
 var screenWidth = 640;
 var screenHeight = 480;
 
@@ -136,7 +136,7 @@ Promise.all(models).then(function(results) {
 
   //Models are placed, hand them over to the renderer
   renderer.models.push(models[0]);
-  // transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 284, 1);
+  transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 76, 1);
 
   //renderer.models.push(models[1]);
 
@@ -151,7 +151,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 20
+var movement = 5
 
 
 //FPS measurement
@@ -275,16 +275,16 @@ function frame() {
 
   }
   if(playerState.input.u === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 1);
+    //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * moveSpeed, 0, 1);
 
     //movementTarget.move(0,dt * moveSpeed, 0);
-
+    drawStartUpper = true;
   }
   if(playerState.input.o === true) {
-    transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 1);
+    //transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, dt * -moveSpeed, 0, 1);
 
     //movementTarget.move(0,dt * -moveSpeed, 0);
-
+    drawStartUpper = false;
   }
 
 
