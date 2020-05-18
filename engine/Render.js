@@ -816,7 +816,17 @@ Render.prototype.probeDown = function(w0, w1, w2) {
   return true;
 }
 
+var colorStartV0 = new Vector3(255,0,0);
+colorStartV0.position[3] = 255;
+var colorStartV1 = new Vector3(0,255,0);
+colorStartV1.position[3] = 255;
+var colorStartV2 = new Vector3(0,0,255);
+colorStartV2.position[3] = 255;
+
 Render.prototype.startSweep = function(v0, v1, v2) {
+  // this.drawPixel(v0.position.position[0], v0.position.position[1], colorStartV0, true);
+  // this.drawPixel(v1.position.position[0], v1.position.position[1], colorStartV1, true);
+  // this.drawPixel(v2.position.position[0], v2.position.position[1], colorStartV2, true);
 
   //Get the starting position: the UpperLeft-most vertex
   var i = 0;
@@ -850,9 +860,9 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   var currentP = getMinXVertex(v0,v1,v2).position.copy();
 
-  var colorStartVert = new Vector3(0,255,0);
-  colorStartVert.position[3] = 255;
-  this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
+  // var colorStartVert = new Vector3(140,140,255);
+  // colorStartVert.position[3] = 255;
+  // this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
   w0 = EdgeFunction(v1.position, v2.position, currentP);
   w1 = EdgeFunction(v2.position, v0.position, currentP);
@@ -860,17 +870,6 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
   var validUp = false;
   var validDown = false;
-
-
-  //Set up stamp edges
-  // var wrb01 = w2 + a01_h + b01_h;
-  // var wrb12 = w0 + a12_h + b12_h;
-  // var wrb20 = w1 + a20_h + b20_h;
-  //
-  // var wlb01 = w2 - a01_h + b01_h;
-  // var wlb12 = w0 - a12_h + b12_h;
-  // var wlb20 = w1 - a20_h + b20_h;
-
   // console.log('begin sweep');
   // console.log(w0 + " " + w1 + " " + w2);
   // console.log("unit steps in x:  ");
@@ -881,9 +880,11 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   // console.log(a12_h + " " + a20_h + " " + a01_h);
   // console.log("stamp unit steps in y: ");
   // console.log(b12_h + " " + b20_h + " " + b01_h);
+  var i = -1;
   var validRight;
 
   do {
+    i++;
     //Vertex is still in the triangle
     //Check for valid Up and Down, if they don't exist yet
     if(validUp === false) {
@@ -892,7 +893,7 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
         var upP = currentP.copy();
         upP.position[1] -= 1 ;  //Remember, Raster Space is inversed, so minus 1!
-        this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
+        // this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
         validUp = [upP, v0, v1, v2, w0 - b12, w1 - b20, w2 - b01 ];
       }
@@ -911,17 +912,19 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
     this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
 
-    //validRight = this.probeRight(v0, v1, v2, rt, rb)
-
-    //One step along the x-axis
-    currentP.position[0] += 1;
-
-    w0 += a12;
-    w1 += a20;
-    w2 += a01;
 
 
-  } while( this.probeRight(w0, w1, w2) );
+    validRight = this.probeRight(w0,w1,w2);
+
+    if(validRight) {
+
+        //One step along the x-axis
+        currentP.position[0] += 1;
+        w0 += a12;
+        w1 += a20;
+        w2 += a01;
+    }
+  } while(validRight);
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
   if(validUp) {
@@ -933,9 +936,14 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   }
   if(!validDown && !validUp) {
     // console.log('nothing. steps tried: ' + i);
+    // console.log('currentP: ');
+    // log2(currentP);
     // console.log('right probe');
-    // console.log(wrrt01 + " " + wrrb01 + " " + wrrt20 + " " + wrrb20+ " " + wrrb12 + " " + wrrt12);
-    //
+    // console.log(wrt01 + " " + wrb01 + " " + wrt20 + " " + wrb20+ " " + wrb12 + " " + wrt12);
+    // console.log('half steps:')
+    // console.log(a01_h + " " + b01_h);
+    // console.log(w2);
+
     // console.log('upper probe')
     // console.log(wrt01 + " " + wo01 + " " + wrt20 + " " + wo20 + " " + wrt12 + " " + wo12);
     // console.log('lower probe');
@@ -955,10 +963,11 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
   var validUp = false;
   var sweep = true;
   var validRight;
-  var i = 0;
+  var i = -1;
 
   while (sweep) {
     do {
+      i++
       //Vertex is still in the triangle
       //Check for valid Up, if it doesn't exist yet
       if(validUp === false) {
@@ -971,6 +980,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
           var w0_new = w0 - b12;
           var w1_new = w1 - b20;
           var w2_new = w2 - b01
+          // this.drawPixel(upP.position[0], upP.position[1], colorStartVert, true);
 
           validUp = true;
         }
@@ -978,19 +988,21 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
 
       //Draw the pixel
 
-      //this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
-      //One step along the x-axis
-      currentP.position[0] += 1;
+      this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
+      validRight = this.probeRight(w0,w1,w2);
+
+      if(validRight) {
+          //One step along the x-axis
+          currentP.position[0] += 1;
+          w0 += a12;
+          w1 += a20;
+          w2 += a01;
+      }
+
+      //this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
 
-      w0 += a12;
-      w1 += a20;
-      w2 += a01;
-
-      this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
-
-
-    } while( this.probeRight(w0, w1, w2))
+    } while( validRight)
 
     //The sweep is done. Now, if we have a new ValidUp or ValidDown, we need to sweep again
     if(validUp) {
@@ -1003,6 +1015,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
     }
 
     else  {
+      // console.log('steps taken: ' + i)
       sweep = false;
     }
   }
@@ -1029,6 +1042,8 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
           //We have a validDown. We need to save its context for a future call to sweepUp()
           var downP = currentP.copy();
           downP.position[1] += 1;
+          // this.drawPixel(downP.position[0], downP.position[1], colorStartVert, true);
+
           var w0_new = w0 + b12;
           var w1_new = w1 + b20;
           var w2_new = w2 + b01;
@@ -1037,17 +1052,21 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
       }
 
       //Draw the pixel
-      //this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
+      this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
       //One step along the x-axis
-      currentP.position[0] += 1;
+      validRight = this.probeRight(w0,w1,w2);
 
-      w0 += a12;
-      w1 += a20;
-      w2 += a01;
+      if(validRight) {
+          //One step along the x-axis
+          currentP.position[0] += 1;
+          w0 += a12;
+          w1 += a20;
+          w2 += a01;
+      }
 
-      this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
+      //this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
-    } while( this.probeRight(w0, w1, w2))
+    } while( validRight)
 
     //The sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
     if(validDown === true) {
