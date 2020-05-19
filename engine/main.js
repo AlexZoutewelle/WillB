@@ -24,16 +24,16 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-var flatColorPS = new FlatColorEffect(renderer);
-//var texturePS = new TextureEffect(renderer);
+//var flatColorPS = new FlatColorEffect(renderer);
+var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 var lightBlendPS = new LightBlendPS(renderer);
 //var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-var flatColorVS = new FlatColorVS(renderer);
-//var textureVertexShader = new TextureVS(renderer);
+//var flatColorVS = new FlatColorVS(renderer);
+var textureVertexShader = new TextureVS(renderer);
 //var flatShadeVertexShader = new FlatShadeVS(renderer);
 var pointShader = new PointShadeVS(renderer);
 
@@ -58,7 +58,7 @@ var movementTarget = pointShader;
 
 
 //Load models
-var model_name1 = "cube";
+var model_name1 = "cow";
 var model_name2 = "cube";
 
 var models = [
@@ -71,45 +71,43 @@ Promise.all(models).then(function(results) {
   models = results;
 
   // creating a flat plane
-  // var wallFar = new Geometry();
-  // wallFar.createPlane(20,20,1,'sky');
-  //
-  // //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
-  // renderer.models.push(wallFar);
-  //
-  //
-  //
-  // var wallLeft = new Geometry();
-  // wallLeft.createPlane(20,20,3,'sky');
-  // transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
-  // renderer.models.push(wallLeft);
-  //
-  // var wallRight = new Geometry();
-  // wallRight.createPlane(20,20,3,'sky');
-  // transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
-  // renderer.models.push(wallRight);
-  //
-  // var wallTop = new Geometry();
-  // wallTop.createPlane(20,20,3,'sky');
-  // transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
-  // renderer.models.push(wallTop);
-  //
-  //
-  // var wallBottom = new Geometry();
-  // wallBottom.createPlane(20,20,3,'grass');
-  // transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
-  // renderer.models.push(wallBottom);
-  //
-  //
-  // var wallClose = new Geometry();
-  // wallClose.createPlane(20,20,3,'mountain');
-  // transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
-  // renderer.models.push(wallClose);
+  var wallFar = new Geometry();
+  wallFar.createPlane(20,20,1,'sky');
 
-  //
-  // // //Models are loaded. Place them somewhere in the world
-  // transformModel(models[0], 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0);
+  //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  renderer.models.push(wallFar);
 
+
+
+  var wallLeft = new Geometry();
+  wallLeft.createPlane(20,20,3,'sky');
+  transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
+  renderer.models.push(wallLeft);
+
+  var wallRight = new Geometry();
+  wallRight.createPlane(20,20,3,'sky');
+  transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
+  renderer.models.push(wallRight);
+
+  var wallTop = new Geometry();
+  wallTop.createPlane(20,20,3,'sky');
+  transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
+  renderer.models.push(wallTop);
+
+
+  var wallBottom = new Geometry();
+  wallBottom.createPlane(20,20,3,'grass');
+  transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
+  renderer.models.push(wallBottom);
+
+
+  var wallClose = new Geometry();
+  wallClose.createPlane(20,20,3,'mountain');
+  transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
+  renderer.models.push(wallClose);
+
+
+  // //Models are loaded. Place them somewhere in the world
 
   // var object_transform1 = new Transformation();
   // object_transform1.fields = object_transform1.rotate(0,210,0);
@@ -135,8 +133,9 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
+  transformModel(models[0], 0, 0, 0, 10, 3.5, -5, 0, -90, 0, 1);
+
   renderer.models.push(models[0]);
-  // transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 76, 1);
 
   //renderer.models.push(models[1]);
 

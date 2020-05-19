@@ -866,7 +866,7 @@ Render.prototype.startSweep = function(v0, v1, v2) {
         w1 += a20;
         w2 += a01;
     }
-  } while(validRight && currentP.position[0] < maxX);
+  } while(validRight && currentP.position[0] <= maxX);
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
   if(validUp) {
@@ -889,7 +889,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
       //Vertex is still in the triangle
       //Check for valid Up, if it doesn't exist yet
       if(validUp === false) {
-        if(this.probeUp(w0, w1, w2) && currentP.position[1] > minY) {
+        if(this.probeUp(w0, w1, w2) && currentP.position[1] >= minY) {
           //We have a validUp. We need to save its context for a future call to sweepUp()
           var upP = currentP.copy();
           upP.position[1] -= 1;
@@ -911,7 +911,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
           w1 += a20;
           w2 += a01;
       }
-    } while( validRight && currentP.position[0] < maxX)
+    } while( validRight && currentP.position[0] <= maxX)
 
     //The sweep is done. Now, if we have a new ValidUp or ValidDown, we need to sweep again
     if(validUp) {
@@ -939,7 +939,7 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
       //Vertex is still in the triangle
       //Check for valid Down, if it doesn't exist yet
       if(validDown === false) {
-        if( this.probeDown(w0, w1, w2) && currentP.position[1] < maxY ) {
+        if( this.probeDown(w0, w1, w2) && currentP.position[1] <= maxY ) {
           //We have a validDown. We need to save its context for a future call to sweepUp()
           var downP = currentP.copy();
           downP.position[1] += 1;
@@ -961,7 +961,7 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
           w1 += a20;
           w2 += a01;
       }
-    } while( validRight && currentP.position[0] < maxX)
+    } while( validRight && currentP.position[0] <= maxX)
 
     //The sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
     if(validDown === true) {
