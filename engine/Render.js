@@ -47,7 +47,7 @@ function Render(screenWidth, screenHeight) {
 
   this.ctx = this.canvas.getContext('2d');
   this.canvas.requestPointerLock();
-
+  console.log(this);
 
   //console.log(this.ctx);
   this.screenWidth = screenWidth;
@@ -672,16 +672,19 @@ var b20_h;
 var a01_h;
 var b01_h;
 
+//Trianble bounding box
+var tri_minX;
+var tri_maxX;
+var tri_minY;
+var tri_maxY;
+
 Render.prototype.probeRight = function(w0, w1, w2) {
   // console.log('probeRight');
 
   //Edge v0-v1
   wrb01 = w2 + a01_h - b01_h;
   wrt01 = w2 + a01_h + b01_h;
-  // console.log('edge v0-v1')
-  // console.log(wrt01 + " " + wrb01);
   if(wrb01 < 0 && wrt01 < 0) {
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
@@ -689,10 +692,7 @@ Render.prototype.probeRight = function(w0, w1, w2) {
 
   wrt12 = w0 + a12_h - b12_h;
   wrb12 = w0 + a12_h + b12_h;
-  // console.log('edge v1-v2')
-  // console.log(wrt12 + " " + wrb12);
   if(wrt12 < 0 && wrb12 < 0) {
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
@@ -700,10 +700,7 @@ Render.prototype.probeRight = function(w0, w1, w2) {
 
   wrt20 = w1 + a20_h - b20_h;
   wrb20 = w1 + a20_h + b20_h;
-  // console.log('edge v2-v0')
-  // console.log(wrt20 + " " + wrb20);
   if(wrt20 < 0 && wrb20 < 0) {
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
@@ -716,18 +713,12 @@ Render.prototype.probeRight = function(w0, w1, w2) {
 Render.prototype.probeUp = function(w0, w1, w2) {
   //When we are probing up, we check if the upper edge (o-rt) intersects the triangle, or if the edge is within the triangle completely
   //Since we are using barycentric coordinates, it is simply a matter of adding the stamp's unit steps to the current positions barycentrics
-  // console.log('probing upper');
-  // console.log(w0 + " " + w1 + " " + w2);
 
   //Edge v0-v1
   wo01 = w2 - a01_h - b01_h;
   wrt01 = w2 + a01_h - b01_h;
-  // console.log('w2 in probeUp: ' + w2);
-  // console.log(wo01 + " " + wrt01);
 
   if(wo01 < 0 && wrt01 < 0) {
-    // console.log('upper edge is not valid for     v0-v1')
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
@@ -736,8 +727,6 @@ Render.prototype.probeUp = function(w0, w1, w2) {
   wo12 = w0 - a12_h - b12_h;
   wrt12 = w0 + a12_h - b12_h;
   if(wo12 < 0 && wrt12 < 0) {
-     //console.log('upper edge is not valid for     v1-v2')
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
@@ -746,36 +735,16 @@ Render.prototype.probeUp = function(w0, w1, w2) {
   wo20 = w1 - a20_h - b20_h;
   wrt20 = w1 + a20_h - b20_h;
   if(wo20 < 0 && wrt20 < 0) {
-    //console.log('upper edge is not valid for     v2-v0')
-
     //The entire edge is outside of the triangle, so we can return False
     return false;
   }
+
   //If we made it here, we have a successful upper probe, and we can continue sweeping on y + 1
-  // console.log('successful probe up: ' + w0 + " " + w1 + " " + w2);
-  // console.log('wo01 and wrt01: ' + wo01 + " " + wrt01)
-
-
   return true;
 }
 
 
 Render.prototype.probeDown = function(w0, w1, w2) {
-  // wo01 = w2 - a01_h - b01_h;
-  // wo12 = w0 - a12_h - b12_h;
-  // wo20 = w1 - a20_h - b20_h;
-  //
-  // wrt01 = w2 + a01_h - b01_h;
-  // wrt12 = w0 + a12_h - b12_h;
-  // wrt20 = w1 + a20_h - b20_h;
-  //
-  // wrb01 = w2 + a01_h + b01_h;
-  // wrb12 = w0 + a12_h + b12_h;
-  // wrb20 = w1 + a20_h + b20_h;
-  //
-  // wlb01 = w2 - a01_h + b01_h;
-  // wlb12 = w0 - a12_h + b12_h;
-  // wlb20 = w1 - a20_h + b20_h;
   //Edge v0-v1
   wlb01 = w2 - a01_h + b01_h;
   wrb01 = w2 + a01_h + b01_h;
@@ -843,14 +812,16 @@ Render.prototype.startSweep = function(v0, v1, v2) {
   b01_h = b01 / 2;
 
 
+  //Triangle's bounding box
+  minX = getMin3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+  maxX = getMax3(v0.position.position[0], v1.position.position[0], v2.position.position[0]);
+  minY = getMin3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+  maxY = getMax3(v0.position.position[1], v1.position.position[1], v2.position.position[1]);
+
   triArea = EdgeFunction(v0.position, v1.position, v2.position);
 
   //Get the starting position: the UpperLeft-most vertex
   var currentP = getMinXVertex(v0,v1,v2).position.copy();
-
-  // var colorStartVert = new Vector3(140,140,255);
-  // colorStartVert.position[3] = 255;
-  // this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
   w0 = EdgeFunction(v1.position, v2.position, currentP);
   w1 = EdgeFunction(v2.position, v0.position, currentP);
@@ -870,7 +841,6 @@ Render.prototype.startSweep = function(v0, v1, v2) {
 
         var upP = currentP.copy();
         upP.position[1] -= 1 ;  //Remember, Raster Space is inversed, so minus 1!
-        // this.drawPixel(currentP.position[0], currentP.position[1], colorStartVert, true);
 
         validUp = [upP, v0, v1, v2, w0 - b12, w1 - b20, w2 - b01 ];
       }
@@ -888,7 +858,6 @@ Render.prototype.startSweep = function(v0, v1, v2) {
     //Draw the pixel
 
     this.drawVertex(currentP, v0, v1, v2, w0, w1, w2)
-
     validRight = this.probeRight(w0,w1,w2);
     if(validRight) {
         //One step along the x-axis
@@ -897,7 +866,7 @@ Render.prototype.startSweep = function(v0, v1, v2) {
         w1 += a20;
         w2 += a01;
     }
-  } while(validRight);
+  } while(validRight && currentP.position[0] < maxX);
 
   //The first sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
   if(validUp) {
@@ -920,7 +889,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
       //Vertex is still in the triangle
       //Check for valid Up, if it doesn't exist yet
       if(validUp === false) {
-        if(this.probeUp(w0, w1, w2)) {
+        if(this.probeUp(w0, w1, w2) && currentP.position[1] > minY) {
           //We have a validUp. We need to save its context for a future call to sweepUp()
           var upP = currentP.copy();
           upP.position[1] -= 1;
@@ -942,7 +911,7 @@ Render.prototype.sweepUpper = function(currentP, v0, v1, v2, w0, w1, w2) {
           w1 += a20;
           w2 += a01;
       }
-    } while( validRight)
+    } while( validRight && currentP.position[0] < maxX)
 
     //The sweep is done. Now, if we have a new ValidUp or ValidDown, we need to sweep again
     if(validUp) {
@@ -965,13 +934,12 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
   var validDown = false;
   var sweep = true;
   var validRight;
-
   while (sweep) {
     do {
       //Vertex is still in the triangle
       //Check for valid Down, if it doesn't exist yet
       if(validDown === false) {
-        if( this.probeDown(w0, w1, w2) ) {
+        if( this.probeDown(w0, w1, w2) && currentP.position[1] < maxY ) {
           //We have a validDown. We need to save its context for a future call to sweepUp()
           var downP = currentP.copy();
           downP.position[1] += 1;
@@ -993,7 +961,7 @@ Render.prototype.sweepLower = function(currentP, v0, v1, v2, w0, w1, w2) {
           w1 += a20;
           w2 += a01;
       }
-    } while( validRight)
+    } while( validRight && currentP.position[0] < maxX)
 
     //The sweep is done. Now, if we have a ValidUp or ValidDown, we need to do the appropriate sweeps
     if(validDown === true) {

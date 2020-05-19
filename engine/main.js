@@ -12,7 +12,7 @@ var renderer = new Render(screenWidth, screenHeight);
 var camera = new Transformation([
         [1, 0, 0, 2],
         [0, 1, 0, 2],
-        [0, 0, 1, -5],
+        [0, 0, 1, -20],
         [0, 0, 0, 1]
 ]);
 
@@ -24,18 +24,18 @@ renderer.camera = camera;
           //Renderer setup start
 //Initialize pixel and vertex shaders
 
-//var flatColorPS = new FlatColorEffect(renderer);
-var texturePS = new TextureEffect(renderer);
+var flatColorPS = new FlatColorEffect(renderer);
+//var texturePS = new TextureEffect(renderer);
 //var dynColorPS = new DynColorEffect(renderer);
 var lightBlendPS = new LightBlendPS(renderer);
 //var wireFramePS = new WireFramePS(renderer);
 //var vertexPositionPS = new VertexPositionPS(renderer);
 
 //var defaultVertexShader = new DefaultVS(renderer);
-//var flatColorVS = new FlatColorVS(renderer);
-var textureVertexShader = new TextureVS(renderer);
-var flatShadeVertexShader = new FlatShadeVS(renderer);
-//var pointShader = new PointShadeVS(renderer);
+var flatColorVS = new FlatColorVS(renderer);
+//var textureVertexShader = new TextureVS(renderer);
+//var flatShadeVertexShader = new FlatShadeVS(renderer);
+var pointShader = new PointShadeVS(renderer);
 
 
 //var ppLightingPS = new PPLightingPS(renderer);
@@ -44,8 +44,8 @@ var flatShadeVertexShader = new FlatShadeVS(renderer);
 
 
 //Set a thing you want to control using IJKLOU
-var movementTarget = flatShadeVertexShader;
-//var movementTarget = pointShader;
+//var movementTarget = flatShadeVertexShader;
+var movementTarget = pointShader;
 
 
 
@@ -58,7 +58,7 @@ var movementTarget = flatShadeVertexShader;
 
 
 //Load models
-var model_name1 = "triangle";
+var model_name1 = "cube";
 var model_name2 = "cube";
 
 var models = [
@@ -70,41 +70,41 @@ var models = [
 Promise.all(models).then(function(results) {
   models = results;
 
-  //creating a flat plane
-  var wallFar = new Geometry();
-  wallFar.createPlane(20,20,1,'sky');
-
-  //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
-  renderer.models.push(wallFar);
-
-
-
-  var wallLeft = new Geometry();
-  wallLeft.createPlane(20,20,3,'sky');
-  transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
-  renderer.models.push(wallLeft);
-
-  var wallRight = new Geometry();
-  wallRight.createPlane(20,20,3,'sky');
-  transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
-  renderer.models.push(wallRight);
-
-  var wallTop = new Geometry();
-  wallTop.createPlane(20,20,3,'sky');
-  transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
-  renderer.models.push(wallTop);
-
-
-  var wallBottom = new Geometry();
-  wallBottom.createPlane(20,20,3,'grass');
-  transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
-  renderer.models.push(wallBottom);
-
-
-  var wallClose = new Geometry();
-  wallClose.createPlane(20,20,3,'mountain');
-  transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
-  renderer.models.push(wallClose);
+  // creating a flat plane
+  // var wallFar = new Geometry();
+  // wallFar.createPlane(20,20,1,'sky');
+  //
+  // //transformModel(wallFar, 0, 0, 0, -10, 0, 0, 0, 45, 0 , 1);
+  // renderer.models.push(wallFar);
+  //
+  //
+  //
+  // var wallLeft = new Geometry();
+  // wallLeft.createPlane(20,20,3,'sky');
+  // transformModel(wallLeft, 0, 0, 0, 0, 0, -20, 0, 90, 0 , 1);
+  // renderer.models.push(wallLeft);
+  //
+  // var wallRight = new Geometry();
+  // wallRight.createPlane(20,20,3,'sky');
+  // transformModel(wallRight, 0, 0, 0, 20, 0, 0, 0, -90, 0 , 1);
+  // renderer.models.push(wallRight);
+  //
+  // var wallTop = new Geometry();
+  // wallTop.createPlane(20,20,3,'sky');
+  // transformModel(wallTop, 0, 0, 0, 0, 20, 0, 90, 0, 0 , 1);
+  // renderer.models.push(wallTop);
+  //
+  //
+  // var wallBottom = new Geometry();
+  // wallBottom.createPlane(20,20,3,'grass');
+  // transformModel(wallBottom, 0, 0, 0, 0, 0, -20, -90, 0, 0 , 1);
+  // renderer.models.push(wallBottom);
+  //
+  //
+  // var wallClose = new Geometry();
+  // wallClose.createPlane(20,20,3,'mountain');
+  // transformModel(wallClose, 0, 0, 0, 20, 0, -20, 0, 180, 0 , 1);
+  // renderer.models.push(wallClose);
 
   //
   // // //Models are loaded. Place them somewhere in the world
@@ -135,7 +135,7 @@ Promise.all(models).then(function(results) {
   models[1].id = "n2";
 
   //Models are placed, hand them over to the renderer
-  // renderer.models.push(models[0]);
+  renderer.models.push(models[0]);
   // transformModel(renderer.models[0], 0, 0, 0, 0, 0, 0, 0, 0, 76, 1);
 
   //renderer.models.push(models[1]);
@@ -151,7 +151,7 @@ Promise.all(models).then(function(results) {
 
 
 
-var movement = 5
+var movement = 20
 
 
 //FPS measurement
